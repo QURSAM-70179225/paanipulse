@@ -27,7 +27,7 @@ const fill = (s: string, v: Record<string, string | number>) => Object.entries(v
 export function BucketTest({ farmId, efficiency, calibrated, labels }: { farmId: string; efficiency: number; calibrated: boolean; labels: BucketLabels }) {
   const router = useRouter();
   const [volume, setVolume] = useState(200);
-  const [seconds, setSeconds] = useState(24);
+  const [seconds, setSeconds] = useState(21); // ≈ default efficiency at noon, so the demo narrows the range without shifting the headline numbers
   const [hour, setHour] = useState(12);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);

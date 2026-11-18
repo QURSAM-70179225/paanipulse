@@ -90,7 +90,8 @@ and keep a terminal ready with `npm run simulate`.
 2. **Karamat's farm:** "Kal 6 ghantay chala, zaroorat 0" → **"Aaj pump band rakhein"** → play the Urdu voice note.
 3. **This week:** pumped 84% more than needed: 444,000 L lost below the roots, ~5 kg urea, 101 kWh of solar.
 4. **Start the simulator:** the live water meter starts counting within seconds, with no hardware.
-5. **Bucket test:** 200 L in 24 s → the flow range narrows (the meter is calibrated to this pump).
+5. **Bucket test:** 200 L in 21 s → the flow range narrows (the meter is calibrated to this pump). A slower fill
+   (e.g. 24 s) lowers the efficiency and every litre/kWh figure updates, which is correct but changes the numbers mid-demo.
 6. **Chat:** tap "kal barish hogi?" → rain expected, keep the pump off. Mention the number guardrail.
 7. **Spare sunshine:** about Rs 1,000 a day from e-rickshaw battery charging on a "pump off" day.
 8. **Authority dashboard:** heatmap of 151 wells, 59 losing >30%, 5.6 MWh wasted → filter Narowal → Export CSV.
