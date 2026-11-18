@@ -86,7 +86,10 @@ export default async function Home() {
         </ol>
       </section>
 
-      <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-600">{T("footerTheme")}</footer>
+      <footer className="flex flex-col items-center gap-2 border-t border-slate-200 py-6 text-center text-xs text-slate-600">
+        <Link href="/about" className="font-semibold text-sky-800 underline">{T("howWeCalculate")}</Link>
+        <span>{T("footerTheme")}</span>
+      </footer>
     </main>
   );
 }

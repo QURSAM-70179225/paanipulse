@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { PumpChart } from "@/components/farmer/PumpChart";
+import { BucketTest } from "@/components/farmer/BucketTest";
+import { LiveMeter } from "@/components/farmer/LiveMeter";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { VoicePlayer } from "@/components/VoicePlayer";
 import { cn } from "@/lib/utils";
@@ -47,6 +49,15 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
         {s.yesterday && s.yesterday.actualHours > 0 && <YesterdayCard s={s} T={T} L={L} />}
         <HeroCard s={s} T={T} />
         <TodayStats s={s} T={T} L={L} />
+        <LiveMeter
+          farmId={s.farm.id}
+          initialHasTelemetry={s.pump.hasTelemetry}
+          labels={{
+            title: T("liveTitle"), waiting: T("liveWaiting"), today: T("liveToday"), now: T("liveNow"), energy: T("liveEnergy"),
+            runHours: T("liveRunHours"), updated: T("liveUpdated"), noHardware: T("liveNoHardware"), off: T("liveOff"),
+            litres: T("litres"), hours: T("hours"), kwh: T("kwh"),
+          }}
+        />
         <WeekCard s={s} T={T} L={L} />
         <Card>
           <CardHeader>
@@ -62,6 +73,16 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           </CardContent>
         </Card>
         <SpareSunCard s={s} T={T} ur={ur} />
+        <BucketTest
+          farmId={s.farm.id}
+          efficiency={s.pump.efficiency}
+          calibrated={s.pump.calibrated}
+          labels={{
+            title: T("bucketTitle"), intro: T("bucketIntro"), volume: T("bucketVolume"), seconds: T("bucketSeconds"), hour: T("bucketHour"),
+            submit: T("bucketSubmit"), result: T("bucketResult"), reset: T("bucketReset"), error: T("bucketError"),
+            efficiencyNow: T("efficiencyNow"), calibrated: T("calibrated"), defaultEstimate: T("defaultEstimate"),
+          }}
+        />
         <WeatherStrip s={s} T={T} locale={locale} />
         <Link href={`/farmer/${s.farm.id}/chat`} className={cn(buttonVariants({ size: "lg" }), "w-full bg-[#128C7E] hover:bg-[#0e7266]")}>
           <MessageCircle className="h-5 w-5" aria-hidden /> {T("askAssistant")}

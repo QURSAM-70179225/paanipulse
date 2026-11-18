@@ -82,3 +82,12 @@ describe("chat guardrails", () => {
     expect(detectIntent("fazil bijli se kya kamaun?")).toBe("savings");
   });
 });
+
+import { parseTelemetryCsv } from "@/lib/services/telemetryCsv";
+describe("telemetry CSV", () => {
+  it("parses header + rows", () => {
+    const rows = parseTelemetryCsv("pumpId,timestamp,power_kw,frequency_hz\nkaramat-pump,2026-11-18T07:00:00Z,8.2,42.1\r\nkaramat-pump,2026-11-18T07:05:00Z,8.6,42.9\n");
+    expect(rows).toHaveLength(2);
+    expect(rows[1]).toEqual({ pumpId: "karamat-pump", timestamp: "2026-11-18T07:05:00Z", power_kw: "8.6", frequency_hz: "42.9" });
+  });
+});
