@@ -18,6 +18,7 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
   const weather = await getWeather(farm.lat, farm.lng, { now });
   const todayKey = pktDateKey(pktDayStart(0, now));
   const hours = Object.fromEntries(farm.dailyRecords.map((r) => [pktDateKey(r.date), r.actualHours]));
+  const yesterdayReported = pktDateKey(pktDayStart(-1, now)) in hours;
   const sim = runFarm(farm, pump, hours, weather.days, todayKey);
 
   const week = summarise(sim.days, 7);
@@ -67,6 +68,7 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
       calibrated: pump.calibrated,
       hasTelemetry: pump.hasTelemetry,
     },
+    yesterdayReported,
     dataSource: pump.hasTelemetry ? ("telemetry" as const) : ("sunlight" as const),
     weatherSource: weather.source,
     weatherFetchedAt: weather.fetchedAt,
@@ -93,6 +95,8 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
     })),
     forecast: forecast.map((d) => ({ date: d.date, tMax: d.tMax ?? null, tMin: d.tMin ?? null, precipMm: d.precipMm, et0Mm: d.et0Mm })),
     advisory: text,
+    /** Full simulated history (for the daily job). */
+    days: sim.days,
     headM: sim.headM,
     kwhPerM3: sim.kwhPerM3,
     surplusRsPerKwh: DEFAULTS.surplusRsPerKwh,

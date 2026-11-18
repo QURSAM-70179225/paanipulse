@@ -18,6 +18,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { PumpChart } from "@/components/farmer/PumpChart";
 import { BucketTest } from "@/components/farmer/BucketTest";
 import { LiveMeter } from "@/components/farmer/LiveMeter";
+import { ReportHours } from "@/components/farmer/ReportHours";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { VoicePlayer } from "@/components/VoicePlayer";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,12 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
     <main dir={dirFor(lang)} className={cn("mx-auto min-h-screen max-w-md bg-slate-50 pb-10", ur && "ur-ui")}>
       <Header s={s} T={T} lang={lang} user={user} />
       <div className="flex flex-col gap-4 px-4 pt-4">
+        {!s.yesterdayReported && !s.pump.hasTelemetry && (
+          <ReportHours
+            farmId={s.farm.id}
+            labels={{ title: T("reportTitle"), help: T("reportHelp"), other: T("reportOther"), save: T("reportSave"), thanks: T("reportThanks"), hours: T("hours"), error: T("errGeneric") }}
+          />
+        )}
         {s.yesterday && s.yesterday.actualHours > 0 && <YesterdayCard s={s} T={T} L={L} />}
         <HeroCard s={s} T={T} />
         <TodayStats s={s} T={T} L={L} />
