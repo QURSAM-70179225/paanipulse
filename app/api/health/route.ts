@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getWeather } from "@/lib/services/weather";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,14 @@ export async function GET(req: Request) {
       tables = "missing — run `prisma migrate deploy` (check the build command)";
     }
   }
+  // Weather: try the demo farm's location (Muridke). "live" = Open-Meteo answered.
+  let weather: { source: string; days: number; fetchedAt: string } | { error: string };
+  try {
+    const w = await getWeather(31.8, 74.26);
+    weather = { source: w.source, days: w.days.length, fetchedAt: w.fetchedAt };
+  } catch (e) {
+    weather = { error: (e as Error).message.slice(0, 120) };
+  }
   const problems = [
     !env.AUTH_SECRET && "AUTH_SECRET is not set (or shorter than 16 characters) — sign-in cannot work",
     !env.DATABASE_URL && "DATABASE_URL is not set",
@@ -48,5 +57,6 @@ export async function GET(req: Request) {
     tables !== "ok" && `Tables: ${tables}`,
     database === "ok" && tables === "ok" && demoAccounts < 3 && "Demo accounts missing — the seed did not run (database was not empty?)",
   ].filter(Boolean);
-  return NextResponse.json({ ...base, ok: problems.length === 0, env, database, tables, demoAccounts, farms, problems }, { status: problems.length ? 503 : 200 });
+  const notes = "source" in weather && weather.source !== "live" ? [`Weather is "${weather.source}", not live: Open-Meteo did not answer from this server (network or rate limit). The app still works.`] : [];
+  return NextResponse.json({ ...base, ok: problems.length === 0, env, database, tables, demoAccounts, farms, weather, problems, notes }, { status: problems.length ? 503 : 200 });
 }

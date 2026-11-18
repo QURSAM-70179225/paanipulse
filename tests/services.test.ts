@@ -91,3 +91,18 @@ describe("telemetry CSV", () => {
     expect(rows[1]).toEqual({ pumpId: "karamat-pump", timestamp: "2026-11-18T07:05:00Z", power_kw: "8.6", frequency_hz: "42.9" });
   });
 });
+
+import { buildUrl } from "@/lib/services/weather";
+describe("Open-Meteo URL", () => {
+  it("uses the free host without a key and the customer host with one", () => {
+    delete process.env.OPEN_METEO_API_KEY;
+    const free = buildUrl(31.8, 74.26);
+    expect(free).toContain("https://api.open-meteo.com/v1/forecast?");
+    expect(free).toContain("et0_fao_evapotranspiration");
+    expect(free).toContain("timezone=Asia%2FKarachi");
+    expect(free).not.toContain("apikey");
+    process.env.OPEN_METEO_API_KEY = "k123";
+    expect(buildUrl(31.8, 74.26)).toMatch(/^https:\/\/customer-api\.open-meteo\.com\/v1\/forecast\?.*apikey=k123/);
+    delete process.env.OPEN_METEO_API_KEY;
+  });
+});

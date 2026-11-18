@@ -57,6 +57,13 @@ export function buildUrl(lat: number, lng: number): string {
     forecast_days: String(FORECAST_DAYS),
     timezone: "Asia/Karachi",
   });
+  // Free tier needs no key (non-commercial use). For commercial use, Open-Meteo issues an API key
+  // that is sent to the "customer-api" host.
+  const key = process.env.OPEN_METEO_API_KEY;
+  if (key) {
+    p.set("apikey", key);
+    return `https://customer-api.open-meteo.com/v1/forecast?${p}`;
+  }
   return `https://api.open-meteo.com/v1/forecast?${p}`;
 }
 
