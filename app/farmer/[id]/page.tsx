@@ -59,7 +59,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           />
         )}
         {s.yesterday && s.yesterday.actualHours > 0 && <YesterdayCard s={s} T={T} L={L} />}
-        <HeroCard s={s} T={T} />
+        <HeroCard s={s} T={T} ur={ur} />
         <TodayStats s={s} T={T} L={L} />
         <LiveMeter
           farmId={s.farm.id}
@@ -165,7 +165,7 @@ function YesterdayCard({ s, T, L }: { s: FarmState; T: TFn; L: (m3: number) => s
   );
 }
 
-function HeroCard({ s, T }: { s: FarmState; T: TFn }) {
+function HeroCard({ s, T, ur }: { s: FarmState; T: TFn; ur: boolean }) {
   const a = s.today.advice;
   const style = a.kind === "irrigate" ? "from-emerald-700 to-emerald-600" : a.kind === "skip-rain" ? "from-indigo-700 to-sky-700" : "from-sky-800 to-sky-600";
   const Icon = a.kind === "irrigate" ? Droplets : a.kind === "skip-rain" ? CloudRain : PowerOff;
@@ -177,6 +177,11 @@ function HeroCard({ s, T }: { s: FarmState; T: TFn }) {
         <Icon className="h-5 w-5" aria-hidden /> {T("todayAdvice")}
       </p>
       <h2 id="today-advice" className="mt-2 text-3xl font-bold leading-snug">{headline}</h2>
+      {s.criticalStage && (
+        <p className="mt-2 rounded-xl bg-white/15 px-3 py-2 text-sm">
+          {T(a.kind === "irrigate" ? "criticalNow" : "criticalNext", { stage: ur ? s.criticalStage.ur : s.criticalStage.en })}
+        </p>
+      )}
       {a.kind === "irrigate" && a.totalHours > a.hoursToday && <p className="mt-2 text-sm text-white/90">{T("adviceRemainder", { total: hrs(a.totalHours) })}</p>}
       {a.kind !== "irrigate" && next !== null && (
         <p className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-sm">

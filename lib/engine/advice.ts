@@ -24,6 +24,18 @@ export interface Advice {
   flowM3PerHour: number;
   /** Effective rain expected tomorrow (mm). */
   rainTomorrowMm: number;
+  /** Why irrigation is advised/next: soil reached RAW, or a critical growth stage. */
+  reason?: "raw" | "critical-stage";
+  /** Critical stage id (e.g. "cri") when reason is critical-stage. */
+  stageId?: string;
+}
+
+/** A critical-stage window relative to today (in days) and the minimum depletion that triggers it (mm). */
+export interface CriticalWindow {
+  id: string;
+  startInDays: number;
+  endInDays: number;
+  minDepletionMm: number;
 }
 
 export interface BalanceAdviceInput {
@@ -38,6 +50,8 @@ export interface BalanceAdviceInput {
   hoursAvailableToday: number;
   /** Used to extrapolate beyond the forecast horizon (mm/day). */
   fallbackNetUseMm?: number;
+  /** Optional critical growth stage (e.g. wheat CRI). */
+  critical?: CriticalWindow;
 }
 
 /**
@@ -48,23 +62,33 @@ export interface BalanceAdviceInput {
 export function adviseFromBalance(i: BalanceAdviceInput): Advice {
   const base = { flowM3PerHour: i.flowM3PerHour, rainTomorrowMm: i.effRainTomorrowMm };
   const endToday = Math.max(0, i.depletionStartMm + (i.forecastNetUseMm[0] ?? 0));
-  if (endToday >= i.rawMm) {
+  const c = i.critical;
+  const criticalToday = !!c && c.startInDays <= 0 && c.endInDays >= 0 && endToday >= c.minDepletionMm && endToday > 0;
+  if (endToday >= i.rawMm || criticalToday) {
+    const why = endToday >= i.rawMm ? { reason: "raw" as const } : { reason: "critical-stage" as const, stageId: c!.id };
     if (i.effRainTomorrowMm >= endToday) {
-      return { ...base, kind: "skip-rain", hoursToday: 0, totalHours: 0, grossM3Today: 0, daysUntilNext: 1 };
+      return { ...base, ...why, kind: "skip-rain", hoursToday: 0, totalHours: 0, grossM3Today: 0, daysUntilNext: 1 };
     }
     const grossTotal = ((endToday / 1000) * i.areaM2) / i.irrigationEfficiency;
     const totalHours = i.flowM3PerHour > 0 ? roundTo(grossTotal / i.flowM3PerHour, DEFAULTS.hoursStep) : 0;
     const cap = Math.min(DEFAULTS.maxPumpHoursPerDay, Math.max(0, i.hoursAvailableToday));
     const hoursToday = clamp(totalHours, 0, cap);
-    return { ...base, kind: "irrigate", hoursToday, totalHours, grossM3Today: hoursToday * i.flowM3PerHour, daysUntilNext: 0 };
+    return { ...base, ...why, kind: "irrigate", hoursToday, totalHours, grossM3Today: hoursToday * i.flowM3PerHour, daysUntilNext: 0 };
   }
-  // Walk the forecast to find when depletion reaches RAW.
+  // Walk the forecast to find when depletion reaches RAW (or the critical-stage threshold inside its window).
   let dr = endToday;
   let daysUntilNext: number | null = null;
+  let reason: Advice["reason"];
   for (let k = 1; k < i.forecastNetUseMm.length; k++) {
     dr = Math.max(0, dr + i.forecastNetUseMm[k]);
     if (dr >= i.rawMm) {
       daysUntilNext = k;
+      reason = "raw";
+      break;
+    }
+    if (c && k >= c.startInDays && k <= c.endInDays && dr >= c.minDepletionMm) {
+      daysUntilNext = k;
+      reason = "critical-stage";
       break;
     }
   }
@@ -72,7 +96,7 @@ export function adviseFromBalance(i: BalanceAdviceInput): Advice {
     const rate = i.fallbackNetUseMm ?? average(i.forecastNetUseMm.filter((x) => x > 0));
     daysUntilNext = rate > 0 ? i.forecastNetUseMm.length - 1 + Math.ceil((i.rawMm - dr) / rate) : null;
   }
-  return { ...base, kind: "keep-off", hoursToday: 0, totalHours: 0, grossM3Today: 0, daysUntilNext };
+  return { ...base, kind: "keep-off", hoursToday: 0, totalHours: 0, grossM3Today: 0, daysUntilNext, ...(reason ? { reason } : {}), ...(reason === "critical-stage" ? { stageId: c!.id } : {}) };
 }
 
 /** Flooded rice: daily need model (ETc + percolation − effective rain). Skip if tomorrow's rain covers today's need. */

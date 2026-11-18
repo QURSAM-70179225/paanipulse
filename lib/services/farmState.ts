@@ -2,7 +2,7 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import { pktDateKey, pktDayStart } from "@/lib/dates";
-import { DEFAULTS, flowRangeM3h, summarise, surplusIdeas, type CropType } from "@/lib/engine";
+import { CRITICAL_STAGES, DEFAULTS, flowRangeM3h, summarise, surplusIdeas, type CropType } from "@/lib/engine";
 import { advisoryText } from "./advisoryText";
 import { runFarm } from "./farmSim";
 import { getWeather } from "./weather";
@@ -28,6 +28,8 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
   const todayIdx = weather.days.findIndex((d) => d.date === todayKey);
   const forecast = weather.days.slice(todayIdx, todayIdx + 7);
 
+  const stage = advice.stageId ? (CRITICAL_STAGES[farm.cropType as CropType] ?? []).find((st) => st.id === advice.stageId) : undefined;
+  const criticalStage = stage ? { ur: stage.labelUr, roman: stage.labelRoman, en: stage.labelEn } : undefined;
   const text = advisoryText({
     crop: farm.cropType as CropType,
     kind: advice.kind,
@@ -41,6 +43,7 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
     weekSpareKwh: week.spareKwh,
     weekWastedKwh: week.wastedKwh,
     surplusRsPerKwh: DEFAULTS.surplusRsPerKwh,
+    criticalStage,
   });
 
   // On a "pump off" day, the whole day's solar yield is spare.
@@ -69,6 +72,7 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
       hasTelemetry: pump.hasTelemetry,
     },
     yesterdayReported,
+    criticalStage: criticalStage ?? null,
     dataSource: pump.hasTelemetry ? ("telemetry" as const) : ("sunlight" as const),
     weatherSource: weather.source,
     weatherFetchedAt: weather.fetchedAt,

@@ -249,6 +249,8 @@ const en = {
   reportOther: "Other",
   reportSave: "Save",
   reportThanks: "Saved. Thank you!",
+  criticalNow: "Critical stage: {stage}. Missing water now costs yield.",
+  criticalNext: "Next watering is timed for a critical stage: {stage}.",
   // installer portal
   installerTitle: "Installer portal",
   installerSub: "Farms you installed · PaaniPulse is part of your after-sales service",
@@ -500,6 +502,8 @@ const ur: Record<DictKey, string> = {
   reportOther: "دوسرا",
   reportSave: "محفوظ کریں",
   reportThanks: "محفوظ ہو گیا۔ شکریہ!",
+  criticalNow: "اہم مرحلہ: {stage}۔ اس وقت پانی کی کمی سے پیداوار کم ہوتی ہے۔",
+  criticalNext: "اگلا پانی اہم مرحلے کے لیے ہے: {stage}۔",
   installerTitle: "انسٹالر پورٹل",
   installerSub: "آپ کے لگائے ہوئے کھیت · پانی پلس آپ کی بعد از فروخت سروس ہے",
   registerFarmer: "نیا کسان رجسٹر کریں",

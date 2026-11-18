@@ -25,8 +25,11 @@ export interface AdvisoryFacts {
   weekSpareKwh: number;
   weekWastedKwh: number;
   surplusRsPerKwh: number;
+  /** Set when today's / next irrigation is driven by a critical growth stage. */
+  criticalStage?: { ur: string; roman: string; en: string };
 }
 
+const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
 const fmtH = (h: number) => (Number.isInteger(h) ? String(h) : h.toFixed(1));
 const fmt0 = (x: number) => Math.round(x).toLocaleString("en-US");
 
@@ -59,6 +62,11 @@ export function advisoryText(f: AdvisoryFacts) {
 
   // 2. Today's instruction
   const next = whenNext(f.daysUntilNext);
+  if (f.criticalStage && f.kind === "irrigate") {
+    ur.push(`${f.criticalStage.ur}، اس وقت پانی کی کمی سے پیداوار کم ہوتی ہے۔`);
+    ro.push(`${cap(f.criticalStage.roman)}, is waqt pani ki kami se paidawar kam hoti hai.`);
+    en.push(`Your ${c.en}'s ${f.criticalStage.en}; water stress now reduces yield.`);
+  }
   if (f.kind === "irrigate") {
     ur.push(`آج پمپ ${fmtH(f.hoursToday)} گھنٹے چلائیں، دوپہر کے وقت جب دھوپ تیز ہو۔`);
     ro.push(`Aaj pump ${fmtH(f.hoursToday)} ghantay chalayen, dopahar ke waqt jab dhoop tez ho.`);

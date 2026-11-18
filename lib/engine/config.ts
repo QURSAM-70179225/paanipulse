@@ -76,3 +76,24 @@ export const SURPLUS_USES = [
   { id: "grain-drying", labelEn: "Run a grain dryer / chakki", labelUr: "اناج خشک کرنا / چکی", rsPerKwh: 15 },
   { id: "cold-storage", labelEn: "Small cold room for vegetables/milk", labelUr: "سبزی / دودھ کے لیے ٹھنڈا کمرہ", rsPerKwh: 18 },
 ] as const;
+
+/**
+ * Critical growth stages where a missed irrigation costs yield (Punjab agronomy practice).
+ * Wheat: first irrigation at crown-root initiation (CRI), ~20–25 days after sowing.
+ * The rule only fires if the soil has started to dry (depletion ≥ minDepletionFraction × TAW),
+ * so a field that is still wet is not irrigated. Adjust after validating with local farmers/extension staff.
+ */
+export interface CriticalStage {
+  id: string;
+  fromDay: number;
+  toDay: number;
+  minDepletionFraction: number;
+  labelEn: string;
+  labelUr: string;
+  labelRoman: string;
+}
+export const CRITICAL_STAGES: Partial<Record<CropType, CriticalStage[]>> = {
+  wheat: [
+    { id: "cri", fromDay: 20, toDay: 25, minDepletionFraction: 0.2, labelEn: "crown roots are forming", labelUr: "گندم کی تاج جڑیں بن رہی ہیں", labelRoman: "gandum ki taaj jarein ban rahi hain" },
+  ],
+};

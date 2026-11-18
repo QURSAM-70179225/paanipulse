@@ -2,7 +2,7 @@
  * Day-by-day farm simulation: runs the water balance over history (actual pump hours)
  * and produces today's advice from the forecast. Pure — weather and hours are passed in.
  */
-import { CROPS, DEFAULTS, IRRIGATION_EFFICIENCY, type CropType, type IrrigationMethod } from "./config";
+import { CRITICAL_STAGES, CROPS, DEFAULTS, IRRIGATION_EFFICIENCY, type CropType, type IrrigationMethod } from "./config";
 import { effectiveRain, etc as etcOf, kcForDay, netNeedMm, stageForDay } from "./cropWater";
 import { adviseFlooded, adviseFromBalance, type Advice } from "./advice";
 import { kwhPerM3, modeBDay, totalHeadM, type PumpSpec } from "./pump";
@@ -146,6 +146,11 @@ export function simulateFarm(
       });
     }
     const horizon = perDay.slice(i, i + 7).map((x) => x.etcMm - x.effRainMm);
+    // Next critical stage that hasn't ended yet (e.g. wheat CRI at 20–25 days after sowing).
+    const stage = (CRITICAL_STAGES[farm.crop] ?? []).find((st) => d.dss <= st.toDay);
+    const critical = stage && d.dss >= 0
+      ? { id: stage.id, startInDays: stage.fromDay - d.dss, endInDays: stage.toDay - d.dss, minDepletionMm: stage.minDepletionFraction * d.taw }
+      : undefined;
     return adviseFromBalance({
       depletionStartMm: depletionStart,
       rawMm: d.raw,
@@ -156,6 +161,7 @@ export function simulateFarm(
       flowM3PerHour: flow,
       hoursAvailableToday: d.solar.pumpableHours,
       fallbackNetUseMm: d.etcMm,
+      critical,
     });
   };
 

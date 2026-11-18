@@ -229,3 +229,34 @@ describe("simulateFarm (integration)", () => {
     expect(res.today.depletionStartMm).toBeGreaterThan(0);
   });
 });
+
+describe("critical growth stage (wheat CRI)", () => {
+  const common = { areaM2: acresToM2(10), irrigationEfficiency: 0.55, flowM3PerHour: 30, hoursAvailableToday: 8, rawMm: 28, effRainTomorrowMm: 0 };
+  const crit = { id: "cri", startInDays: 0, endInDays: 5, minDepletionMm: 10 };
+  it("irrigates inside the window once the soil has started drying, even below RAW", () => {
+    const a = adviseFromBalance({ ...common, depletionStartMm: 12, forecastNetUseMm: [1, 1, 1], critical: crit });
+    expect(a.kind).toBe("irrigate");
+    expect(a.reason).toBe("critical-stage");
+    expect(a.stageId).toBe("cri");
+  });
+  it("does not irrigate a field that is still wet", () => {
+    const a = adviseFromBalance({ ...common, depletionStartMm: 0, forecastNetUseMm: [1, 1, 1, 1, 1, 1, 1], critical: crit });
+    expect(a.kind).toBe("keep-off");
+  });
+  it("schedules the next watering at the window when the soil will be dry enough then", () => {
+    const a = adviseFromBalance({ ...common, depletionStartMm: 5, forecastNetUseMm: [1, 1, 1, 1, 1, 1, 1], critical: { ...crit, startInDays: 4, endInDays: 9 } });
+    expect(a.kind).toBe("keep-off");
+    expect(a.daysUntilNext).toBe(4);
+    expect(a.reason).toBe("critical-stage");
+  });
+  it("simulateFarm: unirrigated wheat at day 22 gets its first watering", () => {
+    const weather = Array.from({ length: 25 }, (_, i) => ({ date: new Date(Date.UTC(2026, 9, 26 + i)).toISOString().slice(0, 10), et0Mm: 2.5, precipMm: 0, radiationMj: 13 }));
+    const res = simulateFarm(
+      { crop: "wheat", sowingDate: weather[0].date, areaAcres: 8, irrigationMethod: "flood", lat: 31.8, pump: { ratedKw: 15, pvKwp: 20, staticDepthFt: 90 } },
+      weather, {}, weather[22].date,
+    );
+    expect(res.today.depletionStartMm).toBeLessThan(res.today.rawMm);
+    expect(res.today.advice.kind).toBe("irrigate");
+    expect(res.today.advice.reason).toBe("critical-stage");
+  });
+});
