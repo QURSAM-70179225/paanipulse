@@ -14,7 +14,8 @@
     "simulate:reset": "tsx scripts/simulate-telemetry.ts --reset",
     "demo:reset": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && tsx scripts/seed-if-empty.ts && next build"
+    "vercel-build": "prisma generate && prisma migrate deploy && tsx scripts/seed-if-empty.ts && next build",
+    "render-build": "prisma generate && prisma migrate deploy && tsx scripts/seed-if-empty.ts && next build"
   },
   "dependencies": {
     "@fontsource/noto-nastaliq-urdu": "^5.3.0",
@@ -52,5 +53,8 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "engines": {
+    "node": ">=20.19"
   }
 }

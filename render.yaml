@@ -1,0 +1,31 @@
+# Render Blueprint: New → Blueprint → pick this repo. Secrets (sync: false) are asked for on first deploy.
+services:
+  - type: web
+    name: paanipulse
+    runtime: node
+    plan: free            # free sleeps after ~15 min idle; "starter" stays awake
+    region: singapore     # closest Render region to Pakistan
+    buildCommand: npm ci --include=dev && npm run render-build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL       # Neon pooled connection string
+        sync: false
+      - key: DIRECT_URL         # Neon direct connection string (or the same string)
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: AZURE_SPEECH_KEY
+        sync: false
+      - key: AZURE_SPEECH_REGION
+        value: centralindia
+      - key: AUTHORITY_INVITE_CODE
+        sync: false
+      - key: DEMO_MODE
+        value: "true"

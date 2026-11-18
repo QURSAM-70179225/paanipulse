@@ -1,0 +1,14 @@
+# Optional: keeps a free Render instance awake (e.g. on demo day) so judges don't wait for a cold start.
+# Turn on with repository variable KEEP_WARM = true (Settings → Secrets and variables → Actions → Variables).
+# GitHub may delay scheduled runs by a few minutes; open the site once yourself right before presenting.
+name: Keep warm
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+jobs:
+  ping:
+    if: ${{ vars.KEEP_WARM == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS --retry 3 --retry-delay 10 --max-time 90 "${{ secrets.APP_URL }}/api/health"

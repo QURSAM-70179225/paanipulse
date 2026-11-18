@@ -1,0 +1,17 @@
+# Free replacement for a paid Render cron job: calls the daily advisory endpoint at 06:00 PKT.
+# Repository → Settings → Secrets and variables → Actions:
+#   secret   APP_URL      e.g. https://paanipulse.onrender.com
+#   secret   CRON_SECRET  same value as CRON_SECRET on Render
+name: Daily advisory
+on:
+  schedule:
+    - cron: "0 1 * * *" # 01:00 UTC = 06:00 PKT
+  workflow_dispatch: {}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake the app (free Render instances sleep)
+        run: curl -fsS --retry 6 --retry-delay 15 --max-time 90 "${{ secrets.APP_URL }}/api/health"
+      - name: Run daily advisory
+        run: curl -fsS --max-time 120 -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "${{ secrets.APP_URL }}/api/cron/daily-advisory"

@@ -50,7 +50,25 @@ For local Postgres you can also use a free Neon *branch* of your production data
 
 Or tap the "Try the demo" buttons on the home page.
 
-## Deploy (Neon + Vercel, both free)
+## Deploy on Render + Neon (recommended for this team)
+
+1. **Neon**: in your project click **Connect**. Copy the connection string **with "Connection pooling" ON**
+   (`DATABASE_URL`, host contains `-pooler`) and again **with pooling OFF** (`DIRECT_URL`).
+   If you only have one string, use it for both. Never commit it or paste it in chats.
+2. **Render** (https://render.com): **New → Blueprint** → connect GitHub → pick `paanipulse`. Render reads `render.yaml`
+   (Singapore region, build `npm ci --include=dev && npm run render-build`, start `npm start`, health check `/api/health`).
+3. Render asks for the secret values: `DATABASE_URL`, `DIRECT_URL`, `GROQ_API_KEY`, `AZURE_SPEECH_KEY`,
+   `AUTHORITY_INVITE_CODE`. `AUTH_SECRET` and `CRON_SECRET` are generated automatically.
+4. **Apply**. The first build creates the tables and seeds the demo data (only when the database is empty).
+   Later deploys never wipe real accounts. After changing a variable: *Manual Deploy → Deploy latest commit*.
+5. **Daily 06:00 advisory (free)**: GitHub repo → *Settings → Secrets and variables → Actions* → add secrets
+   `APP_URL` (your `https://….onrender.com`) and `CRON_SECRET` (copy it from Render → Environment).
+   `.github/workflows/daily-advisory.yml` then runs every morning; test it with *Actions → Daily advisory → Run workflow*.
+6. **Free plan sleeps after ~15 min idle** (first visit then takes 30–60 s). On demo day, add the repository *variable*
+   `KEEP_WARM = true` to enable `.github/workflows/keep-warm.yml`, and open the site yourself a minute before presenting.
+   Remove it afterwards, or use Render's paid "Starter" plan to stay awake.
+
+## Deploy on Vercel (alternative)
 
 1. **Neon** (https://neon.tech) → create a project (region: closest available to Pakistan, e.g. Singapore or Frankfurt).
    From *Connection details* copy two strings: the **pooled** one (`DATABASE_URL`) and the **direct** one (`DIRECT_URL`).
@@ -65,7 +83,7 @@ Or tap the "Try the demo" buttons on the home page.
 Run the live-meter simulator against the deployed site from your laptop:
 
 ```bash
-npm run simulate -- --url https://YOUR-APP.vercel.app
+npm run simulate -- --url https://YOUR-APP.onrender.com   # or your vercel.app URL
 ```
 
 **Recorded voice note (recommended for the demo):** record the daily advisory in your own voice and save it as
