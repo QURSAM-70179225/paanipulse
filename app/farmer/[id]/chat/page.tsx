@@ -43,6 +43,9 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
           playVoice: T("playVoice"),
           stopVoice: T("stopVoice"),
           voiceUnavailable: T("voiceUnavailable"),
+          recording: T("recording"),
+          transcribing: T("transcribing"),
+          micError: T("micError"),
           quick: [T("quick1"), T("quick2"), "kal barish hogi?", "aaj kitne ghantay pump chalaun?", T("quick3"), T("quick4")],
         }}
       />

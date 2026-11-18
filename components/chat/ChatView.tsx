@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCheck, Mic, RotateCcw, SendHorizonal, Sprout } from "lucide-react";
+import { ArrowLeft, CheckCheck, Loader2, Mic, RotateCcw, SendHorizonal, Sprout, Square } from "lucide-react";
 import { VoicePlayer } from "@/components/VoicePlayer";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import type { Lang } from "@/lib/i18n/dict";
@@ -21,6 +21,9 @@ export interface ChatLabels {
   playVoice: string;
   stopVoice: string;
   voiceUnavailable: string;
+  recording: string;
+  transcribing: string;
+  micError: string;
   quick: string[];
 }
 
@@ -53,6 +56,51 @@ export function ChatView({
   const [mode, setMode] = useState<"ai" | "fallback" | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const ur = lang === "ur";
+  const [rec, setRec] = useState<"idle" | "recording" | "transcribing">("idle");
+  const [micMsg, setMicMsg] = useState<string | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  /** Tap to start recording, tap again to stop → Whisper → send as a message. */
+  async function toggleRecording() {
+    setMicMsg(null);
+    if (rec === "recording") {
+      recorderRef.current?.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg"].find((m) => MediaRecorder.isTypeSupported(m)) ?? "";
+      const r = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      chunksRef.current = [];
+      r.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
+      r.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setRec("transcribing");
+        try {
+          const blob = new Blob(chunksRef.current, { type: r.mimeType || "audio/webm" });
+          const fd = new FormData();
+          fd.append("file", blob, "voice.webm");
+          fd.append("lang", lang);
+          const res = await fetch("/api/stt", { method: "POST", body: fd });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.text) throw new Error();
+          setRec("idle");
+          await send(data.text);
+        } catch {
+          setRec("idle");
+          setMicMsg(labels.micError);
+        }
+      };
+      recorderRef.current = r;
+      r.start();
+      setRec("recording");
+      // Safety stop after 60 s.
+      setTimeout(() => r.state === "recording" && r.stop(), 60_000);
+    } catch {
+      setMicMsg(labels.micError);
+    }
+  }
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -178,6 +226,11 @@ export function ChatView({
         ))}
       </div>
 
+      {(rec !== "idle" || micMsg) && (
+        <p role="status" className={cn("px-3 py-1 text-center text-sm", micMsg ? "bg-red-50 text-red-800" : "bg-white text-[#075E54]")}>
+          {micMsg ?? (rec === "recording" ? labels.recording : labels.transcribing)}
+        </p>
+      )}
       <form
         className="flex items-center gap-2 bg-[#F0F0F0] px-2 py-2"
         onSubmit={(e) => {
@@ -196,14 +249,30 @@ export function ChatView({
           autoComplete="off"
           className="h-12 min-w-0 flex-1 rounded-full border-0 bg-white px-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-[#128C7E]"
         />
-        <button
-          type="submit"
-          disabled={busy || !input.trim()}
-          aria-label={labels.send}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#128C7E] text-white hover:bg-[#0e7266] disabled:bg-[#128C7E]/60"
-        >
-          {input.trim() ? <SendHorizonal className={cn("h-5 w-5", ur && "rotate-180")} aria-hidden /> : <Mic className="h-5 w-5" aria-hidden />}
-        </button>
+        {input.trim() ? (
+          <button
+            type="submit"
+            disabled={busy}
+            aria-label={labels.send}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#128C7E] text-white hover:bg-[#0e7266] disabled:bg-[#128C7E]/60"
+          >
+            <SendHorizonal className={cn("h-5 w-5", ur && "rotate-180")} aria-hidden />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={toggleRecording}
+            disabled={busy || rec === "transcribing"}
+            aria-label={rec === "recording" ? labels.recording : labels.send}
+            aria-pressed={rec === "recording"}
+            className={cn(
+              "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white disabled:opacity-60",
+              rec === "recording" ? "animate-pulse bg-red-600" : "bg-[#128C7E] hover:bg-[#0e7266]",
+            )}
+          >
+            {rec === "recording" ? <Square className="h-5 w-5" aria-hidden /> : rec === "transcribing" ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : <Mic className="h-5 w-5" aria-hidden />}
+          </button>
+        )}
       </form>
     </div>
   );
