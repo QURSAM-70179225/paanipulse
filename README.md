@@ -9,11 +9,13 @@ Qursam Bibi and Muzammil Hussain.
 ## Setup
 
 ```bash
-cp .env.example .env
+cp .env.example .env       # fill in DATABASE_URL / DIRECT_URL (Neon or local Postgres) and AUTH_SECRET
 npm install
-npx prisma migrate dev     # creates the SQLite DB and runs the seed (Karamat + 150 simulated wells)
+npx prisma migrate dev     # creates the tables and runs the seed (Karamat + 150 simulated wells)
 npm run dev                # http://localhost:3000
 ```
+
+For local Postgres you can also use a free Neon *branch* of your production database.
 
 | Command | What it does |
 |---|---|

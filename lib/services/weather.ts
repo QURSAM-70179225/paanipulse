@@ -1,14 +1,13 @@
 /**
  * Weather service: Open-Meteo forecast API (free, no key) with three fallbacks, in order:
  *   1. in-memory cache (1 h)
- *   2. last successful live response saved on disk (data/weather-cache/)
+ *   2. last successful live response saved in the database (WeatherCache table)
  *   3. DEMO_MODE offline sample (data/sample-weather.json), clearly flagged as "sample"
  */
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { z } from "zod";
 import type { WeatherDay } from "@/lib/engine";
 import { pktDateKey, pktDayStart } from "@/lib/dates";
+import { prisma } from "@/lib/db";
 import { sampleWeather } from "./sampleWeather";
 
 export type WeatherSource = "live" | "cached-live" | "sample";
@@ -25,7 +24,6 @@ const PAST_DAYS = 31;
 const FORECAST_DAYS = 7;
 const TTL_MS = 60 * 60 * 1000;
 const TIMEOUT_MS = 6000;
-const CACHE_DIR = path.join(process.cwd(), "data", "weather-cache");
 
 const OpenMeteoSchema = z.object({
   daily: z.object({
@@ -93,21 +91,21 @@ export function parseOpenMeteo(json: unknown): WeatherDay[] {
 
 const demoMode = () => (process.env.DEMO_MODE ?? "true").toLowerCase() !== "false";
 
-async function readDiskCache(key: string): Promise<WeatherResult | null> {
+async function readSavedCache(key: string): Promise<WeatherResult | null> {
   try {
-    const raw = await fs.readFile(path.join(CACHE_DIR, `${key}.json`), "utf8");
-    return JSON.parse(raw) as WeatherResult;
+    const row = await prisma.weatherCache.findUnique({ where: { key } });
+    return row ? (JSON.parse(row.json) as WeatherResult) : null;
   } catch {
     return null;
   }
 }
 
-async function writeDiskCache(key: string, result: WeatherResult) {
+async function writeSavedCache(key: string, result: WeatherResult) {
   try {
-    await fs.mkdir(CACHE_DIR, { recursive: true });
-    await fs.writeFile(path.join(CACHE_DIR, `${key}.json`), JSON.stringify(result));
+    const json = JSON.stringify(result);
+    await prisma.weatherCache.upsert({ where: { key }, create: { key, json, fetchedAt: new Date() }, update: { json, fetchedAt: new Date() } });
   } catch {
-    // Read-only filesystem (e.g. serverless) — memory cache still works.
+    // DB unavailable — memory cache still works.
   }
 }
 
@@ -123,10 +121,10 @@ export async function getWeather(lat: number, lng: number, opts: { now?: Date } 
     if (days.length < FORECAST_DAYS) throw new Error("Open-Meteo returned too few days");
     const result: WeatherResult = { days, source: "live", fetchedAt: new Date().toISOString(), lat, lng };
     memory.set(key, { at: Date.now(), result });
-    await writeDiskCache(key, result);
+    await writeSavedCache(key, result);
     return result;
   } catch (err) {
-    const disk = await readDiskCache(key);
+    const disk = await readSavedCache(key);
     const todayKey = pktDateKey(pktDayStart(0, opts.now));
     const tomorrowKey = pktDateKey(pktDayStart(1, opts.now));
     const usable = disk && disk.days.some((d) => d.date === todayKey) && disk.days.some((d) => d.date === tomorrowKey);

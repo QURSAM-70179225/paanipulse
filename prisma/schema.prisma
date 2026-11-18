@@ -1,11 +1,40 @@
-// PaaniPulse data model. SQLite locally; switch provider + DATABASE_URL for Postgres.
+// PaaniPulse data model. PostgreSQL (Neon in production, any Postgres locally).
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled connection (Neon: the "-pooler" host)
+  directUrl = env("DIRECT_URL") // direct connection for migrations (can be the same URL locally)
+}
+
+/// Account. Farmers sign in with phone + PIN; installers and authorities with email + password.
+model User {
+  id             String   @id @default(cuid())
+  role           String // FARMER | INSTALLER | AUTHORITY
+  name           String
+  phone          String?  @unique
+  email          String?  @unique
+  passwordHash   String
+  organisation   String?
+  createdAt      DateTime @default(now())
+  farms          Farm[]   @relation("FarmOwner")
+  installedFarms Farm[]   @relation("FarmInstaller")
+}
+
+/// Last good Open-Meteo response per ~11 km cell (survives serverless cold starts).
+model WeatherCache {
+  key       String   @id
+  json      String
+  fetchedAt DateTime
+}
+
+/// Neural TTS audio, keyed by sha1(voice|text).
+model AudioCache {
+  id        String   @id
+  mp3       Bytes
+  createdAt DateTime @default(now())
 }
 
 model Farm {
@@ -24,6 +53,10 @@ model Farm {
   isSynthetic      Boolean        @default(false)
   dataConsent      Boolean        @default(true)
   createdAt        DateTime       @default(now())
+  ownerId          String?
+  owner            User?          @relation("FarmOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  installerId      String?
+  installer        User?          @relation("FarmInstaller", fields: [installerId], references: [id], onDelete: SetNull)
   pumps            Pump[]
   dailyRecords     DailyRecord[]
   advisories       Advisory[]
@@ -87,8 +120,10 @@ model Advisory {
   textRomanUrdu String
   textEnglish   String
   audioUrl      String?
-  sentVia       String   @default("app") // app | whatsapp
+  sentVia       String   @default("app") // app | whatsapp | cron
   createdAt     DateTime @default(now())
+
+  @@index([farmId, date])
 }
 
 model ChatMessage {

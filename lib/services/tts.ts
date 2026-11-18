@@ -1,10 +1,8 @@
-/** Azure Speech neural TTS (ur-PK) with an on-disk cache. Returns null when not configured or on failure. */
+/** Azure Speech neural TTS (ur-PK) cached in the database. Returns null when not configured or on failure. */
 import "server-only";
 import { createHash } from "node:crypto";
-import { promises as fs } from "node:fs";
-import path from "node:path";
+import { prisma } from "@/lib/db";
 
-const CACHE_DIR = path.join(process.cwd(), "data", "audio-cache");
 export const VOICES = { ur: "ur-PK-UzmaNeural", en: "en-IN-NeerjaNeural" } as const;
 
 const escapeXml = (s: string) => s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[c]!);
@@ -14,11 +12,11 @@ export const ttsConfigured = () => !!(process.env.AZURE_SPEECH_KEY && process.en
 export async function synthesize(text: string, lang: "ur" | "en"): Promise<Buffer | null> {
   const voice = VOICES[lang];
   const key = createHash("sha1").update(`${voice}|${text}`).digest("hex");
-  const file = path.join(CACHE_DIR, `${key}.mp3`);
   try {
-    return await fs.readFile(file);
+    const hit = await prisma.audioCache.findUnique({ where: { id: key } });
+    if (hit) return Buffer.from(hit.mp3);
   } catch {
-    /* not cached */
+    /* cache unavailable */
   }
   if (!ttsConfigured()) return null;
   const region = process.env.AZURE_SPEECH_REGION!;
@@ -37,8 +35,7 @@ export async function synthesize(text: string, lang: "ur" | "en"): Promise<Buffe
     });
     if (!res.ok) return null;
     const buf = Buffer.from(await res.arrayBuffer());
-    await fs.mkdir(CACHE_DIR, { recursive: true }).catch(() => {});
-    await fs.writeFile(file, buf).catch(() => {});
+    await prisma.audioCache.upsert({ where: { id: key }, create: { id: key, mp3: buf }, update: {} }).catch(() => {});
     return buf;
   } catch {
     return null;

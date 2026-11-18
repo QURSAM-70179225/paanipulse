@@ -8,6 +8,8 @@ import { detectScript, fallbackAnswer, runTool, TOOL_DEFS, type Script } from "@
 import { chatWithTools, groqFallbackModel, llmConfigured, numbersGrounded, RateLimitError, type ChatMsg } from "@/lib/services/llm";
 
 export const dynamic = "force-dynamic";
+// Groq tool rounds can take several seconds; allow up to 60 s on Vercel.
+export const maxDuration = 60;
 
 const Body = z.object({ farmId: z.string().min(1).max(64), message: z.string().trim().min(1).max(500) });
 
