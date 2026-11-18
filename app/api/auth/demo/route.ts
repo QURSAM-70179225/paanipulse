@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loginWithEmail, loginWithPhone } from "@/lib/auth/login";
 import { DEMO_ACCOUNTS, homeFor } from "@/lib/auth/token";
+import { relativeRedirect } from "@/lib/http/redirect";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Sign-in failed on the server. See /api/health?full=1" }, { status: 500 });
   }
   if (!r) return NextResponse.json({ error: "unknown demo account" }, { status: 400 });
-  if (!r.ok) return NextResponse.redirect(new URL("/login?error=demo", req.url), 303);
+  if (!r.ok) return relativeRedirect("/login?error=demo");
   const dest = next.startsWith("/") && !next.startsWith("//") ? next : as === "farmer" ? "/farmer/karamat" : homeFor(r.role);
-  return NextResponse.redirect(new URL(dest, req.url), 303);
+  return relativeRedirect(dest);
 }

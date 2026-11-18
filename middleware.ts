@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { publicUrl } from "@/lib/http/redirect";
 import { homeFor, SESSION_COOKIE, verifySession, type Role } from "@/lib/auth/token";
 
 /** Route → roles allowed. Fine-grained farm ownership is checked again in pages and APIs. */
@@ -15,11 +16,9 @@ export async function middleware(req: NextRequest) {
   if (!rule) return NextResponse.next();
   const user = await verifySession(req.cookies.get(SESSION_COOKIE)?.value);
   if (!user) {
-    const url = new URL("/login", req.url);
-    url.searchParams.set("next", pathname + search);
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(publicUrl(req, `/login?next=${encodeURIComponent(pathname + search)}`));
   }
-  if (!rule.roles.includes(user.role)) return NextResponse.redirect(new URL(homeFor(user.role), req.url));
+  if (!rule.roles.includes(user.role)) return NextResponse.redirect(publicUrl(req, homeFor(user.role)));
   return NextResponse.next();
 }
 
