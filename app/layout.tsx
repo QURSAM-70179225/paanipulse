@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource/noto-nastaliq-urdu/400.css";
 import "@fontsource/noto-nastaliq-urdu/700.css";
 import "./globals.css";
+import { getLang } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "PaaniPulse",
@@ -14,9 +15,10 @@ export const viewport: Viewport = {
   themeColor: "#047857",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const lang = await getLang("en");
   return (
-    <html lang="en">
+    <html lang={lang}>
       <body className="min-h-screen antialiased">{children}</body>
     </html>
   );

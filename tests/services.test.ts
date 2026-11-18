@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+vi.mock("server-only", () => ({}));
 import { parseOpenMeteo } from "@/lib/services/weather";
 import { advisoryText } from "@/lib/services/advisoryText";
 
@@ -52,5 +53,32 @@ describe("advisory text", () => {
   });
   it("skip-rain message", () => {
     expect(advisoryText({ ...base, kind: "skip-rain" }).textEnglish).toContain("rain is expected tomorrow");
+  });
+});
+
+import { numbersGrounded, numbersIn } from "@/lib/services/llm";
+import { detectIntent, detectScript } from "@/lib/services/chatTools";
+
+describe("chat guardrails", () => {
+  it("extracts numbers with thousands separators and decimals", () => {
+    expect(numbersIn("About 444,500 litres and 8.4 mm; Rs 1,028")).toEqual([444500, 8.4, 1028]);
+  });
+  it("accepts numbers that appear in tool outputs, rejects invented ones", () => {
+    const tool = JSON.stringify({ rainTomorrowMm: 8.4, rupeesToday: 1028, lostLitres: 444500 });
+    expect(numbersGrounded("Kal 8.4 mm barish, Rs 1,028", [tool]).ok).toBe(true);
+    const bad = numbersGrounded("You could earn Rs 2,028 today", [tool]);
+    expect(bad.ok).toBe(false);
+    expect(bad.ungrounded).toEqual([2028]);
+  });
+  it("allows small counts like '3 ideas'", () => {
+    expect(numbersGrounded("Here are 3 ideas", ["{}"]).ok).toBe(true);
+  });
+  it("detects script and intent", () => {
+    expect(detectScript("آج کتنے گھنٹے پمپ چلاؤں؟")).toBe("ur");
+    expect(detectScript("kal barish hogi?")).toBe("roman");
+    expect(detectScript("Will it rain tomorrow?")).toBe("en");
+    expect(detectIntent("kal barish hogi?")).toBe("weather");
+    expect(detectIntent("aaj kitne ghantay pump chalaun?")).toBe("advice");
+    expect(detectIntent("fazil bijli se kya kamaun?")).toBe("savings");
   });
 });

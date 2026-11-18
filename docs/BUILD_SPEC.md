@@ -68,7 +68,8 @@ This replaces the original build prompt PDF wherever they differ.
 - **SHOULD:** bucket-test calibration; telemetry simulator ("installer upgrade"); /about methodology; minimal landing;
   one-line data consent ("Aap ka data aap ka hai — sirf zila level par, bina naam ke share hoga").
 - **COULD:** one-page onboarding form; live Azure TTS for every chat reply.
-- **WON'T (roadmap slide):** full i18n toggle with RTL everywhere, Twilio WhatsApp, telemetry CSV upload, Postgres,
+- **Added after Phase 5 (team decision):** full Urdu / English switch (Urdu = RTL + Nastaliq) on landing, dashboard and chat.
+- **WON'T (roadmap slide):** Twilio WhatsApp, telemetry CSV upload, Postgres,
   Punjabi voice, multi-field farms.
 
 ## Milestones
@@ -80,6 +81,8 @@ This replaces the original build prompt PDF wherever they differ.
 6. Extras: simulator, bucket test UI, /about, landing polish; `npm run build` + `npm test` green; record backup video
 
 ## Known risks
+- `llama-3.3-70b-versatile` was retired on Groq; using `openai/gpt-oss-120b` (tool calling). Free tier: 8k tokens/min →
+  retry on `gpt-oss-20b`, then rule-based fallback. Every AI answer is checked: numbers must come from tool outputs.
 - Open-Meteo free tier is rate-limited per IP (hit during dev on a shared IP) → DEMO_MODE cache is mandatory, and
   refresh `data/sample-weather.json` with a real response before the event.
 - Browser Urdu TTS missing on many laptops → pre-generate the advisory mp3.

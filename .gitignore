@@ -45,3 +45,4 @@ prisma/*.db
 prisma/*.db-journal
 !.env.example
 data/weather-cache/
+data/audio-cache/
