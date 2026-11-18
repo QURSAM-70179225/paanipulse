@@ -103,6 +103,9 @@ export function AuthForm({ mode, dict, next }: { mode: Mode; dict: Record<DictKe
         </>
       )}
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+      {mode === "login" && (
+        <Link href="/forgot" className="-mt-1 text-sm font-semibold text-sky-800 underline">{T("forgot")}</Link>
+      )}
       <button type="submit" disabled={busy} className="h-12 rounded-xl bg-emerald-700 font-semibold text-white hover:bg-emerald-800 disabled:opacity-60">
         {mode === "login" ? T("signIn") : T("createAccount")}
       </button>

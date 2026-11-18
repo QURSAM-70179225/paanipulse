@@ -19,6 +19,9 @@ import { PumpChart } from "@/components/farmer/PumpChart";
 import { BucketTest } from "@/components/farmer/BucketTest";
 import { LiveMeter } from "@/components/farmer/LiveMeter";
 import { ReportHours } from "@/components/farmer/ReportHours";
+import { FieldCheck } from "@/components/farmer/FieldCheck";
+import { fieldCheckSummary } from "@/lib/services/fieldCheck";
+import { dictFor } from "@/lib/i18n/dict";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { VoicePlayer } from "@/components/VoicePlayer";
 import { cn } from "@/lib/utils";
@@ -47,6 +50,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
   const ur = lang === "ur";
   const locale = ur ? "ur-PK" : "en-GB";
   const L = (m3: number) => `${n0(m3 * 1000)} ${T("litres")}`;
+  const fc = await fieldCheckSummary(id);
 
   return (
     <main dir={dirFor(lang)} className={cn("mx-auto min-h-screen max-w-md bg-slate-50 pb-10", ur && "ur-ui")}>
@@ -95,6 +99,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             efficiencyNow: T("efficiencyNow"), calibrated: T("calibrated"), defaultEstimate: T("defaultEstimate"),
           }}
         />
+        <FieldCheck farmId={s.farm.id} d={dictFor(lang)} initial={{ ...fc, checks: fc.checks.map((c) => ({ ...c, takenAt: c.takenAt.toISOString() })) }} />
         <WeatherStrip s={s} T={T} locale={locale} />
         <Link href={`/farmer/${s.farm.id}/chat`} className={cn(buttonVariants({ size: "lg" }), "w-full bg-[#128C7E] hover:bg-[#0e7266]")}>
           <MessageCircle className="h-5 w-5" aria-hidden /> {T("askAssistant")}

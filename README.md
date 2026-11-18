@@ -38,6 +38,8 @@ For local Postgres you can also use a free Neon *branch* of your production data
 | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | no | Urdu neural voice (`centralindia`). Without: recorded mp3 or the phone's own voice |
 | `CRON_SECRET` | for the daily 06:00 advisory | Vercel sends it automatically to the cron job |
 | `TELEMETRY_INGEST_KEY` | no | If set, pump drives / the simulator must send it as `x-ingest-key` |
+| `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL` | for email password reset | Without: reset links are only written to the server log |
+| `SUPPORT_WHATSAPP` | no | Number shown to farmers who forgot their PIN (e.g. `923001234567`) |
 | `DEMO_MODE` | no (default `true`) | Offline sample weather fallback + one-tap demo accounts. Set `false` for a real launch |
 
 ### Demo accounts (seeded)
@@ -88,6 +90,19 @@ npm run simulate -- --url https://YOUR-APP.onrender.com   # or your vercel.app U
 
 **Recorded voice note (recommended for the demo):** record the daily advisory in your own voice and save it as
 `public/audio/advisory-karamat.mp3`. It plays when Azure TTS is not configured, and works with no internet.
+
+## Account recovery
+
+- **Farmers (phone + PIN):** the installer who registered them resets the PIN from the installer portal
+  (identity checked in person, no SMS cost). Optional support WhatsApp number on `/forgot`.
+- **Installers / officials (email):** `/forgot` sends a one-time link valid 30 minutes (only its hash is stored).
+- **Everyone signed in:** `/account` to change PIN / password. Demo accounts can never be changed.
+
+## Meter field check
+
+On the farm dashboard, "Meter field check" compares a real drum measurement (and optionally the inverter's kW)
+with the app's prediction, stores it, and shows the average difference before/after calibration. The lender
+report includes it.
 
 ## Pages
 

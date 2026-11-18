@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ResetPinButton } from "@/components/account/SecretForms";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Installer portal · PaaniPulse" };
@@ -88,6 +89,7 @@ export default async function InstallerPage() {
                       <div className="flex gap-2">
                         <Link href={`/farmer/${r.id}`} className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-slate-300 px-2 hover:bg-slate-50"><LayoutDashboard className="h-4 w-4" aria-hidden /> {d.openDashboard}</Link>
                         <Link href={`/report/${r.id}`} className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-slate-300 px-2 hover:bg-slate-50"><FileText className="h-4 w-4" aria-hidden /> {d.openReport}</Link>
+                        {r.ownerId && !r.synthetic && <ResetPinButton farmerId={r.ownerId} name={r.farmerName} d={d} />}
                       </div>
                     </td>
                   </tr>

@@ -24,3 +24,12 @@ describe("auth", () => {
     expect(homeFor("AUTHORITY")).toBe("/authority");
   });
 });
+
+import { isDemoAccount } from "@/lib/auth/token";
+describe("demo accounts", () => {
+  it("are recognised so their secrets stay unchangeable", () => {
+    expect(isDemoAccount({ phone: "03000000000" })).toBe(true);
+    expect(isDemoAccount({ email: "Installer@PaaniPulse.demo" })).toBe(true);
+    expect(isDemoAccount({ phone: "03001234567", email: null })).toBe(false);
+  });
+});

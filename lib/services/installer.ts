@@ -10,7 +10,7 @@ export async function getInstallerFarms(installerId: string) {
     orderBy: [{ isSynthetic: "asc" }, { createdAt: "desc" }],
     select: {
       id: true, farmerName: true, district: true, tehsil: true, cropType: true, areaAcres: true, isSynthetic: true,
-      owner: { select: { phone: true } },
+      owner: { select: { id: true, phone: true } },
       pumps: { select: { ratedKw: true, calibrated: true, hasTelemetry: true } },
       dailyRecords: { where: { date: { gte: since }, pumpedM3: { not: null } }, select: { pumpedM3: true, excessM3: true, wastedKwh: true } },
     },
@@ -21,6 +21,7 @@ export async function getInstallerFarms(installerId: string) {
     return {
       id: f.id,
       farmerName: f.farmerName,
+      ownerId: f.owner?.id ?? null,
       phoneMasked: f.owner?.phone ? `${f.owner.phone.slice(0, 4)}•••${f.owner.phone.slice(-3)}` : null,
       district: f.district,
       tehsil: f.tehsil,

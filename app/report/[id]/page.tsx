@@ -91,6 +91,9 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
             <Row label={T("rptEnergyUsed")} value={`${n0(r.asset.energyUsedKwh)} kWh`} />
             <Row label={T("rptSolarAvailable")} value={`${n0(r.asset.solarKwh)} kWh`} />
             <Row label={T("rptUtilisation")} value={`${n0(r.asset.utilisationPct)}%`} />
+            {r.fieldChecks.count > 0 && (
+              <Row label={T("fcTitle")} value={`${r.fieldChecks.count} × · ±${n0(r.fieldChecks.meanAbsErrorPct ?? 0)}%`} />
+            )}
           </Section>
           <Section icon={Droplets} title={T("rptWater")}>
             <Row label={T("rptPumped")} value={`${n0(r.water.pumpedM3)} m³`} />

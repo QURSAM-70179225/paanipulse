@@ -56,3 +56,8 @@ export const DEMO_ACCOUNTS = {
   installer: { email: "installer@paanipulse.demo", password: "demo1234" },
   authority: { email: "authority@paanipulse.demo", password: "demo1234" },
 } as const;
+
+/** Demo accounts are shared by judges: their PIN/password can never be changed or reset. */
+export function isDemoAccount(u: { phone?: string | null; email?: string | null }) {
+  return u.phone === DEMO_ACCOUNTS.farmer.phone || !!u.email?.toLowerCase().endsWith("@paanipulse.demo");
+}

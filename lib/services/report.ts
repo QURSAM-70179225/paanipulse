@@ -3,6 +3,7 @@ import "server-only";
 import { DEFAULTS, ureaEquivalent } from "@/lib/engine";
 import { farmRef } from "./authority";
 import { getFarmState } from "./farmState";
+import { fieldCheckSummary } from "./fieldCheck";
 
 export async function getWellReport(farmId: string, opts: { anonymise: boolean; days?: number }) {
   const s = await getFarmState(farmId);
@@ -54,6 +55,7 @@ export async function getWellReport(farmId: string, opts: { anonymise: boolean; 
     score: Math.round(Math.max(0, Math.min(100, 100 - lostPct))),
     flags: { overPumping: lostPct > 30, uncalibrated: !s.pump.calibrated, noDataDays },
     weatherSource: s.weatherSource,
+    fieldChecks: await fieldCheckSummary(farmId).then((f) => ({ count: f.count, meanAbsErrorPct: f.meanAbsErrorPct })),
   };
 }
 export type WellReport = NonNullable<Awaited<ReturnType<typeof getWellReport>>>;
