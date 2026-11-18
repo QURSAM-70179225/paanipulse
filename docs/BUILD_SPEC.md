@@ -88,3 +88,11 @@ This replaces the original build prompt PDF wherever they differ.
 - Browser Urdu TTS missing on many laptops → pre-generate the advisory mp3.
 - Interview answers (10 questions) are from a real farmer contact — keep the raw notes; ask permission before
   quoting by name in the pitch.
+
+## Added after Milestone 6 (team decision)
+- PostgreSQL (Neon) + Vercel deployment; DB-backed weather/audio caches; migrate + seed-if-empty on build
+- Accounts: farmer (phone + PIN), installer and authority (email + password; authority needs invite code)
+- 4-step farm onboarding; installer portal (register farmers at point of sale)
+- Urdu voice input (Groq Whisper); daily 06:00 advisory job (Vercel Cron) + farmer hour reports
+- Wheat crown-root (CRI) first-irrigation rule, only when the soil has started drying
+- Printable well report for lenders / installers (anonymised for lenders)

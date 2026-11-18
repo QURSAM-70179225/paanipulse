@@ -27,13 +27,46 @@ For local Postgres you can also use a free Neon *branch* of your production data
 
 ### Environment variables
 
-| Variable | Needed? | What happens without it |
+| Variable | Needed? | What it does / what happens without it |
 |---|---|---|
-| `DATABASE_URL` | yes | — |
-| `GROQ_API_KEY` | for AI chat | Chat uses rule-based answers (same numbers) |
+| `DATABASE_URL` | yes | Postgres connection (Neon: the **pooled** URL, host contains `-pooler`) |
+| `DIRECT_URL` | yes | Direct Postgres URL for migrations (Neon: the unpooled URL; locally the same as `DATABASE_URL`) |
+| `AUTH_SECRET` | yes | Signs login sessions. Any long random string, e.g. `openssl rand -base64 32` |
+| `AUTHORITY_INVITE_CODE` | for authority sign-up | Code an Irrigation Dept / lender must enter to create an account |
+| `GROQ_API_KEY` | for AI chat + voice input | Without it: rule-based chat answers (same numbers), typing only |
 | `GROQ_MODEL` | no | Defaults to `openai/gpt-oss-120b` (falls back to `openai/gpt-oss-20b` on rate limit) |
-| `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | no | Voice note plays `public/audio/advisory-<farmId>.mp3` if present, else the phone's own Urdu voice |
-| `DEMO_MODE` | no (default `true`) | With `true`, offline sample weather is used if Open-Meteo is unreachable |
+| `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | no | Urdu neural voice (`centralindia`). Without: recorded mp3 or the phone's own voice |
+| `CRON_SECRET` | for the daily 06:00 advisory | Vercel sends it automatically to the cron job |
+| `TELEMETRY_INGEST_KEY` | no | If set, pump drives / the simulator must send it as `x-ingest-key` |
+| `DEMO_MODE` | no (default `true`) | Offline sample weather fallback + one-tap demo accounts. Set `false` for a real launch |
+
+### Demo accounts (seeded)
+
+| Role | Sign in with | Sees |
+|---|---|---|
+| Farmer (Karamat) | phone `03000000000`, PIN `1234` | `/farmer/karamat`, chat, report |
+| Installer (Shahid Solar) | `installer@paanipulse.demo` / `demo1234` | `/installer` (26 farms) |
+| Irrigation Dept | `authority@paanipulse.demo` / `demo1234` | `/authority`, anonymised reports |
+
+Or tap the "Try the demo" buttons on the home page.
+
+## Deploy (Neon + Vercel, both free)
+
+1. **Neon** (https://neon.tech) → create a project (region: closest available to Pakistan, e.g. Singapore or Frankfurt).
+   From *Connection details* copy two strings: the **pooled** one (`DATABASE_URL`) and the **direct** one (`DIRECT_URL`).
+2. **Vercel** (https://vercel.com) → *Add New → Project* → import the GitHub repo `paanipulse`.
+3. Before the first deploy, open *Environment Variables* and add the variables from the table above
+   (at least `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `GROQ_API_KEY`, `CRON_SECRET`, `DEMO_MODE=true`).
+4. Click **Deploy**. The build (`vercel-build`) applies the database migrations, seeds the demo data **only if the
+   database is empty**, and builds the app. Later deploys never wipe your real accounts.
+5. After changing any environment variable, redeploy (*Deployments → ⋯ → Redeploy*).
+6. The daily advisory job is configured in `vercel.json` (01:00 UTC = 06:00 PKT).
+
+Run the live-meter simulator against the deployed site from your laptop:
+
+```bash
+npm run simulate -- --url https://YOUR-APP.vercel.app
+```
 
 **Recorded voice note (recommended for the demo):** record the daily advisory in your own voice and save it as
 `public/audio/advisory-karamat.mp3`. It plays when Azure TTS is not configured, and works with no internet.
@@ -43,6 +76,10 @@ For local Postgres you can also use a free Neon *branch* of your production data
 | URL | For | What it shows |
 |---|---|---|
 | `/` | everyone | Problem, how it works (Urdu / English) |
+| `/login`, `/signup` | everyone | Farmer (phone + PIN), installer / authority (email + password) |
+| `/farmer/onboard` | farmer | 4-step farm set-up (map, crop, pump, consent) |
+| `/installer` | installer | Farms installed, status, register a farmer |
+| `/report/<farmId>` | farmer, installer, lender | Printable 30-day well report (anonymised for lenders) |
 | `/farmer/karamat` | farmer (mobile) | Yesterday vs need, today's advice + voice note, live meter, weekly waste, chart, spare sunshine, bucket test, weather |
 | `/farmer/karamat/chat` | farmer (mobile) | WhatsApp-style assistant (Urdu script, Roman Urdu, English) |
 | `/authority` | Irrigation Dept / lenders (desktop) | Heatmap of 151 wells, filters, KPIs incl. MWh wasted, district table, CSV export |
