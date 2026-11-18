@@ -66,7 +66,25 @@ export interface DayResult {
 
 export interface SimulationResult {
   days: DayResult[];
-  today: { date: string; advice: Advice; depletionStartMm: number; rawMm: number; tawMm: number; pvKwh: number; pumpableHours: number; stage: DayResult["stage"]; daysSinceSowing: number };
+  today: {
+    date: string;
+    advice: Advice;
+    depletionStartMm: number;
+    rawMm: number;
+    tawMm: number;
+    pvKwh: number;
+    pumpableHours: number;
+    stage: DayResult["stage"];
+    daysSinceSowing: number;
+    et0: number;
+    etc: number;
+    rainMm: number;
+    effRainMm: number;
+    /** Gross-equivalent crop water use today (m³). */
+    needM3: number;
+    /** Peak pump input power today (kW) — used for the flow range. */
+    peakPumpKw: number;
+  };
   headM: number;
   kwhPerM3: number;
   areaM2: number;
@@ -210,6 +228,12 @@ export function simulateFarm(
       pumpableHours: t.solar.pumpableHours,
       stage: stageForDay(farm.crop, t.dss),
       daysSinceSowing: t.dss,
+      et0: t.w.et0Mm,
+      etc: t.etcMm,
+      rainMm: t.w.precipMm,
+      effRainMm: t.effRainMm,
+      needM3: mmOverAreaToM3(Math.max(0, t.etcMm - t.effRainMm + t.percolation), areaM2) / eff,
+      peakPumpKw: t.solar.peakPumpKw,
     },
     headM,
     kwhPerM3: kpm,

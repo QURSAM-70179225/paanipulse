@@ -58,6 +58,8 @@ export interface ModeBDay {
   pumpableHours: number;
   /** PV energy produced if fully used (kWh). */
   pvKwh: number;
+  /** Highest pump input power during the day (kW). */
+  peakPumpKw: number;
   /** Volume if the pump ran all pumpable hours (m³). */
   maxM3: number;
   /** Mean flow over the best `hours` hours (m³/h). */
@@ -86,6 +88,7 @@ export function modeBDay(pump: PumpSpec, hourlyGhi: number[]): ModeBDay {
   return {
     pumpableHours: running.length,
     pvKwh: hrs.reduce((s, h) => s + h.pvKw, 0),
+    peakPumpKw: hrs.reduce((m, h) => Math.max(m, h.pumpKw), 0),
     maxM3: running.reduce((s, h) => s + h.flowM3h, 0),
     flowForHours: (hours: number) => {
       const n = Math.min(Math.max(hours, 1), Math.max(1, running.length));
