@@ -34,7 +34,7 @@ Re-seed any time with `npm run seed`. Tests: `npm test`.
 - [x] Milestone 2: engine (FAO-56, soil-water balance, pump physics) + 33 unit tests; engine-driven seed
 - [x] Milestone 3: weather service (live → saved → offline sample) + farm dashboard
 - [x] Milestone 4: Urdu/English switch, WhatsApp-style AI chat (Groq tools + number guardrail + offline fallback), voice notes
-- [ ] Milestone 5: authority dashboard
+- [x] Milestone 5: authority dashboard (heatmap, filters, KPIs incl. MWh wasted, district table, CSV)
 - [ ] Milestone 6: extras, build, backup video
 
 See [`docs/BUILD_SPEC.md`](docs/BUILD_SPEC.md) for the full spec and the decisions behind it.
