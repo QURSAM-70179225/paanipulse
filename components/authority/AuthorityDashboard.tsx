@@ -62,7 +62,7 @@ export function AuthorityDashboard({ initial, lang, dict, user }: { initial: Aut
   }, [qs, initial]);
 
   const k = data.kpis;
-  const mapFarms = useMemo(() => data.farms.map((f) => ({ ref: f.ref, district: f.district, crop: f.crop, lat: f.lat, lng: f.lng, intensity: f.intensity, excessPct: f.excessPct, wastedKwh: f.wastedKwh })), [data]);
+  const mapFarms = useMemo(() => data.farms.map((f) => ({ id: f.id, ref: f.ref, district: f.district, crop: f.crop, lat: f.lat, lng: f.lng, intensity: f.intensity, excessPct: f.excessPct, wastedKwh: f.wastedKwh })), [data]);
   const chartRows = data.districts.map((d) => ({ district: d.district, pumped: Math.round(d.pumpedM3), need: Math.round(d.needM3) }));
   const selectCls = "h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600";
 
@@ -152,7 +152,7 @@ export function AuthorityDashboard({ initial, lang, dict, user }: { initial: Aut
             <CardContent>
               <div className="h-[420px] overflow-hidden rounded-xl" dir="ltr">
                 {data.farms.length ? (
-                  <ExtractionMap farms={mapFarms} labels={{ excess: T("excessLabel"), intensity: T("intensityLabel"), wasted: T("wastedLabel") }} />
+                  <ExtractionMap farms={mapFarms} labels={{ report: T("openReportLink"), excess: T("excessLabel"), intensity: T("intensityLabel"), wasted: T("wastedLabel") }} />
                 ) : (
                   <p className="flex h-full items-center justify-center bg-slate-100 text-slate-600">{T("noResults")}</p>
                 )}

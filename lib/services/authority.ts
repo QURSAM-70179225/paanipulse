@@ -34,6 +34,8 @@ function coarse(id: string, lat: number, lng: number) {
 }
 
 export interface FarmRow {
+  /** Internal id (not personal) — used only to open the anonymised well report. */
+  id: string;
   ref: string;
   district: string;
   tehsil: string | null;
@@ -73,6 +75,7 @@ export async function getAuthorityData(f: AuthorityFilters) {
     const excess = s("excessM3");
     const days = Math.max(1, farm.dailyRecords.length);
     return {
+      id: farm.id,
       ref: farmRef(farm.id, farm.district),
       district: farm.district,
       tehsil: farm.tehsil,

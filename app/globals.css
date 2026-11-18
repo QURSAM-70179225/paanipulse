@@ -34,3 +34,11 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   unicode-bidi: isolate;
 }
+
+/* Printable reports */
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+  .print-page { box-shadow: none !important; border: none !important; margin: 0 !important; max-width: none !important; }
+  @page { size: A4; margin: 14mm; }
+}

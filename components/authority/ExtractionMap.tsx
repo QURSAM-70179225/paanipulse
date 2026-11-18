@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
 
 export interface MapFarm {
+  id: string;
   ref: string;
   district: string;
   crop: string;
@@ -17,6 +18,7 @@ export interface MapFarm {
 }
 
 export interface MapLabels {
+  report: string;
   excess: string;
   intensity: string;
   wasted: string;
@@ -81,6 +83,8 @@ export default function ExtractionMap({ farms, labels }: { farms: MapFarm[]; lab
             {labels.intensity}: {f.intensity.toFixed(1)} m³/acre/day
             <br />
             {labels.wasted}: {Math.round(f.wastedKwh)} kWh
+            <br />
+            <a href={`/report/${f.id}`}>{labels.report} →</a>
           </Popup>
         </CircleMarker>
       ))}

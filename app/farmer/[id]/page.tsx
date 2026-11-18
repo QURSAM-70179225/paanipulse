@@ -108,6 +108,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             </span>
           </p>
           <p>{T("consent")}</p>
+          <Link href={`/report/${s.farm.id}`} className="font-semibold text-sky-800 underline">{T("openReportLink")}</Link>
         </footer>
       </div>
     </main>
