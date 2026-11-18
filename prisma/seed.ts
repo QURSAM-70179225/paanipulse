@@ -1,10 +1,13 @@
 /**
  * Seed: 1 detailed demo farm (Karamat, Muridke) + 150 SIMULATED farms across 7 districts.
  * All dates are relative to "today" (Asia/Karachi) so the demo stays coherent whenever it runs.
- * Engine-derived DailyRecord fields are filled in Milestone 2.
+ * DailyRecords are computed by the engine against the offline sample weather; the app recomputes them with live
+ * weather when available.
  */
 import { PrismaClient } from "@prisma/client";
-import { pktDayStart } from "../lib/dates";
+import { pktDateKey, pktDayStart } from "../lib/dates";
+import { runFarm } from "../lib/services/farmSim";
+import { sampleWeather } from "../lib/services/sampleWeather";
 
 const prisma = new PrismaClient();
 const HISTORY_DAYS = 30;
@@ -43,6 +46,34 @@ const DISTRICTS = [
 
 const FIRST_NAMES = ["Muhammad", "Ghulam", "Allah", "Abdul", "Muhammad", "Rana", "Chaudhry", "Malik", "Mian", "Haji"];
 const LAST_NAMES = ["Aslam", "Rasool", "Ditta", "Rehman", "Iqbal", "Akram", "Bashir", "Nawaz", "Sarwar", "Yousaf", "Anwar", "Latif"];
+
+const weather = sampleWeather();
+const todayKey = pktDateKey(pktDayStart(0));
+
+/** Run the engine for a farm's hour history and store full DailyRecords. */
+async function writeRecords(farmId: string, hours: Record<string, number>) {
+  const farm = await prisma.farm.findUniqueOrThrow({ where: { id: farmId }, include: { pumps: true } });
+  const res = runFarm(farm, farm.pumps[0], hours, weather, todayKey);
+  await prisma.dailyRecord.createMany({
+    data: res.days.map((d) => ({
+      farmId,
+      date: new Date(`${d.date}T00:00:00+05:00`),
+      actualHours: d.actualHours,
+      et0: d.et0,
+      etc: d.etc,
+      rainMm: d.rainMm,
+      depletionMm: d.depletionEndMm,
+      needM3: d.needM3,
+      pumpedM3: d.pumpedM3,
+      recommendedHours: d.recommendedHours,
+      excessM3: d.excessM3,
+      wastedKwh: d.wastedKwh,
+      pvKwh: d.pvKwh,
+      spareKwh: d.spareKwh,
+    })),
+  });
+  return res;
+}
 
 async function main() {
   await prisma.chatMessage.deleteMany();
@@ -94,13 +125,10 @@ async function main() {
     karamatHours.push(h);
   }
   karamatHours[karamatHours.length - 1] = 6; // yesterday: 6 h (demo line "Kal aap ne 6 ghantay chalaya")
-  await prisma.dailyRecord.createMany({
-    data: karamatHours.map((h, i) => ({
-      farmId: karamat.id,
-      date: pktDayStart(i - HISTORY_DAYS),
-      actualHours: h,
-    })),
-  });
+  await writeRecords(
+    karamat.id,
+    Object.fromEntries(karamatHours.map((h, i) => [pktDateKey(pktDayStart(i - HISTORY_DAYS)), h])),
+  );
 
   // ── 150 simulated farms ──────────────────────────────────────────────────
   for (let i = 1; i <= 150; i++) {
@@ -109,7 +137,7 @@ async function main() {
     const sowingOffset =
       crop === "wheat" ? -Math.round(between(5, 25)) : crop === "maize" ? -Math.round(between(80, 100)) : -Math.round(between(220, 260));
     const ratedKw = pick<number>([[7.5, 25], [11, 30], [15, 30], [18.5, 10], [22, 5]]);
-    const habit = between(0.0, 0.6); // over-pumping tendency (tuned against engine in Milestone 2)
+    const habit = between(0.0, 1.0); // over-pumping tendency: 0 = pumps roughly what the crop uses
     const farm = await prisma.farm.create({
       data: {
         farmerName: `${FIRST_NAMES[Math.floor(rand() * FIRST_NAMES.length)]} ${LAST_NAMES[Math.floor(rand() * LAST_NAMES.length)]}`,
@@ -120,7 +148,8 @@ async function main() {
         tehsil: dist.tehsil,
         cropType: crop,
         sowingDate: pktDayStart(sowingOffset),
-        areaAcres: round(between(4, 25), 0.5),
+        // Area served by the tube well: ~0.55–1 acre/kW for wheat; thirstier crops lean on canal water too.
+        areaAcres: Math.min(25, Math.max(4, round(ratedKw * (crop === "wheat" ? between(0.55, 1.0) : between(0.25, 0.45)), 0.5))),
         irrigationMethod: pick<string>([["flood", 80], ["furrow", 15], ["sprinkler", 4], ["drip", 1]]),
         isSynthetic: true,
         pumps: {
@@ -134,14 +163,17 @@ async function main() {
         },
       },
     });
-    const baseHours = between(2, 4) * (1 + habit);
-    await prisma.dailyRecord.createMany({
-      data: Array.from({ length: HISTORY_DAYS }, (_, k) => ({
-        farmId: farm.id,
-        date: pktDayStart(k - HISTORY_DAYS),
-        actualHours: rand() < 0.65 ? Math.min(9, round(baseHours * between(0.7, 1.4), 0.5)) : 0,
-      })),
-    });
+    // Hours needed to replace crop water use, scaled by this farmer's over-pumping habit.
+    const dry = runFarm(farm, (await prisma.pump.findFirstOrThrow({ where: { farmId: farm.id } })), {}, weather, todayKey);
+    const hours: Record<string, number> = {};
+    for (const d of dry.days) {
+      const needHours = d.flowM3PerHour > 0 ? d.needM3 / d.flowM3PerHour : 0;
+      // Farmers irrigate in turns: ~65% of days, with ~1.55× a day's need on those days (≈ need on average).
+      const onDay = rand() < 0.65;
+      const h = onDay ? needHours * 1.55 * (1 + habit) * between(0.85, 1.15) : 0;
+      hours[d.date] = Math.min(d.pumpableHours, Math.max(0, round(h, 0.5)));
+    }
+    await writeRecords(farm.id, hours);
   }
 
   const counts = {

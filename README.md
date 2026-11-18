@@ -18,7 +18,7 @@ Re-seed any time with `npm run seed`. Tests: `npm test`.
 ## Status
 
 - [x] Milestone 1: scaffold, schema, seed (Karamat + 150 simulated farms), landing page
-- [ ] Milestone 2: engine (FAO-56, soil-water balance, pump physics) + tests
+- [x] Milestone 2: engine (FAO-56, soil-water balance, pump physics) + 33 unit tests; engine-driven seed
 - [ ] Milestone 3: weather service + farm dashboard
 - [ ] Milestone 4: chat + daily Urdu advisory + voice
 - [ ] Milestone 5: authority dashboard

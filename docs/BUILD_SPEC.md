@@ -2,6 +2,9 @@
 
 This replaces the original build prompt PDF wherever they differ.
 
+## Team
+- Qursam Bibi, Muzammil Hussain (2 people)
+
 ## Positioning
 - **Hackathon:** LUMS CfE × OGDCL CleanTech Hackathon 2026
 - **Primary theme:** Renewable & Alternative Energy (supporting: Energy Storage & Efficiency, Energy Finance & Business Model Innovation)
@@ -80,4 +83,5 @@ This replaces the original build prompt PDF wherever they differ.
 - Open-Meteo free tier is rate-limited per IP (hit during dev on a shared IP) → DEMO_MODE cache is mandatory, and
   refresh `data/sample-weather.json` with a real response before the event.
 - Browser Urdu TTS missing on many laptops → pre-generate the advisory mp3.
-- Interview answers so far are unconfirmed — do not quote them as real until a named farmer confirms.
+- Interview answers (10 questions) are from a real farmer contact — keep the raw notes; ask permission before
+  quoting by name in the pitch.

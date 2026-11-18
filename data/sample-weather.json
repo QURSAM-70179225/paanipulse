@@ -1,0 +1,314 @@
+{
+  "_comment": "OFFLINE SAMPLE (not observed). Typical mid-November weather for Muridke, Sheikhupura, keyed by day offset from today. Used only when DEMO_MODE=true and Open-Meteo is unreachable.",
+  "location": {
+    "lat": 31.8,
+    "lng": 74.26,
+    "name": "Muridke, Sheikhupura"
+  },
+  "days": [
+    {
+      "offset": -30,
+      "et0Mm": 2.45,
+      "precipMm": 0,
+      "radiationMj": 15.17,
+      "tMax": 30.6,
+      "tMin": 15.4
+    },
+    {
+      "offset": -29,
+      "et0Mm": 2.65,
+      "precipMm": 0,
+      "radiationMj": 14.46,
+      "tMax": 30.5,
+      "tMin": 16.3
+    },
+    {
+      "offset": -28,
+      "et0Mm": 2.63,
+      "precipMm": 0,
+      "radiationMj": 14.38,
+      "tMax": 31,
+      "tMin": 15.9
+    },
+    {
+      "offset": -27,
+      "et0Mm": 2.63,
+      "precipMm": 0,
+      "radiationMj": 13.8,
+      "tMax": 30.2,
+      "tMin": 15.8
+    },
+    {
+      "offset": -26,
+      "et0Mm": 2.57,
+      "precipMm": 0,
+      "radiationMj": 13.41,
+      "tMax": 30.6,
+      "tMin": 15.2
+    },
+    {
+      "offset": -25,
+      "et0Mm": 2.62,
+      "precipMm": 0,
+      "radiationMj": 14.52,
+      "tMax": 29.3,
+      "tMin": 15.1
+    },
+    {
+      "offset": -24,
+      "et0Mm": 2.6,
+      "precipMm": 0,
+      "radiationMj": 14.23,
+      "tMax": 30.2,
+      "tMin": 15
+    },
+    {
+      "offset": -23,
+      "et0Mm": 2.57,
+      "precipMm": 0,
+      "radiationMj": 14.49,
+      "tMax": 29.4,
+      "tMin": 14.3
+    },
+    {
+      "offset": -22,
+      "et0Mm": 1.83,
+      "precipMm": 3.2,
+      "radiationMj": 9.47,
+      "tMax": 25.8,
+      "tMin": 14.1
+    },
+    {
+      "offset": -21,
+      "et0Mm": 2.38,
+      "precipMm": 0,
+      "radiationMj": 13.32,
+      "tMax": 30.2,
+      "tMin": 14.4
+    },
+    {
+      "offset": -20,
+      "et0Mm": 2.45,
+      "precipMm": 0,
+      "radiationMj": 14.16,
+      "tMax": 28.2,
+      "tMin": 13.7
+    },
+    {
+      "offset": -19,
+      "et0Mm": 2.38,
+      "precipMm": 0,
+      "radiationMj": 13.47,
+      "tMax": 28.8,
+      "tMin": 13.3
+    },
+    {
+      "offset": -18,
+      "et0Mm": 2.46,
+      "precipMm": 0,
+      "radiationMj": 12.65,
+      "tMax": 28.5,
+      "tMin": 13.4
+    },
+    {
+      "offset": -17,
+      "et0Mm": 2.37,
+      "precipMm": 0,
+      "radiationMj": 13.95,
+      "tMax": 28.6,
+      "tMin": 12.9
+    },
+    {
+      "offset": -16,
+      "et0Mm": 2.27,
+      "precipMm": 0,
+      "radiationMj": 12.83,
+      "tMax": 28.1,
+      "tMin": 13.2
+    },
+    {
+      "offset": -15,
+      "et0Mm": 2.23,
+      "precipMm": 0,
+      "radiationMj": 13.13,
+      "tMax": 28.4,
+      "tMin": 12.6
+    },
+    {
+      "offset": -14,
+      "et0Mm": 2.38,
+      "precipMm": 0,
+      "radiationMj": 12.92,
+      "tMax": 28.7,
+      "tMin": 13.2
+    },
+    {
+      "offset": -13,
+      "et0Mm": 2.27,
+      "precipMm": 0,
+      "radiationMj": 12.92,
+      "tMax": 27.8,
+      "tMin": 13.2
+    },
+    {
+      "offset": -12,
+      "et0Mm": 2.34,
+      "precipMm": 0,
+      "radiationMj": 12.63,
+      "tMax": 28,
+      "tMin": 12.1
+    },
+    {
+      "offset": -11,
+      "et0Mm": 2.22,
+      "precipMm": 0,
+      "radiationMj": 12.46,
+      "tMax": 27.1,
+      "tMin": 12.2
+    },
+    {
+      "offset": -10,
+      "et0Mm": 2.26,
+      "precipMm": 0,
+      "radiationMj": 13.21,
+      "tMax": 26.4,
+      "tMin": 12.9
+    },
+    {
+      "offset": -9,
+      "et0Mm": 2.02,
+      "precipMm": 0,
+      "radiationMj": 12.36,
+      "tMax": 26.3,
+      "tMin": 11.2
+    },
+    {
+      "offset": -8,
+      "et0Mm": 2.27,
+      "precipMm": 0,
+      "radiationMj": 11.97,
+      "tMax": 27.1,
+      "tMin": 11.1
+    },
+    {
+      "offset": -7,
+      "et0Mm": 2.09,
+      "precipMm": 0,
+      "radiationMj": 12.47,
+      "tMax": 25.9,
+      "tMin": 12.5
+    },
+    {
+      "offset": -6,
+      "et0Mm": 2.2,
+      "precipMm": 0,
+      "radiationMj": 12.85,
+      "tMax": 27.2,
+      "tMin": 12.3
+    },
+    {
+      "offset": -5,
+      "et0Mm": 2.14,
+      "precipMm": 0,
+      "radiationMj": 11.78,
+      "tMax": 25.3,
+      "tMin": 10.8
+    },
+    {
+      "offset": -4,
+      "et0Mm": 1.91,
+      "precipMm": 0,
+      "radiationMj": 11.24,
+      "tMax": 26.3,
+      "tMin": 10.5
+    },
+    {
+      "offset": -3,
+      "et0Mm": 2.09,
+      "precipMm": 0,
+      "radiationMj": 11.93,
+      "tMax": 26.3,
+      "tMin": 10.4
+    },
+    {
+      "offset": -2,
+      "et0Mm": 2.11,
+      "precipMm": 0,
+      "radiationMj": 11.43,
+      "tMax": 25.5,
+      "tMin": 11.5
+    },
+    {
+      "offset": -1,
+      "et0Mm": 1.86,
+      "precipMm": 0,
+      "radiationMj": 11.74,
+      "tMax": 24.5,
+      "tMin": 11.3
+    },
+    {
+      "offset": 0,
+      "et0Mm": 1.99,
+      "precipMm": 0,
+      "radiationMj": 12.34,
+      "tMax": 24.4,
+      "tMin": 11.1
+    },
+    {
+      "offset": 1,
+      "et0Mm": 0.94,
+      "precipMm": 8.4,
+      "radiationMj": 6.32,
+      "tMax": 20.3,
+      "tMin": 10.5
+    },
+    {
+      "offset": 2,
+      "et0Mm": 1.44,
+      "precipMm": 1.6,
+      "radiationMj": 8.53,
+      "tMax": 22.4,
+      "tMin": 10.1
+    },
+    {
+      "offset": 3,
+      "et0Mm": 1.75,
+      "precipMm": 0,
+      "radiationMj": 11.81,
+      "tMax": 25.2,
+      "tMin": 10.2
+    },
+    {
+      "offset": 4,
+      "et0Mm": 1.86,
+      "precipMm": 0,
+      "radiationMj": 10.54,
+      "tMax": 23.8,
+      "tMin": 10.4
+    },
+    {
+      "offset": 5,
+      "et0Mm": 1.73,
+      "precipMm": 0,
+      "radiationMj": 11.49,
+      "tMax": 25.2,
+      "tMin": 8.5
+    },
+    {
+      "offset": 6,
+      "et0Mm": 1.94,
+      "precipMm": 0,
+      "radiationMj": 11.67,
+      "tMax": 25.2,
+      "tMin": 10.1
+    },
+    {
+      "offset": 7,
+      "et0Mm": 1.88,
+      "precipMm": 0,
+      "radiationMj": 10.87,
+      "tMax": 23.5,
+      "tMin": 9.5
+    }
+  ]
+}
