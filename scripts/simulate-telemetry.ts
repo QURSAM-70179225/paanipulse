@@ -52,7 +52,7 @@ async function stream() {
     const freq = power > 0 ? 50 * Math.cbrt(power / RATED_KW) : 0;
     const reading = { pumpId: PUMP_ID, timestamp: new Date(simMs).toISOString(), power_kw: +power.toFixed(2), frequency_hz: +freq.toFixed(1) };
     try {
-      const res = await fetch(`${URL_BASE}/api/telemetry`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify([reading]) });
+      const res = await fetch(`${URL_BASE}/api/telemetry`, { method: "POST", headers: { "Content-Type": "application/json", ...(process.env.TELEMETRY_INGEST_KEY ? { "x-ingest-key": process.env.TELEMETRY_INGEST_KEY } : {}) }, body: JSON.stringify([reading]) });
       const hh = String(Math.floor(hour)).padStart(2, "0");
       const mm = String(Math.floor((hour % 1) * 60)).padStart(2, "0");
       console.log(`${hh}:${mm}  ${reading.power_kw.toFixed(2)} kW  ${reading.frequency_hz} Hz  -> ${res.status}`);

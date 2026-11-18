@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { notFound, serverError } from "@/lib/api/http";
+import { guardFarm, notFound, serverError } from "@/lib/api/http";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const denied = await guardFarm(id);
+  if (denied) return denied;
   try {
     const farm = await prisma.farm.findUnique({ where: { id }, include: { pumps: true } });
     if (!farm) return notFound("Farm not found");

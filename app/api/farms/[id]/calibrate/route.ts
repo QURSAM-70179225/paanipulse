@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { badRequest, notFound, serverError } from "@/lib/api/http";
+import { badRequest, guardFarm, notFound, serverError } from "@/lib/api/http";
 import { calibrateEfficiency, DEFAULTS, flowRangeM3h } from "@/lib/engine";
 import { pumpKwAtHour } from "@/lib/services/pumpPower";
 
@@ -21,6 +21,8 @@ const Body = z.union([
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const denied = await guardFarm(id);
+  if (denied) return denied;
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return badRequest(parsed.error);
   try {

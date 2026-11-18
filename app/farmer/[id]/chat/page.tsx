@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { canAccessFarm, getSession } from "@/lib/auth/session";
 import { getFarmState } from "@/lib/services/farmState";
 import { ChatView } from "@/components/chat/ChatView";
 import { dirFor, isLang, t, type DictKey } from "@/lib/i18n/dict";
@@ -13,6 +14,7 @@ const time = (d: Date) => d.toLocaleTimeString("en-GB", { hour: "2-digit", minut
 
 export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!(await canAccessFarm(await getSession(), id))) notFound();
   const farm = await prisma.farm.findUnique({ where: { id }, select: { language: true } });
   if (!farm) notFound();
   const lang = await getLang(isLang(farm.language) ? farm.language : "ur");

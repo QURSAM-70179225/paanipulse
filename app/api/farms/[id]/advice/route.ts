@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { badRequest, notFound, serverError } from "@/lib/api/http";
+import { badRequest, guardFarm, notFound, serverError } from "@/lib/api/http";
 import { getFarmState } from "@/lib/services/farmState";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +14,8 @@ const Query = z.object({
 /** Runs the engine for the farm, stores today's DailyRecord + Advisory, and returns the full view model. */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const denied = await guardFarm(id);
+  if (denied) return denied;
   const parsed = Query.safeParse(Object.fromEntries(req.nextUrl.searchParams));
   if (!parsed.success) return badRequest(parsed.error);
   const now = parsed.data.date ? new Date(`${parsed.data.date}T12:00:00+05:00`) : new Date();

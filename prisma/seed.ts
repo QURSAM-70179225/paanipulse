@@ -5,6 +5,8 @@
  * weather when available.
  */
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { DEMO_ACCOUNTS } from "../lib/auth/token";
 import { pktDateKey, pktDayStart } from "../lib/dates";
 import { runFarm } from "../lib/services/farmSim";
 import { sampleWeather } from "../lib/services/sampleWeather";
@@ -82,6 +84,19 @@ async function main() {
   await prisma.telemetryReading.deleteMany();
   await prisma.pump.deleteMany();
   await prisma.farm.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.weatherCache.deleteMany();
+
+  // ── Demo accounts (one-tap "Try demo" on the landing page) ───────────────
+  const [farmerUser, installerUser] = await Promise.all([
+    prisma.user.create({ data: { role: "FARMER", name: "Karamat Ali", phone: DEMO_ACCOUNTS.farmer.phone, passwordHash: await bcrypt.hash(DEMO_ACCOUNTS.farmer.pin, 10) } }),
+    prisma.user.create({
+      data: { role: "INSTALLER", name: "Shahid Mehmood", organisation: "Shahid Solar, Sheikhupura", email: DEMO_ACCOUNTS.installer.email, passwordHash: await bcrypt.hash(DEMO_ACCOUNTS.installer.password, 10) },
+    }),
+    prisma.user.create({
+      data: { role: "AUTHORITY", name: "Groundwater Cell (demo)", organisation: "Punjab Irrigation Department (demo)", email: DEMO_ACCOUNTS.authority.email, passwordHash: await bcrypt.hash(DEMO_ACCOUNTS.authority.password, 10) },
+    }),
+  ]);
 
   // ── Demo farm: Karamat, Muridke ──────────────────────────────────────────
   const karamat = await prisma.farm.create({
@@ -99,6 +114,8 @@ async function main() {
       areaAcres: 12.5, // "aadha murabba"
       irrigationMethod: "flood",
       isSynthetic: false,
+      ownerId: farmerUser.id,
+      installerId: installerUser.id,
       pumps: {
         create: {
           id: "karamat-pump",
@@ -152,6 +169,8 @@ async function main() {
         areaAcres: Math.min(25, Math.max(4, round(ratedKw * (crop === "wheat" ? between(0.55, 1.0) : between(0.25, 0.45)), 0.5))),
         irrigationMethod: pick<string>([["flood", 80], ["furrow", 15], ["sprinkler", 4], ["drip", 1]]),
         isSynthetic: true,
+        // The demo installer looks after the simulated wells in Sheikhupura.
+        installerId: dist.name === "Sheikhupura" ? installerUser.id : null,
         pumps: {
           create: {
             ratedKw,
@@ -180,6 +199,7 @@ async function main() {
     farms: await prisma.farm.count(),
     synthetic: await prisma.farm.count({ where: { isSynthetic: true } }),
     dailyRecords: await prisma.dailyRecord.count(),
+    users: await prisma.user.count(),
   };
   console.log("Seeded:", counts);
 }

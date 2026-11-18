@@ -19,6 +19,9 @@ const Readings = z.array(Reading).min(1).max(5000);
  * or a multipart upload with a CSV file in field "file".
  */
 export async function POST(req: Request) {
+  // Optional device key: when TELEMETRY_INGEST_KEY is set, drives/simulator must send it.
+  const key = process.env.TELEMETRY_INGEST_KEY;
+  if (key && req.headers.get("x-ingest-key") !== key) return NextResponse.json({ error: "invalid ingest key" }, { status: 401 });
   const type = req.headers.get("content-type") ?? "";
   let raw: unknown;
   try {

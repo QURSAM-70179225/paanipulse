@@ -1,11 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { badRequest, serverError } from "@/lib/api/http";
+import { badRequest, guardRole, serverError } from "@/lib/api/http";
 import { AuthorityQuery, getAuthorityData } from "@/lib/services/authority";
 
 export const dynamic = "force-dynamic";
 
 /** [lat, lng, intensity m³/acre/day] points for a heatmap layer. */
 export async function GET(req: NextRequest) {
+  const denied = await guardRole("AUTHORITY");
+  if (denied) return denied;
   const parsed = AuthorityQuery.safeParse(Object.fromEntries([...req.nextUrl.searchParams].filter(([, v]) => v !== "")));
   if (!parsed.success) return badRequest(parsed.error);
   try {

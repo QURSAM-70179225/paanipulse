@@ -5,6 +5,9 @@ import {
   PowerOff, Radio, Sprout, Sun, Thermometer, Wheat, Zap, Coins, Info, CircleAlert,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
+import { canAccessFarm, getSession } from "@/lib/auth/session";
+import type { SessionUser } from "@/lib/auth/token";
+import { AccountBar } from "@/components/auth/AccountBar";
 import { getFarmState, type FarmState } from "@/lib/services/farmState";
 import { CROP_NAMES } from "@/lib/services/advisoryText";
 import { dirFor, isLang, t, type DictKey, type Lang } from "@/lib/i18n/dict";
@@ -33,6 +36,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function FarmPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const user = await getSession();
+  if (!user || !(await canAccessFarm(user, id))) notFound();
   const farmLang = (await prisma.farm.findUnique({ where: { id }, select: { language: true } }))?.language;
   const lang = await getLang(isLang(farmLang) ? farmLang : "ur");
   const s = await getFarmState(id);
@@ -44,7 +49,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
 
   return (
     <main dir={dirFor(lang)} className={cn("mx-auto min-h-screen max-w-md bg-slate-50 pb-10", ur && "ur-ui")}>
-      <Header s={s} T={T} lang={lang} />
+      <Header s={s} T={T} lang={lang} user={user} />
       <div className="flex flex-col gap-4 px-4 pt-4">
         {s.yesterday && s.yesterday.actualHours > 0 && <YesterdayCard s={s} T={T} L={L} />}
         <HeroCard s={s} T={T} />
@@ -102,17 +107,18 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
   );
 }
 
-function Header({ s, T, lang }: { s: FarmState; T: TFn; lang: Lang }) {
+function Header({ s, T, lang, user }: { s: FarmState; T: TFn; lang: Lang; user: SessionUser }) {
   const crop = CROP_NAMES[s.farm.crop];
   const ur = lang === "ur";
   return (
     <header className="bg-gradient-to-br from-emerald-800 to-teal-700 px-4 pb-5 pt-4 text-white">
       <div className="flex items-center justify-between gap-2">
-        <Link href="/" className="inline-flex min-h-9 items-center gap-1 text-sm text-emerald-100 hover:text-white">
+        <Link href={user.role === "INSTALLER" ? "/installer" : "/"} className="inline-flex min-h-9 items-center gap-1 text-sm text-emerald-100 hover:text-white">
           <ArrowLeft className={cn("h-4 w-4", ur && "rotate-180")} aria-hidden /> {T("appName")}
         </Link>
         <LanguageToggle lang={lang} />
       </div>
+      <AccountBar user={user} signOutLabel={T("signOut")} className="mt-2 justify-between text-emerald-50" />
       <h1 className="mt-2 text-2xl font-bold">{s.farm.farmerName}</h1>
       <p className="text-emerald-50">{s.farm.tehsil ? `${s.farm.tehsil}, ` : ""}{s.farm.district}</p>
       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-emerald-50">

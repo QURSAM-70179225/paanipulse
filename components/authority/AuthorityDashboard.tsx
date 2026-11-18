@@ -8,6 +8,8 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import type { AuthorityData } from "@/lib/services/authority";
 import { fill, type DictKey, type Lang } from "@/lib/i18n/dict";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { AccountBar } from "@/components/auth/AccountBar";
+import type { SessionUser } from "@/lib/auth/token";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -25,7 +27,7 @@ const CROP_LABEL: Record<string, { en: string; ur: string }> = {
 const n0 = (x: number) => Math.round(x).toLocaleString("en-US");
 const n1 = (x: number) => x.toLocaleString("en-US", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
 
-export function AuthorityDashboard({ initial, lang, dict }: { initial: AuthorityData; lang: Lang; dict: Record<DictKey, string> }) {
+export function AuthorityDashboard({ initial, lang, dict, user }: { initial: AuthorityData; lang: Lang; dict: Record<DictKey, string>; user: SessionUser }) {
   const T = (k: DictKey, v?: Record<string, string | number>) => (v ? fill(dict[k], v) : dict[k]);
   const ur = lang === "ur";
   const [district, setDistrict] = useState("");
@@ -72,7 +74,10 @@ export function AuthorityDashboard({ initial, lang, dict }: { initial: Authority
             <Link href="/" className="inline-flex min-h-9 items-center gap-1 text-sm text-sky-100 hover:text-white">
               <ArrowLeft className={cn("h-4 w-4", ur && "rotate-180")} aria-hidden /> {T("appName")}
             </Link>
-            <LanguageToggle lang={lang} />
+            <div className="flex flex-wrap items-center gap-3">
+              <AccountBar user={user} signOutLabel={T("signOut")} />
+              <LanguageToggle lang={lang} />
+            </div>
           </div>
           <h1 className="flex items-center gap-2 text-2xl font-bold sm:text-3xl">
             <MapIcon className="h-7 w-7 shrink-0" aria-hidden /> {T("authTitle")}

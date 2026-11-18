@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { Droplets, Gauge, MessageCircle, Coins, Map, Sun, ArrowRight } from "lucide-react";
+import { Gauge, MessageCircle, Coins, Map, Sun, ArrowRight, LogIn, UserPlus } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { DemoButtons } from "@/components/auth/DemoButtons";
+import { getSession } from "@/lib/auth/session";
+import { homeFor } from "@/lib/auth/token";
 import { dirFor, t, type DictKey } from "@/lib/i18n/dict";
 import { getLang } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
@@ -24,6 +27,8 @@ export default async function Home() {
   const lang = await getLang("en");
   const T = (k: DictKey) => t(lang, k);
   const ur = lang === "ur";
+  const user = await getSession();
+  const demoEnabled = (process.env.DEMO_MODE ?? "true").toLowerCase() !== "false";
   return (
     <main dir={dirFor(lang)} className={cn(ur && "ur-ui")}>
       <section className="bg-gradient-to-br from-emerald-800 via-teal-700 to-sky-800 text-white">
@@ -40,14 +45,28 @@ export default async function Home() {
             {T("heroTitle2")}
           </h1>
           <p className="max-w-2xl text-lg text-emerald-50">{T("heroBody")}</p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Link href="/farmer/karamat" className={cn(buttonVariants({ size: "lg" }), "bg-white text-emerald-900 hover:bg-emerald-50")}>
-              <Droplets className="h-5 w-5" aria-hidden /> {T("farmerDemo")} <ArrowRight className={cn("h-4 w-4", ur && "rotate-180")} aria-hidden />
+          {user ? (
+            <Link href={homeFor(user.role)} className={cn(buttonVariants({ size: "lg" }), "w-fit bg-white text-emerald-900 hover:bg-emerald-50")}>
+              {user.name} <ArrowRight className={cn("h-4 w-4", ur && "rotate-180")} aria-hidden />
             </Link>
-            <Link href="/authority" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "border-white/60 bg-transparent text-white hover:bg-white/10")}>
-              <Map className="h-5 w-5" aria-hidden /> {T("authorityDashboard")}
-            </Link>
-          </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {demoEnabled && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-semibold text-emerald-100">{T("tryDemo")}</p>
+                  <DemoButtons variant="dark" labels={{ farmer: T("demoFarmer"), installer: T("demoInstaller"), authority: T("demoAuthority") }} />
+                </div>
+              )}
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Link href="/login" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "border-white/60 bg-transparent text-white hover:bg-white/10")}>
+                  <LogIn className="h-5 w-5" aria-hidden /> {T("signIn")}
+                </Link>
+                <Link href="/signup" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "border-white/60 bg-transparent text-white hover:bg-white/10")}>
+                  <UserPlus className="h-5 w-5" aria-hidden /> {T("createAccount")}
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

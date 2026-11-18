@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { notFound, serverError } from "@/lib/api/http";
+import { guardFarm, notFound, serverError } from "@/lib/api/http";
 import { pktDayStart } from "@/lib/dates";
 import { flowM3sFromPower, modeAIntegrate, totalHeadM } from "@/lib/engine";
 
@@ -9,6 +9,8 @@ export const dynamic = "force-dynamic";
 /** Live virtual water meter from today's pump-drive telemetry (Mode A). Polled every 5 s by the dashboard. */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const denied = await guardFarm(id);
+  if (denied) return denied;
   try {
     const pump = await prisma.pump.findFirst({ where: { farmId: id } });
     if (!pump) return notFound("Farm not found");

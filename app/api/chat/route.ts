@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { badRequest, notFound, serverError } from "@/lib/api/http";
+import { badRequest, guardFarm, notFound, serverError } from "@/lib/api/http";
 import { getFarmState } from "@/lib/services/farmState";
 import { CROP_NAMES } from "@/lib/services/advisoryText";
 import { detectScript, fallbackAnswer, runTool, TOOL_DEFS, type Script } from "@/lib/services/chatTools";
@@ -39,6 +39,8 @@ export async function POST(req: Request) {
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return badRequest(parsed.error);
   const { farmId, message } = parsed.data;
+  const denied = await guardFarm(farmId);
+  if (denied) return denied;
 
   try {
     const state = await getFarmState(farmId);
@@ -105,6 +107,8 @@ const DelQuery = z.object({ farmId: z.string().min(1).max(64) });
 export async function DELETE(req: Request) {
   const parsed = DelQuery.safeParse(Object.fromEntries(new URL(req.url).searchParams));
   if (!parsed.success) return badRequest(parsed.error);
+  const denied = await guardFarm(parsed.data.farmId);
+  if (denied) return denied;
   await prisma.chatMessage.deleteMany({ where: { farmId: parsed.data.farmId } });
   return NextResponse.json({ ok: true });
 }
