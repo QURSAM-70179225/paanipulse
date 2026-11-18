@@ -1,0 +1,101 @@
+// PaaniPulse data model. SQLite locally; switch provider + DATABASE_URL for Postgres.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Farm {
+  id               String         @id @default(cuid())
+  farmerName       String
+  phone            String?
+  language         String         @default("ur") // "ur" | "en"
+  lat              Float
+  lng              Float
+  district         String
+  tehsil           String?
+  cropType         String // wheat | rice | maize | cotton | sugarcane
+  sowingDate       DateTime
+  areaAcres        Float
+  irrigationMethod String // flood | furrow | sprinkler | drip
+  isSynthetic      Boolean        @default(false)
+  dataConsent      Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  pumps            Pump[]
+  dailyRecords     DailyRecord[]
+  advisories       Advisory[]
+  chatMessages     ChatMessage[]
+}
+
+model Pump {
+  id              String             @id @default(cuid())
+  farmId          String
+  farm            Farm               @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  ratedKw         Float
+  pvKwp           Float
+  staticDepthFt   Float // depth to water level (NOT bore depth)
+  boreDepthFt     Float?
+  drawdownM       Float              @default(3)
+  efficiency      Float              @default(0.4) // wire-to-water
+  calibrated      Boolean            @default(false)
+  hasTelemetry    Boolean            @default(false)
+  telemetry       TelemetryReading[]
+}
+
+model TelemetryReading {
+  id          String   @id @default(cuid())
+  pumpId      String
+  pump        Pump     @relation(fields: [pumpId], references: [id], onDelete: Cascade)
+  timestamp   DateTime
+  powerKw     Float
+  frequencyHz Float
+
+  @@index([pumpId, timestamp])
+}
+
+model DailyRecord {
+  id               String   @id @default(cuid())
+  farmId           String
+  farm             Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  date             DateTime // local date at 00:00 Asia/Karachi stored as UTC instant
+  actualHours      Float // pump hours actually run (farmer-reported or telemetry)
+  // Engine outputs (filled from Milestone 2 onwards)
+  et0              Float?
+  etc              Float?
+  rainMm           Float?
+  depletionMm      Float?
+  needM3           Float?
+  pumpedM3         Float?
+  recommendedHours Float?
+  excessM3         Float?
+  wastedKwh        Float?
+  pvKwh            Float?
+  spareKwh         Float?
+
+  @@unique([farmId, date])
+}
+
+model Advisory {
+  id            String   @id @default(cuid())
+  farmId        String
+  farm          Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  date          DateTime
+  textUrdu      String
+  textRomanUrdu String
+  textEnglish   String
+  audioUrl      String?
+  sentVia       String   @default("app") // app | whatsapp
+  createdAt     DateTime @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  farmId    String
+  farm      Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  role      String // user | assistant
+  content   String
+  createdAt DateTime @default(now())
+}

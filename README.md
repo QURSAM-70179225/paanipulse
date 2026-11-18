@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PaaniPulse
 
-## Getting Started
+**Solar made pumping free. PaaniPulse makes it smart.**
+A virtual water and energy meter plus an Urdu irrigation advisor for solar tube wells, with no extra hardware.
+LUMS CfE × OGDCL CleanTech Hackathon 2026 · Theme: Renewable & Alternative Energy.
 
-First, run the development server:
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env
+npm install
+npx prisma migrate dev     # creates SQLite DB and runs the seed
+npm run dev                # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Re-seed any time with `npm run seed`. Tests: `npm test`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Status
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [x] Milestone 1: scaffold, schema, seed (Karamat + 150 simulated farms), landing page
+- [ ] Milestone 2: engine (FAO-56, soil-water balance, pump physics) + tests
+- [ ] Milestone 3: weather service + farm dashboard
+- [ ] Milestone 4: chat + daily Urdu advisory + voice
+- [ ] Milestone 5: authority dashboard
+- [ ] Milestone 6: extras, build, backup video
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [`docs/BUILD_SPEC.md`](docs/BUILD_SPEC.md) for the full spec and the decisions behind it.
