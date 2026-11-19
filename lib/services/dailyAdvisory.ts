@@ -10,6 +10,8 @@ import { pktDateKey, pktDayStart } from "@/lib/dates";
 import { modeAIntegrate } from "@/lib/engine";
 import { getFarmState } from "./farmState";
 import { synthesize, ttsConfigured } from "./tts";
+import { dailySms } from "./smsText";
+import { sendSms, smsConfigured } from "./sms";
 
 const toDate = (key: string) => new Date(`${key}T00:00:00+05:00`);
 
@@ -54,8 +56,15 @@ export async function runDailyForFarm(farmId: string, now = new Date()) {
     });
   }
 
-  // 3. Today's advisory (+ voice).
+  // Today's recommended hours: used by the pump over-run alert and the dashboard.
   const today = toDate(state.today.date);
+  await prisma.dailyRecord.upsert({
+    where: { farmId_date: { farmId, date: today } },
+    create: { farmId, date: today, actualHours: 0, recommendedHours: state.today.advice.hoursToday, et0: state.today.et0, etc: state.today.etc, rainMm: state.today.rainMm, needM3: state.today.needM3, pvKwh: state.today.pvKwh },
+    update: { recommendedHours: state.today.advice.hoursToday },
+  });
+
+  // 3. Today's advisory (+ voice).
   let audioUrl: string | null = null;
   if (ttsConfigured()) {
     const audio = await synthesize(state.advisory.textUrdu, "ur");
@@ -65,7 +74,17 @@ export async function runDailyForFarm(farmId: string, now = new Date()) {
   if (existing) await prisma.advisory.update({ where: { id: existing.id }, data: { ...state.advisory, audioUrl, sentVia: "cron" } });
   else await prisma.advisory.create({ data: { farmId, date: today, ...state.advisory, audioUrl, sentVia: "cron" } });
 
-  return { farmId, advice: state.today.advice.kind, hours: state.today.advice.hoursToday, voice: !!audioUrl };
+  // 4. Daily advice by SMS / WhatsApp for farmers who opted in (works with no internet on the phone).
+  let sms = false;
+  if (smsConfigured()) {
+    const owner = await prisma.farm.findUnique({ where: { id: farmId }, select: { owner: { select: { phone: true, smsAdvice: true } } } });
+    if (owner?.owner?.smsAdvice && owner.owner.phone) {
+      const a = state.today.advice;
+      sms = await sendSms(owner.owner.phone, dailySms({ kind: a.kind, hoursToday: a.hoursToday, daysUntilNext: a.daysUntilNext, rainTomorrowMm: a.rainTomorrowMm }));
+    }
+  }
+
+  return { farmId, advice: state.today.advice.kind, hours: state.today.advice.hoursToday, voice: !!audioUrl, sms };
 }
 
 export async function runDailyAdvisories(now = new Date()) {

@@ -44,7 +44,10 @@ On the home page tap **Farmer (Karamat)**, **Installer (Shahid Solar)** or **Irr
 - **Show the value:** water lost below the roots, fertiliser washed away, solar energy wasted and what spare energy
   could earn; live weather that refreshes itself, with the next 24 hours; pump output in litres per minute and area per hour.
 - **Map:** anonymised district-level groundwater dashboard and a printable per-well report for lenders.
-- **Everything in Urdu or English**, right-to-left Urdu, installable on a phone, works with cached data when offline.
+- **Built for poor internet:** installable on a phone; with no connection it still shows the last advice (with voice)
+  and saves reports to send later. A **pump timer rings a loud alarm** when it is time to switch the pump off, the live
+  meter warns when the pump over-runs, and farmers can opt in to the **daily advice and over-run warning by SMS/WhatsApp**.
+- **Everything in Urdu or English**, right-to-left Urdu.
 
 > **Design rule:** code computes, AI speaks. Every number comes from tested code; an AI answer containing any number
 > not returned by the engine is replaced by a rule-based answer.

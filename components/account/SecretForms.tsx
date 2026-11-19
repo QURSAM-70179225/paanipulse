@@ -133,3 +133,27 @@ export function PhoneResetForm({ d }: { d: D }) {
     </form>
   );
 }
+
+export function SmsAdviceToggle({ d, initial, available }: { d: D; initial: boolean; available: boolean }) {
+  const [on, setOn] = useState(initial);
+  const [msg, setMsg] = useState<string | null>(null);
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-slate-700">{d.smsAdviceBody}</p>
+      <p className="font-semibold text-slate-900">{on ? d.smsAdviceOn : d.smsAdviceOff}</p>
+      {!available && <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{d.smsNotReady}</p>}
+      <button
+        type="button"
+        disabled={!available}
+        className={btn}
+        onClick={async () => {
+          const r = await post("/api/account/sms", { enabled: !on });
+          if (r.ok) { setOn(!on); setMsg(null); } else setMsg(r.error === "demo-account" ? d.errDemo : d.errGeneric);
+        }}
+      >
+        {on ? d.smsTurnOff : d.smsTurnOn}
+      </button>
+      {msg && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{msg}</p>}
+    </div>
+  );
+}

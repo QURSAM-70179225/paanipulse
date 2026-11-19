@@ -106,9 +106,9 @@ erDiagram
 
 | Model | Purpose |
 |---|---|
-| `User` | `role` = FARMER / INSTALLER / AUTHORITY; farmers log in by `phone` + PIN, others by `email` + password (bcrypt hashes) |
+| `User` | `role` = FARMER / INSTALLER / AUTHORITY; farmers log in by `phone` + PIN, others by `email` + password (bcrypt hashes); `smsAdvice` opt-in for text messages |
 | `Farm` | Location, district, crop, sowing date, area, irrigation method, language, `dataConsent`, `isSynthetic`, owner and installer |
-| `Pump` | Rated kW, panel kWp, static water level (ft), drawdown, efficiency, `calibrated`, `hasTelemetry` |
+| `Pump` | Rated kW, panel kWp, static water level (ft), drawdown, efficiency, `calibrated`, `hasTelemetry`, `lastOverrunAlert` (date of the last over-run SMS) |
 | `TelemetryReading` | Drive readings: timestamp, power kW, frequency Hz |
 | `DailyRecord` | One row per farm per day: reported/estimated pump hours plus engine outputs (ET₀, ETc, rain, need, pumped, excess, wasted kWh, PV and spare kWh) |
 | `Advisory` | Daily advice in Urdu, Roman Urdu and English |
@@ -223,6 +223,21 @@ map), stores today's `Advisory` and pre-generates the Urdu voice note when Azure
 district code plus a hashed reference, coordinates blurred to about 1 km, and no names or phone numbers. The heatmap
 weights points by m³ per acre per day.
 
+### Offline and alerts
+
+Village connections are unreliable, so the farmer side degrades in layers:
+
+| Situation | What happens | Where |
+|---|---|---|
+| No internet | `public/sw.js` serves `public/offline.html`, which shows the **last advice saved on the phone** (Urdu / Roman / English, voice via the phone's speech engine) | `lib/offline.ts`, `OfflineSnapshot`, `offline.html` |
+| Report pump hours offline | Saved in `localStorage` and sent when the connection returns (`online` event, every minute while the app is open) | `ReportHours`, `flushQueue` |
+| Farmer switches the pump on | **Pump timer**: rings a repeating beep (Web Audio, no sound files), vibrates, shows a full-screen "switch the pump off now", and records the run time. Runs entirely on the phone | `PumpTimer`, `lib/alarm.ts` |
+| Drive shows the pump over-running | Live meter shows a red warning and beeps (if the farmer turned the alarm sound on) | `LiveMeter` |
+| No internet at all, no app | Opt-in **SMS / WhatsApp**: the daily advice at 06:00 and a "pump ran too long" text (drive-connected farms, once a day) | `dailyAdvisory.ts`, `overrunAlert.ts`, `smsText.ts` |
+
+Stored on the phone: the latest advice, queued reports and the running timer. All are wiped on sign-out (phones are
+shared). The alarm cannot run while the phone is locked or the browser is closed; SMS is the fallback for that.
+
 ## 7. Authentication and access control
 
 | Mechanism | Detail |
@@ -243,6 +258,7 @@ weights points by m³ per acre per day.
 | `/api/farms` (POST) | Farmer (own farm) or installer (registers farmer and farm); not authorities |
 | `/api/farms/[id]/*` (incl. `weather-now`), `/api/chat` | Owner farmer or the installing installer (`guardFarm`) |
 | `/api/tts`, `/api/stt`, `/api/account/password` | Any signed-in user |
+| `/api/account/sms` | Farmers only (demo account refused) |
 | `/api/installer/reset-pin` | Installer, only for farmers of farms they installed |
 | `/api/authority/*` | Authority only |
 | `/api/telemetry` | Anyone, **unless `TELEMETRY_INGEST_KEY` is set** (then the `x-ingest-key` header is required); unknown pump ids are rejected |
@@ -263,7 +279,8 @@ weights points by m³ per acre per day.
 | `GET /api/farms/[id]/advice?date=` | Run the engine; store `DailyRecord` and `Advisory`; return the full view model |
 | `POST /api/farms/[id]/calibrate` | Bucket test, or `{reset:true}` |
 | `POST/GET /api/farms/[id]/field-check` | Record and list meter field checks |
-| `POST /api/farms/[id]/hours` | Farmer reports yesterday's pump hours |
+| `POST /api/farms/[id]/hours` | Pump hours for a day (0 = today … 7); `add:true` adds to the stored hours (used by the pump timer) |
+| `POST /api/account/sms` | Farmer turns daily advice / over-run texts on or off |
 | `GET /api/farms/[id]/live` | Today's live meter from telemetry |
 | `POST /api/telemetry` | JSON array, `{readings:[]}`, CSV body or multipart CSV upload |
 | `POST /api/chat`, `DELETE /api/chat?farmId=` | Streamed AI chat; clear history |
@@ -314,6 +331,7 @@ flowchart LR
   shared store.
 - `/api/telemetry` is open unless `TELEMETRY_INGEST_KEY` is set. Set it before connecting real drives.
 - `/api/weather` and `/api/health?full=1` are public and not rate-limited.
+- The pump alarm needs the app open and the phone awake; it cannot switch the motor off (no hardware). Over-run SMS needs a connected drive, runs per server instance and is checked at most every 5 minutes per pump.
 - No email verification and no separate CSRF token (cookies are `SameSite=Lax`).
 - The authority view and the district ranking rest on simulated data.
 - Only Twilio is implemented for SMS; a local Pakistani provider would be a second implementation of `lib/services/sms.ts`.

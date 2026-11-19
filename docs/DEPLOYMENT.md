@@ -63,7 +63,18 @@ Open-Meteo and the answer (daily ET₀, rain, temperatures; hourly sunlight, tem
 - **Check it works:** open `/api/health?full=1` and look for `"weather": {"source": "live"}`. `sample` means Open-Meteo
   did not answer from the server; the app keeps working on sample data and the dashboard badge says so.
 
-## 5. After deploying: checklist
+## 5. Text messages for farmers with poor internet
+
+With the `TWILIO_*` variables set, a farmer can open **My account → Advice by text message** and switch it on. Then:
+
+- the daily 06:00 job sends the day's advice as one short SMS (Roman Urdu, 160 characters), and
+- if the farm has a connected pump drive and the pump runs longer than advised, one "switch the pump off" SMS is sent
+  (at most once a day, checked when readings arrive).
+
+Each text costs money with Twilio (and the farmer's operator may also charge to receive); it is opt-in for that reason.
+The demo farmer cannot enable it (its phone number is fake). Without Twilio the toggle shows "not set up".
+
+## 6. After deploying: checklist
 
 1. `https://YOUR-APP/api/health?full=1` → `"ok": true`, no `problems`, `demoAccounts: 3`, weather `live`.
 2. Tap a demo button on the home page; open the farmer dashboard and the chat.
@@ -71,7 +82,7 @@ Open-Meteo and the answer (daily ET₀, rain, temperatures; hourly sunlight, tem
 4. Run the daily advisory workflow once.
 5. For a real launch: set `DEMO_MODE=false`, set `AUTHORITY_INVITE_CODE`, set `TELEMETRY_INGEST_KEY` if devices connect.
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 | Symptom | Likely cause and fix |
 |---|---|
@@ -81,15 +92,16 @@ Open-Meteo and the answer (daily ET₀, rain, temperatures; hourly sunlight, tem
 | `Demo accounts missing` | The database was not empty at first deploy so the seed was skipped; run `npm run seed` against it once |
 | Weather badge says "Sample" | Open-Meteo unreachable or rate-limited from the server; check health. Not caused by a missing key |
 | Chat answers look generic | `GROQ_API_KEY` missing or rate-limited (free tier ≈ 8k tokens per minute): ask slowly |
+| Alarm does not sound | Browsers allow sound only after a tap: press **Start pump timer** (or **Turn on alarm sound**) once, keep the screen on and the volume up |
 | Daily job returns 401 | `CRON_SECRET` differs between Render and GitHub |
 | First page load takes about a minute | Free Render plan was asleep; use keep-warm and open the site before presenting |
 
-## 7. Vercel (alternative)
+## 8. Vercel (alternative)
 
 Import the repo, add the same variables, deploy. The build script is `vercel-build`; `vercel.json` schedules the daily
 job at 01:00 UTC (06:00 PKT) using `CRON_SECRET` automatically.
 
-## 8. Local development
+## 9. Local development
 
 ```bash
 cp .env.example .env     # DATABASE_URL, DIRECT_URL, AUTH_SECRET

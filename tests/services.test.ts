@@ -163,3 +163,22 @@ describe("hourly weather", () => {
     delete process.env.OPEN_METEO_BASE_URL;
   });
 });
+
+import { dailySms, overrunSms } from "@/lib/services/smsText";
+describe("SMS texts", () => {
+  it("daily advice fits one 160-character SMS and uses only ASCII", () => {
+    const keepOff = dailySms({ kind: "keep-off", hoursToday: 0, daysUntilNext: 39, rainTomorrowMm: 8.4 });
+    expect(keepOff).toBe("PaaniPulse: Aaj pump band rakhein. Agla pani 6 hafte baad. Kal barish ka imkaan.");
+    expect(dailySms({ kind: "irrigate", hoursToday: 4.5, daysUntilNext: 0, rainTomorrowMm: 0 })).toBe("PaaniPulse: Aaj pump 4.5 ghantay chalayen (dopahar mein).");
+    expect(dailySms({ kind: "skip-rain", hoursToday: 0, daysUntilNext: 1, rainTomorrowMm: 9 })).toContain("kal barish");
+    for (const t of [keepOff, overrunSms({ ranHours: 3.25, recommendedHours: 2 }), overrunSms({ ranHours: 0.5, recommendedHours: 0 })]) {
+      expect(t.length).toBeLessThanOrEqual(160);
+      expect(/^[\x20-\x7E]+$/.test(t)).toBe(true);
+    }
+  });
+  it("over-run message tells the farmer to switch the pump off", () => {
+    expect(overrunSms({ ranHours: 3.25, recommendedHours: 2 })).toContain("3.3 ghantay");
+    expect(overrunSms({ ranHours: 3.25, recommendedHours: 2 })).toContain("pump band karein");
+    expect(overrunSms({ ranHours: 1, recommendedHours: 0 })).toContain("zaroorat nahi");
+  });
+});

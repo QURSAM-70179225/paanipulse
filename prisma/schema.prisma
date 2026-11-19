@@ -22,6 +22,8 @@ model User {
   farms          Farm[]   @relation("FarmOwner")
   installedFarms Farm[]   @relation("FarmInstaller")
   resetTokens    PasswordResetToken[]
+  /// Farmer opted in to the daily advice (and pump over-run alerts) by SMS / WhatsApp.
+  smsAdvice      Boolean  @default(false)
 }
 
 /// One-time password reset link (email accounts). Only the SHA-256 hash of the token is stored.
@@ -108,6 +110,8 @@ model Pump {
   efficiency      Float              @default(0.4) // wire-to-water
   calibrated      Boolean            @default(false)
   hasTelemetry    Boolean            @default(false)
+  /// Local date (YYYY-MM-DD) of the last "pump ran too long" SMS, so it is sent at most once a day.
+  lastOverrunAlert String?
   telemetry       TelemetryReading[]
 }
 

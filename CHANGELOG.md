@@ -3,6 +3,9 @@
 All notable changes. Dates are 2026.
 
 ## [Unreleased]
+- Offline mode: last advice saved on the phone and shown by the offline page; pump-hour reports queue offline.
+- Pump timer with loud alarm and full-screen "switch the pump off"; over-run warning on the live meter.
+- Opt-in daily advice and pump over-run alerts by SMS / WhatsApp; hours API accepts today with `add`.
 - Weather: hourly temperature, humidity, wind and rain chance for the next 24 hours; the weather card refreshes
   itself while the app is open; cache shortened to 30 minutes; optional `WEATHER_CACHE_MINUTES` and `OPEN_METEO_BASE_URL`.
 

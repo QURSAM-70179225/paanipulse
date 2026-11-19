@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { badRequest, serverError } from "@/lib/api/http";
 import { parseTelemetryCsv as parseCsv } from "@/lib/services/telemetryCsv";
+import { checkOverrun } from "@/lib/services/overrunAlert";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,8 @@ export async function POST(req: Request) {
       });
       await prisma.pump.updateMany({ where: { id: { in: [...knownIds] } }, data: { hasTelemetry: true } });
     }
+    // Warn the farmer by SMS if the pump has run longer than advised (never blocks or fails ingestion).
+    if (valid.length) await checkOverrun([...knownIds]).catch((e) => console.error("overrun check failed", e));
     return NextResponse.json({ accepted: valid.length, rejectedUnknownPump: parsed.data.length - valid.length });
   } catch (err) {
     return serverError(err);

@@ -81,7 +81,9 @@ Farmers use it **free** at first. A farmer premium of about Rs 200–500 a month
 | Authority dashboard: heatmap, filters, KPIs, district table, CSV | Built, **on simulated data** |
 | Per-well report for lenders (printable, anonymised for lenders) | Built |
 | Daily 06:00 advisory job | Built (GitHub Actions or Vercel Cron) |
-| Installable web app (PWA) with offline page | Built |
+| Installable web app (PWA); **offline mode**: last advice is saved on the phone and shown with no internet, reports are queued and sent later | Built |
+| **Pump timer with loud alarm** ("switch the pump off now"), works with no internet; **over-run warning** on the live meter | Built |
+| **Daily advice by SMS / WhatsApp** and a **"pump ran too long" text** (drive-connected farms), opt-in, one message a day | Built (needs a Twilio account; costs per message) |
 
 ### What is simulated or assumed
 
@@ -128,7 +130,7 @@ Farmers use it **free** at first. A farmer premium of about Rs 200–500 a month
 | Next | Later |
 |---|---|
 | Field validation of the meter; real pilot farms | Smart relay or timer fitted by installers so "keep the pump off" can be enforced, with the farmer's permission |
-| Local SMS provider; WhatsApp delivery of the daily voice note | Multiple fields and pumps per farm |
+| Local SMS provider (cheaper than Twilio); WhatsApp delivery of the daily voice note; background push alerts | Multiple fields and pumps per farm |
 | Crop-stage rules for rice, maize, cotton, sugarcane | Punjabi voice; more crops and regions |
 | Real drive integrations (Modbus / vendor APIs) | Satellite soil-moisture cross-checks |
 
@@ -139,7 +141,8 @@ Farmers use it **free** at first. A farmer premium of about Rs 200–500 a month
 | Meter accuracy challenged | Show ranges; bucket-test calibration; publish field-check results |
 | Farmers fear a water tax | Farmer-owned data, anonymised district view, savings-first language |
 | Nobody pays | Installer channel tested early; lender report as a second revenue path |
-| Advice followed incorrectly | The pump is switched at the breaker by the farmer; plan a relay later |
+| Advice followed incorrectly | The pump is switched at the breaker by the farmer. The app can warn (timer alarm, SMS) but **cannot switch the motor off**; a smart relay or timer fitted by the installer is the real fix |
+| Patchy village internet | Offline advice page, queued reports, SMS fallback, a recorded or phone voice. **Limits:** the timer alarm needs the app open and the phone awake; over-run SMS needs a connected drive |
 | Free-tier limits (weather, AI) | Caching and fallbacks at every external dependency |
 
 ## 10. Sources

@@ -17,6 +17,7 @@ Only the latest commit on `main` is supported (this is a hackathon prototype).
 - Every API input is validated with Zod; farm data is only readable by its owner or installer.
 - Authorities and lenders only see anonymised, district-level data from farms that consented; locations are blurred
   to about 1 km.
+- The phone keeps the latest advice, queued reports and the pump timer in `localStorage`; all of it is wiped on sign-out.
 - Secrets live only in environment variables (never in the repository). `.env` is git-ignored.
 
 ## Known limitations (also listed in ARCHITECTURE.md)

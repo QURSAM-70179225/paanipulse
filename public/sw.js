@@ -3,7 +3,7 @@
  * - Page navigations: network-first; if offline, show /offline.html.
  * - API calls and signed-in pages are NEVER cached (private data, shared phones).
  */
-const VERSION = "pp-v1";
+const VERSION = "pp-v2";
 const STATIC = `${VERSION}-static`;
 const OFFLINE_URL = "/offline.html";
 
@@ -43,4 +43,15 @@ self.addEventListener("fetch", (event) => {
   if (req.mode === "navigate") {
     event.respondWith(fetch(req).catch(() => caches.match(OFFLINE_URL)));
   }
+});
+
+// Tapping a notification (e.g. "switch the pump off") brings the app to the front.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      const open = list.find((c) => "focus" in c);
+      return open ? open.focus() : self.clients.openWindow("/farmer");
+    }),
+  );
 });

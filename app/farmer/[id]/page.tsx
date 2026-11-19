@@ -28,6 +28,8 @@ import { VoicePlayer } from "@/components/VoicePlayer";
 import { cn } from "@/lib/utils";
 import { type Condition } from "@/lib/weatherCode";
 import { WeatherLive } from "@/components/farmer/WeatherLive";
+import { OfflineSnapshot } from "@/components/farmer/OfflineSnapshot";
+import { PumpTimer } from "@/components/farmer/PumpTimer";
 
 export const dynamic = "force-dynamic";
 
@@ -57,25 +59,45 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
 
   return (
     <main dir={dirFor(lang)} className={cn("mx-auto min-h-screen max-w-md bg-slate-50 pb-10", ur && "ur-ui")}>
+      <OfflineSnapshot
+        labels={{ offline: T("offlineBanner"), pending: T("queuedPending") }}
+        snapshot={{
+          v: 1, farmId: s.farm.id, savedAt: new Date().toISOString(), name: s.farm.farmerName, lang, kind: s.today.advice.kind,
+          hoursToday: s.today.advice.hoursToday, daysUntilNext: s.today.advice.daysUntilNext, tempC: s.weatherNow?.tempC ?? null,
+          tMax: s.forecast[0]?.tMax ?? null, tMin: s.forecast[0]?.tMin ?? null, rainTomorrowMm: s.forecast[1]?.precipMm ?? 0,
+          texts: { ur: s.advisory.textUrdu, roman: s.advisory.textRomanUrdu, en: s.advisory.textEnglish },
+        }}
+      />
       <Header s={s} T={T} lang={lang} user={user} />
       <div className="flex flex-col gap-4 px-4 pt-4">
         {!s.yesterdayReported && !s.pump.hasTelemetry && (
           <ReportHours
             farmId={s.farm.id}
-            labels={{ title: T("reportTitle"), help: T("reportHelp"), other: T("reportOther"), save: T("reportSave"), thanks: T("reportThanks"), hours: T("hours"), error: T("errGeneric") }}
+            labels={{ title: T("reportTitle"), help: T("reportHelp"), other: T("reportOther"), save: T("reportSave"), thanks: T("reportThanks"), hours: T("hours"), error: T("errGeneric"), queued: T("queuedSaved") }}
           />
         )}
         {s.yesterday && s.yesterday.actualHours > 0 && <YesterdayCard s={s} T={T} L={L} />}
         <HeroCard s={s} T={T} ur={ur} />
+        <PumpTimer
+          farmId={s.farm.id}
+          recommendedHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
+          adviceIsOff={s.today.advice.kind !== "irrigate"}
+          labels={{
+            title: T("timerTitle"), help: T("timerHelp"), hours: T("timerHours"), start: T("timerStart"), left: T("timerLeft"), stop: T("timerStop"),
+            offNow: T("timerOffNow"), done: T("timerDone"), soon: T("timerSoon"), keepOpen: T("timerKeepOpen"), noNeed: T("timerNoNeed"), saved: T("timerSaved"), unit: T("hours"),
+          }}
+        />
         <TodayStats s={s} T={T} L={L} />
         <PumpOutputCard s={s} T={T} ur={ur} />
         <LiveMeter
           farmId={s.farm.id}
           initialHasTelemetry={s.pump.hasTelemetry}
+          limitHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
           labels={{
             title: T("liveTitle"), waiting: T("liveWaiting"), today: T("liveToday"), now: T("liveNow"), energy: T("liveEnergy"),
             runHours: T("liveRunHours"), updated: T("liveUpdated"), noHardware: T("liveNoHardware"), off: T("liveOff"),
             litres: T("litres"), hours: T("hours"), kwh: T("kwh"),
+            overrunTitle: T("overrunTitle"), overrunNone: T("overrunNone"), overrunHours: T("overrunHours"), soundOn: T("alarmSoundOn"), soundOff: T("alarmSoundOff"),
           }}
         />
         <WeekCard s={s} T={T} L={L} />

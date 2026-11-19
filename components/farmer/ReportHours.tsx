@@ -5,21 +5,28 @@ import { useState, useTransition } from "react";
 import { ClipboardCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { queueReport } from "@/lib/offline";
 
-export function ReportHours({ farmId, labels }: { farmId: string; labels: { title: string; help: string; other: string; save: string; thanks: string; hours: string; error: string } }) {
+export function ReportHours({ farmId, labels }: { farmId: string; labels: { title: string; help: string; other: string; save: string; thanks: string; hours: string; error: string; queued: string } }) {
   const router = useRouter();
   const [custom, setCustom] = useState("");
-  const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
+  const [state, setState] = useState<"idle" | "busy" | "done" | "error" | "queued">("idle");
   const [, start] = useTransition();
 
   async function save(hours: number) {
     setState("busy");
     const res = await fetch(`/api/farms/${farmId}/hours`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hours, daysAgo: 1 }) }).catch(() => null);
-    if (!res?.ok) return setState("error");
+    if (!res) {
+      // No connection: keep the report on the phone and send it later.
+      queueReport({ farmId, hours, daysAgo: 1 });
+      return setState("queued");
+    }
+    if (!res.ok) return setState("error");
     setState("done");
     start(() => router.refresh());
   }
 
+  if (state === "queued") return <p role="status" className="rounded-2xl bg-amber-50 p-4 text-amber-950">{labels.queued}</p>;
   if (state === "done") return <p role="status" className="rounded-2xl bg-emerald-50 p-4 text-emerald-900">{labels.thanks}</p>;
   return (
     <Card className="border-amber-300">
