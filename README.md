@@ -201,9 +201,10 @@ editing with a free offline voice; in the app itself, spoken answers need the op
 
 ## Pitch slides
 
-<!-- TODO(team): add the link, e.g. [Open the slides](https://...) or an image linking to the deck. -->
+📊 **[Download the 3-minute pitch deck (PPTX)](docs/slides/PaaniPulse-pitch-3min.pptx)** · [PDF version](docs/slides/PaaniPulse-pitch-3min.pdf)
 
-> 📊 **Pitch slides: coming soon.**
+Seven slides: hook → problem → solution → live demo → why trust the numbers → who pays → next steps and ask. Speaker notes with
+timings are in the PPTX. The outline and a longer 5-minute version are in [docs/PITCH_DECK.md](docs/PITCH_DECK.md).
 
 ---
 
