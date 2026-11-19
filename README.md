@@ -42,7 +42,7 @@ On the home page tap **Farmer (Karamat)**, **Installer (Shahid Solar)** or **Irr
 - **Advise:** FAO-56 crop water need and a soil-moisture balance give *run N hours*, *keep the pump off* or *skip, rain
   tomorrow*, with a wheat first-watering rule. Delivered as an Urdu voice note and a WhatsApp-style chat (text or voice).
 - **Show the value:** water lost below the roots, fertiliser washed away, solar energy wasted and what spare energy
-  could earn; live weather; pump output in litres per minute and area per hour.
+  could earn; live weather that refreshes itself, with the next 24 hours; pump output in litres per minute and area per hour.
 - **Map:** anonymised district-level groundwater dashboard and a printable per-well report for lenders.
 - **Everything in Urdu or English**, right-to-left Urdu, installable on a phone, works with cached data when offline.
 

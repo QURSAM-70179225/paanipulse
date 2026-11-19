@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft, BatteryCharging, CalendarClock, CloudRain, Droplets, Flame, Gauge, History, Leaf, MessageCircle,
-  Cloud, CloudFog, CloudLightning, CloudSun, Ruler, Snowflake, Wind, Waves,
+  Ruler, Waves,
   PowerOff, Radio, Sprout, Sun, Thermometer, Wheat, Zap, Coins, Info, CircleAlert,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -26,7 +26,8 @@ import { dictFor } from "@/lib/i18n/dict";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { VoicePlayer } from "@/components/VoicePlayer";
 import { cn } from "@/lib/utils";
-import { conditionFor, type Condition } from "@/lib/weatherCode";
+import { type Condition } from "@/lib/weatherCode";
+import { WeatherLive } from "@/components/farmer/WeatherLive";
 
 export const dynamic = "force-dynamic";
 
@@ -294,48 +295,27 @@ function SpareSunCard({ s, T, ur }: { s: FarmState; T: TFn; ur: boolean }) {
   );
 }
 
-const COND_ICON: Record<Condition, React.ElementType> = { clear: Sun, partly: CloudSun, cloudy: Cloud, fog: CloudFog, drizzle: CloudRain, rain: CloudRain, storm: CloudLightning, snow: Snowflake };
-
 function WeatherCard({ s, T, locale }: { s: FarmState; T: TFn; locale: string }) {
   const wd = (d: string) => new Date(`${d}T12:00:00+05:00`).toLocaleDateString(locale, { weekday: "short", timeZone: "Asia/Karachi" });
-  const now = s.weatherNow;
   const today = s.forecast[0];
-  const cond = conditionFor(now?.code);
-  const CondIcon = cond ? COND_ICON[cond] : Thermometer;
-  const when = now?.time ? now.time.slice(11, 16) : null;
-  const mini = (Icon: React.ElementType, label: string, value: string) => (
-    <div className="rounded-xl bg-slate-50 p-2 text-center">
-      <Icon className="mx-auto h-4 w-4 text-sky-700" aria-hidden />
-      <p className="mt-0.5 text-[11px] leading-tight text-slate-600">{label}</p>
-      <p className="num text-sm font-bold text-slate-900"><bdi dir="ltr">{value}</bdi></p>
-    </div>
-  );
+  const conditions = Object.fromEntries((["clear", "partly", "cloudy", "fog", "drizzle", "rain", "storm", "snow"] as Condition[]).map((c) => [c, T(`wx${c}` as DictKey)])) as Record<Condition, string>;
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Thermometer className="h-5 w-5 text-sky-700" aria-hidden /> {T("wxNowTitle")}</CardTitle>
       </CardHeader>
       <CardContent>
-        {now ? (
-          <div className="flex items-center gap-3">
-            <CondIcon className="h-12 w-12 shrink-0 text-amber-500" aria-hidden />
-            <div>
-              <p className="num text-4xl font-bold text-slate-900"><bdi dir="ltr">{Math.round(now.tempC)}°C</bdi></p>
-              <p className="text-sm text-slate-700">
-                {cond ? T(`wx${cond}` as DictKey) : ""}{now.feelsLikeC !== null ? ` · ${T("wxFeels", { t: Math.round(now.feelsLikeC) })}` : ""}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{T("wxOffline")}</p>
-        )}
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {mini(Thermometer, T("wxHighLow"), today ? `${today.tMax !== null ? Math.round(today.tMax) : "–"}° / ${today.tMin !== null ? Math.round(today.tMin) : "–"}°` : "–")}
-          {mini(CloudRain, T("wxRainToday"), `${(today?.precipMm ?? 0).toFixed(1)} ${T("mm")}`)}
-          {now?.humidityPct != null && mini(Droplets, T("wxHumidity"), `${Math.round(now.humidityPct)}%`)}
-          {now?.windKmh != null && mini(Wind, T("wxWind"), `${Math.round(now.windKmh)} ${T("kmh")}`)}
-        </div>
-        {when && <p className="mt-2 text-xs text-slate-500">{T("wxUpdated", { t: when })} · {s.weatherSource === "live" ? T("liveWeather") : s.weatherSource === "cached-live" ? T("savedWeather") : T("sampleWeather")}</p>}
+        <WeatherLive
+          farmId={s.farm.id}
+          initial={{ source: s.weatherSource, current: s.weatherNow, hourly: s.weatherHourly }}
+          today={{ tMax: today?.tMax ?? null, tMin: today?.tMin ?? null, precipMm: today?.precipMm ?? 0 }}
+          labels={{
+            feels: T("wxFeels", { t: "{t}" }), humidity: T("wxHumidity"), wind: T("wxWind"), rainToday: T("wxRainToday"), highLow: T("wxHighLow"),
+            updated: T("wxUpdated", { t: "{t}" }), offline: T("wxOffline"), kmh: T("kmh"), mm: T("mm"), hourlyTitle: T("wxHourlyTitle"),
+            rainChance: T("wxRainChance"), auto: T("wxAuto"), nowLabel: T("wxNowLabel"),
+            sourceLive: T("liveWeather"), sourceSaved: T("savedWeather"), sourceSample: T("sampleWeather"), conditions,
+          }}
+        />
 
         <ul className="mt-4 grid grid-cols-7 gap-1 text-center text-xs">
           {s.forecast.map((d, i) => (

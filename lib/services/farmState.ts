@@ -5,7 +5,7 @@ import { pktDateKey, pktDayStart } from "@/lib/dates";
 import { CRITICAL_STAGES, DEFAULTS, flowRangeM3h, pumpOutput, summarise, surplusIdeas, type CropType } from "@/lib/engine";
 import { advisoryText } from "./advisoryText";
 import { runFarm } from "./farmSim";
-import { getWeather } from "./weather";
+import { getWeather, nextHours } from "./weather";
 
 export async function getFarmState(farmId: string, now: Date = new Date()) {
   const farm = await prisma.farm.findUnique({
@@ -76,6 +76,7 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
     dataSource: pump.hasTelemetry ? ("telemetry" as const) : ("sunlight" as const),
     weatherSource: weather.source,
     weatherNow: weather.current ?? null,
+    weatherHourly: nextHours(weather.hourly, now, 24),
     weatherFetchedAt: weather.fetchedAt,
     today: {
       ...sim.today,

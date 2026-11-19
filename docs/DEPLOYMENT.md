@@ -16,6 +16,8 @@ Never commit secrets and never paste them in chats or issues.
 | `GROQ_API_KEY` | for AI chat and voice input | Without it: rule-based chat answers (same numbers), typing only |
 | `GROQ_MODEL` | no | Default `openai/gpt-oss-120b`; falls back to `openai/gpt-oss-20b` on a rate limit |
 | `OPEN_METEO_API_KEY` | no | **Only for an Open-Meteo commercial plan.** Not needed for the free tier. See section 4 |
+| `WEATHER_CACHE_MINUTES` | no | How long a live weather answer is reused (default 30). Lower = fresher but more Open-Meteo calls |
+| `OPEN_METEO_BASE_URL` | no | Point the app at a self-hosted Open-Meteo or another compatible server. Leave empty normally |
 | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | no | Urdu neural voice (e.g. region `centralindia`). Without: recorded mp3 or the phone's own voice |
 | `CRON_SECRET` | for the daily advisory | Password for the daily job; must match the GitHub secret of the same name |
 | `APP_URL` | recommended | Public address used in emails, e.g. `https://paanipulse.onrender.com` |
@@ -51,7 +53,7 @@ minute before presenting.
 ## 4. Weather and the API key
 
 The app uses **Open-Meteo**, which **needs no key** on the free, non-commercial tier. Each farm's location is sent to
-Open-Meteo and the answer (daily ET₀, rain, temperatures, hourly sunlight, current conditions) is cached for an hour.
+Open-Meteo and the answer (daily ET₀, rain, temperatures; hourly sunlight, temperature, humidity, wind and rain chance; current conditions) is cached for 30 minutes per ~11 km area. The farmer's dashboard refreshes the weather card by itself every 5 minutes while it is open.
 
 - **If your key is from Open-Meteo (commercial plan):** add `OPEN_METEO_API_KEY` in Render. The app then uses
   `customer-api.open-meteo.com`. If the key is rejected it automatically falls back to the free host and logs a warning.

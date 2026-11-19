@@ -1,6 +1,6 @@
 /**
  * Weather service: Open-Meteo forecast API (free, no key) with three fallbacks, in order:
- *   1. in-memory cache (1 h)
+ *   1. in-memory cache (30 min by default; WEATHER_CACHE_MINUTES)
  *   2. last successful live response saved in the database (WeatherCache table)
  *   3. DEMO_MODE offline sample (data/sample-weather.json), clearly flagged as "sample"
  */
@@ -24,8 +24,19 @@ export interface CurrentWeather {
   time: string | null;
 }
 
+/** One hour of the forecast. `time` is local (Asia/Karachi), "YYYY-MM-DDTHH:00". */
+export interface HourPoint {
+  time: string;
+  tempC: number | null;
+  humidityPct: number | null;
+  windKmh: number | null;
+  rainChancePct: number | null;
+}
+
 export interface WeatherResult {
   current?: CurrentWeather | null;
+  /** Hourly temperature, humidity, wind and rain chance from yesterday to the end of the forecast. */
+  hourly?: HourPoint[];
   days: WeatherDay[];
   source: WeatherSource;
   fetchedAt: string;
@@ -35,7 +46,8 @@ export interface WeatherResult {
 
 const PAST_DAYS = 31;
 const FORECAST_DAYS = 7;
-const TTL_MS = 60 * 60 * 1000;
+/** How long a live answer is reused before asking Open-Meteo again (its "current" block updates every ~15 min). */
+const ttlMs = () => (Number(process.env.WEATHER_CACHE_MINUTES) > 0 ? Number(process.env.WEATHER_CACHE_MINUTES) : 30) * 60_000;
 const TIMEOUT_MS = 6000;
 
 const OpenMeteoSchema = z.object({
@@ -61,6 +73,10 @@ const OpenMeteoSchema = z.object({
     .object({
       time: z.array(z.string()),
       shortwave_radiation: z.array(z.number().nullable()),
+      temperature_2m: z.array(z.number().nullable()).optional(),
+      relative_humidity_2m: z.array(z.number().nullable()).optional(),
+      wind_speed_10m: z.array(z.number().nullable()).optional(),
+      precipitation_probability: z.array(z.number().nullable()).optional(),
     })
     .optional(),
 });
@@ -75,7 +91,7 @@ export function buildUrl(lat: number, lng: number, opts: { forceFree?: boolean }
     latitude: lat.toFixed(4),
     longitude: lng.toFixed(4),
     daily: "et0_fao_evapotranspiration,precipitation_sum,temperature_2m_max,temperature_2m_min,shortwave_radiation_sum",
-    hourly: "shortwave_radiation",
+    hourly: "shortwave_radiation,temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation_probability",
     current: "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code",
     past_days: String(PAST_DAYS),
     forecast_days: String(FORECAST_DAYS),
@@ -83,12 +99,12 @@ export function buildUrl(lat: number, lng: number, opts: { forceFree?: boolean }
   });
   // Free tier needs no key (non-commercial use). For commercial use, Open-Meteo issues an API key
   // that is sent to the "customer-api" host.
+  // OPEN_METEO_BASE_URL points at a self-hosted Open-Meteo (it is open source) or a test double.
+  const custom = process.env.OPEN_METEO_BASE_URL?.replace(/\/$/, "");
   const key = opts.forceFree ? undefined : process.env.OPEN_METEO_API_KEY;
-  if (key) {
-    p.set("apikey", key);
-    return `https://customer-api.open-meteo.com/v1/forecast?${p}`;
-  }
-  return `https://api.open-meteo.com/v1/forecast?${p}`;
+  if (key) p.set("apikey", key);
+  const host = custom ?? (key ? "https://customer-api.open-meteo.com" : "https://api.open-meteo.com");
+  return `${host}/v1/forecast?${p}`;
 }
 
 /** Pull the "right now" block out of an Open-Meteo response. Exported for tests. */
@@ -104,6 +120,33 @@ export function parseCurrent(json: unknown): CurrentWeather | null {
     code: c.weather_code ?? null,
     time: c.time ?? null,
   };
+}
+
+/** Hourly temperature / humidity / wind / rain chance from yesterday onwards (keeps the saved copy small). Exported for tests. */
+export function parseHourlyPoints(json: unknown, now: Date = new Date()): HourPoint[] {
+  const parsed = OpenMeteoSchema.safeParse(json);
+  const h = parsed.success ? parsed.data.hourly : undefined;
+  if (!h || !h.temperature_2m) return [];
+  const from = `${pktDateKey(pktDayStart(-1, now))}T00:00`;
+  const out: HourPoint[] = [];
+  h.time.forEach((time, i) => {
+    if (time < from) return;
+    out.push({
+      time,
+      tempC: h.temperature_2m?.[i] ?? null,
+      humidityPct: h.relative_humidity_2m?.[i] ?? null,
+      windKmh: h.wind_speed_10m?.[i] ?? null,
+      rainChancePct: h.precipitation_probability?.[i] ?? null,
+    });
+  });
+  return out;
+}
+
+/** The next `n` hours starting with the current local hour. */
+export function nextHours(hourly: HourPoint[] | undefined, now: Date = new Date(), n = 24): HourPoint[] {
+  if (!hourly?.length) return [];
+  const local = new Date(now.getTime() + 5 * 3_600_000).toISOString().slice(0, 13) + ":00"; // Pakistan is UTC+5 all year
+  return hourly.filter((p) => p.time >= local).slice(0, n);
 }
 
 /** Convert an Open-Meteo response to engine WeatherDays. Exported for tests. */
@@ -158,7 +201,7 @@ async function writeSavedCache(key: string, result: WeatherResult) {
 export async function getWeather(lat: number, lng: number, opts: { now?: Date } = {}): Promise<WeatherResult> {
   const key = cacheKey(lat, lng);
   const hit = memory.get(key);
-  if (hit && Date.now() - hit.at < TTL_MS) return hit.result;
+  if (hit && Date.now() - hit.at < ttlMs()) return hit.result;
 
   try {
     let res = await fetch(buildUrl(lat, lng), { signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store" });
@@ -171,7 +214,7 @@ export async function getWeather(lat: number, lng: number, opts: { now?: Date } 
     const json = await res.json();
     const days = parseOpenMeteo(json);
     if (days.length < FORECAST_DAYS) throw new Error("Open-Meteo returned too few days");
-    const result: WeatherResult = { current: parseCurrent(json), days, source: "live", fetchedAt: new Date().toISOString(), lat, lng };
+    const result: WeatherResult = { current: parseCurrent(json), hourly: parseHourlyPoints(json, opts.now), days, source: "live", fetchedAt: new Date().toISOString(), lat, lng };
     memory.set(key, { at: Date.now(), result });
     await writeSavedCache(key, result);
     return result;
@@ -188,7 +231,7 @@ export async function getWeather(lat: number, lng: number, opts: { now?: Date } 
     if (!demoMode()) throw err;
     const result: WeatherResult = { current: null, days: sampleWeather(opts.now), source: "sample", fetchedAt: new Date().toISOString(), lat, lng };
     // Retry live sooner than the normal TTL when we are on sample data.
-    memory.set(key, { at: Date.now() - TTL_MS + 5 * 60 * 1000, result });
+    memory.set(key, { at: Date.now() - ttlMs() + 5 * 60 * 1000, result });
     return result;
   }
 }

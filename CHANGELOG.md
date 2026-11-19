@@ -2,6 +2,10 @@
 
 All notable changes. Dates are 2026.
 
+## [Unreleased]
+- Weather: hourly temperature, humidity, wind and rain chance for the next 24 hours; the weather card refreshes
+  itself while the app is open; cache shortened to 30 minutes; optional `WEATHER_CACHE_MINUTES` and `OPEN_METEO_BASE_URL`.
+
 ## [0.1.0] hackathon release (November 2026)
 
 ### Core

@@ -183,12 +183,14 @@ sequenceDiagram
 
 **Weather fallback chain** (the badge on screen always says which one was used):
 
-1. In-memory cache, 1 hour, shared by farms within about 11 km
-2. Live Open-Meteo call (past 31 days + 7-day forecast, hourly radiation, current conditions)
+1. In-memory cache, 30 minutes by default (`WEATHER_CACHE_MINUTES`), shared by farms within about 11 km
+2. Live Open-Meteo call (past 31 days + 7-day forecast, hourly sunlight, temperature, humidity, wind and rain chance, current conditions)
 3. Last good response saved in `WeatherCache`
 4. Built-in offline sample (only when `DEMO_MODE` is not `false`)
 
-If `OPEN_METEO_API_KEY` is set, the commercial host is used; a rejected key falls back to the free host.
+If `OPEN_METEO_API_KEY` is set, the commercial host is used; a rejected key falls back to the free host. `OPEN_METEO_BASE_URL` points the app at a self-hosted Open-Meteo.
+
+**Live updates on screen:** the dashboard's weather card (`WeatherLive`) polls `GET /api/farms/[id]/weather-now` every 5 minutes while the page is visible and when the tab comes back to the front. The endpoint answers from the server cache, so polling does not multiply Open-Meteo calls; current conditions are therefore at most about 30 minutes old (Open-Meteo itself refreshes them every ~15 minutes).
 
 ### Chat (`POST /api/chat`)
 
@@ -239,7 +241,7 @@ weights points by m³ per acre per day.
 |---|---|
 | `/api/auth/*` | Anyone (credential-based); reset routes return identical answers whether or not an account exists |
 | `/api/farms` (POST) | Farmer (own farm) or installer (registers farmer and farm); not authorities |
-| `/api/farms/[id]/*`, `/api/chat` | Owner farmer or the installing installer (`guardFarm`) |
+| `/api/farms/[id]/*` (incl. `weather-now`), `/api/chat` | Owner farmer or the installing installer (`guardFarm`) |
 | `/api/tts`, `/api/stt`, `/api/account/password` | Any signed-in user |
 | `/api/installer/reset-pin` | Installer, only for farmers of farms they installed |
 | `/api/authority/*` | Authority only |
@@ -267,6 +269,7 @@ weights points by m³ per acre per day.
 | `POST /api/chat`, `DELETE /api/chat?farmId=` | Streamed AI chat; clear history |
 | `POST /api/tts`, `POST /api/stt` | Text to speech (mp3), speech to text (Whisper) |
 | `GET /api/weather?lat=&lng=` | Weather for a point (cached) |
+| `GET /api/farms/[id]/weather-now` | Current conditions and next 24 hours for a farm (polled by the dashboard) |
 | `GET /api/authority/summary\|heatmap\|export.csv` | Regional aggregation, heat points, CSV |
 | `GET /api/cron/daily-advisory` | Daily job (Bearer `CRON_SECRET`) |
 | `GET /api/health[?full=1]` | Liveness; with `full=1` also configuration, database and weather checks |

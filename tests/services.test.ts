@@ -125,3 +125,41 @@ describe("current weather", () => {
     expect(parseCurrent("garbage")).toBeNull();
   });
 });
+
+import { nextHours, parseHourlyPoints } from "@/lib/services/weather";
+describe("hourly weather", () => {
+  const json = {
+    daily: { time: [], et0_fao_evapotranspiration: [], precipitation_sum: [], temperature_2m_max: [], temperature_2m_min: [], shortwave_radiation_sum: [] },
+    hourly: {
+      time: ["2026-11-17T23:00", "2026-11-18T10:00", "2026-11-18T11:00", "2026-11-18T12:00"],
+      shortwave_radiation: [0, 300, 400, 500],
+      temperature_2m: [12, 19.4, 21.2, 22.6],
+      relative_humidity_2m: [80, 55, 50, 47],
+      wind_speed_10m: [3, 8.2, 9.1, 10],
+      precipitation_probability: [0, 10, 20, 60],
+    },
+  };
+  const now = new Date("2026-11-18T06:30:00Z"); // 11:30 in Pakistan
+  it("keeps points from yesterday onwards with all four measurements", () => {
+    const pts = parseHourlyPoints(json, now);
+    expect(pts).toHaveLength(4);
+    expect(pts[2]).toEqual({ time: "2026-11-18T11:00", tempC: 21.2, humidityPct: 50, windKmh: 9.1, rainChancePct: 20 });
+  });
+  it("drops points older than yesterday and returns [] without hourly weather fields", () => {
+    expect(parseHourlyPoints({ ...json, hourly: { ...json.hourly, time: ["2026-11-10T10:00", ...json.hourly.time.slice(1)] } }, now)).toHaveLength(3);
+    expect(parseHourlyPoints({ daily: json.daily }, now)).toEqual([]);
+  });
+  it("nextHours starts at the current local hour", () => {
+    const next = nextHours(parseHourlyPoints(json, now), now, 24);
+    expect(next.map((p) => p.time)).toEqual(["2026-11-18T11:00", "2026-11-18T12:00"]);
+    expect(nextHours(undefined, now)).toEqual([]);
+  });
+  it("buildUrl asks for the hourly fields and honours a custom base URL", () => {
+    delete process.env.OPEN_METEO_API_KEY;
+    process.env.OPEN_METEO_BASE_URL = "http://localhost:4020/";
+    const url = buildUrl(31.8, 74.26);
+    expect(url.startsWith("http://localhost:4020/v1/forecast?")).toBe(true);
+    expect(decodeURIComponent(url)).toContain("hourly=shortwave_radiation,temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation_probability");
+    delete process.env.OPEN_METEO_BASE_URL;
+  });
+});
