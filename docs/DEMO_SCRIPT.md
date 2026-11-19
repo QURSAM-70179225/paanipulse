@@ -6,7 +6,8 @@
 - Open the site once (free Render plan sleeps) and check `/api/health?full=1`.
 - Tabs ready: the farmer dashboard (Urdu), the authority dashboard (English). A terminal with `npm run simulate`.
 - Charge a phone with the app installed and a recorded voice note as a backup.
-- Record a backup video of this flow on good Wi-Fi.
+- A recorded version of this flow is saved at `docs/demo/paanipulse-demo.mp4` (keep a copy on the laptop as a backup).
+- More guidance for mentor sessions: [MENTOR_PREP.md](MENTOR_PREP.md).
 
 Numbers below were measured with the offline sample weather; with live weather they will differ, so **read them off
 the screen** rather than memorising them.

@@ -20,7 +20,7 @@ A **virtual water meter and daily Urdu irrigation advisor** for solar tube wells
     <td align="center"><img src="docs/screenshots/home-ur.png" width="210" alt="Home page in Urdu"><br><sub>Home (Urdu)</sub></td>
     <td align="center"><img src="docs/screenshots/farmer-ur.png" width="210" alt="Farmer dashboard in Urdu"><br><sub>Today's advice</sub></td>
     <td align="center"><img src="docs/screenshots/chat-ur.png" width="210" alt="WhatsApp-style assistant in Urdu"><br><sub>Voice + chat assistant</sub></td>
-    <td align="center"><img src="docs/screenshots/timer-ur.png" width="210" alt="Pump timer with alarm"><br><sub>Pump-off alarm</sub></td>
+    <td align="center"><img src="docs/screenshots/alarm-ur.png" width="210" alt="Pump timer alarm screen"><br><sub>Pump-off alarm</sub></td>
   </tr>
 </table>
 
@@ -98,7 +98,7 @@ flowchart LR
 | 5 | **Pump timer and alarm** | Start it, set 1 hour: when it ends the phone rings and shows **SWITCH THE PUMP OFF NOW**. Works with no internet. |
 | 6 | **Assistant** (chat) | Ask *"kal barish hogi?"* or tap the 🎤 and speak. Numbers match the dashboard exactly. |
 | 7 | Sign out → **Installer** | The paying customer: farms they installed, who is over-pumping, register a new farmer. |
-| 8 | Sign out → **Irrigation Dept** | Heatmap of 151 wells, filters, MWh of solar wasted, **Export CSV** (anonymised). Open a well → **report** (printable PDF). |
+| 8 | Sign out → **Irrigation Dept** | Heatmap of 150+ wells, filters, MWh of solar wasted, **Export CSV** (anonymised). Open a well → **report** (printable PDF). |
 | 9 | **[/about](https://paanipulse.onrender.com/about)** | Every formula, default, data source and limitation, stated openly. |
 
 ### 🔎 What is real and what is simulated
@@ -106,7 +106,7 @@ flowchart LR
 | | Status |
 |---|---|
 | Engine, formulas, advice, chat guardrail, accounts, access control, offline mode, alarm, reports | ✅ **Real, working, unit-tested** (66 tests) |
-| Weather (temperature, rain, ET₀, sunlight) | ✅ Live from Open-Meteo; a labelled **sample** is used only when it can't be reached |
+| Weather (temperature, rain, ET₀, sunlight) | ✅ Live from Open-Meteo, or from OpenWeatherMap as a backup (then ET₀ and sunlight are **estimated** and labelled). A labelled **sample** is the last resort. |
 | The **150 regional wells** on the authority map | 🟡 **Simulated**, shown with a banner. District rankings come from the simulation, not field data. |
 | **Karamat's farm** | 🟡 Demo farm modelled on a **real farmer interview**; not a connected farm |
 | Pump-drive live meter | 🟡 Uses a **simulator** (`npm run simulate`) for the demo; the data path is real |
@@ -191,11 +191,11 @@ One real farmer interview (pump size, run-hours, "about double the water since s
 
 ## Demo video
 
-<!-- TODO(team): replace this block with your video.
-     YouTube: [![Demo video](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://youtu.be/VIDEO_ID)
-     Or drag an .mp4 into the GitHub editor to embed it directly. -->
+[![Watch the demo video](docs/demo/poster.png)](docs/demo/paanipulse-demo.mp4)
 
-> 🎬 **Demo video: coming soon.** *(3 minutes: problem → Karamat's Urdu voice note → live meter → assistant → authority map.)*
+▶ **[Watch the demo (2 min 11 s, MP4)](docs/demo/paanipulse-demo.mp4)**: recorded on the live site with captions.
+Karamat's Urdu advice → this week's waste and chart → pump output → live weather → pump-off alarm → assistant →
+Irrigation Department map → lender report. *The regional wells in the video are simulated demo data.*
 
 ## Pitch slides
 
@@ -255,8 +255,9 @@ One real farmer interview (pump size, run-hours, "about double the water since s
 |---|---|
 | **Farmer dashboard (English)**<br><img src="docs/screenshots/farmer-en.png" width="300" alt="Farmer dashboard in English"> | **Authority dashboard**<br><img src="docs/screenshots/authority.png" width="520" alt="Authority groundwater dashboard"><br><sub>Map tiles load from OpenStreetMap online; the heatmap and wells always show.</sub> |
 | **Installer portal**<br><img src="docs/screenshots/installer.png" width="420" alt="Installer portal"> | **Well report for lenders**<br><img src="docs/screenshots/report.png" width="420" alt="Printable well report"> |
+| **Weather now and next 24 hours**<br><img src="docs/screenshots/weather-en.png" width="300" alt="Weather card"> | **Pump output**<br><img src="docs/screenshots/output-en.png" width="420" alt="Pump output card"> |
 
-*Screenshots use simulated demo data and illustrative weather values.*
+*Screenshots were taken on the live site. The regional wells are simulated demo data; weather is real.*
 </details>
 
 ---
@@ -354,7 +355,7 @@ docs/ guides + screenshots  tests/ Vitest suites                    .github/ sch
 | 📘 [PRODUCT_ESSENTIALS.md](PRODUCT_ESSENTIALS.md) | Problem, users, who pays, built vs simulated, validation status, roadmap, risks, sources |
 | 🏗️ [ARCHITECTURE.md](ARCHITECTURE.md) | System diagram, data model, engine, request flows, security, API list, limitations |
 | 🚀 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Environment variables, Render + Neon, scheduled jobs, troubleshooting |
-| 🎤 [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | The 3-minute demo and answers to likely questions |
+| 🎤 [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) · 🧑‍🏫 [docs/MENTOR_PREP.md](docs/MENTOR_PREP.md) | The 3-minute demo; pitches, questions and a readiness checklist for mentor sessions |
 | 🧪 [docs/BUCKET_TEST.md](docs/BUCKET_TEST.md) | How to calibrate and field-check the meter with a drum and a phone (English and Urdu) |
 | 🖨️ [docs/qr/](docs/qr) | Printable A5 card with the QR code to the live site |
 | 🤝 [CONTRIBUTING.md](CONTRIBUTING.md) · 🔒 [SECURITY.md](SECURITY.md) · 📝 [CHANGELOG.md](CHANGELOG.md) | Working on it, reporting problems, history |
