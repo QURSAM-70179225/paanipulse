@@ -103,6 +103,10 @@ describe("Open-Meteo URL", () => {
     expect(free).not.toContain("apikey");
     process.env.OPEN_METEO_API_KEY = "k123";
     expect(buildUrl(31.8, 74.26)).toMatch(/^https:\/\/customer-api\.open-meteo\.com\/v1\/forecast\?.*apikey=k123/);
+    // A rejected key falls back to the free host without the key.
+    const fallback = buildUrl(31.8, 74.26, { forceFree: true });
+    expect(fallback).toContain("https://api.open-meteo.com/");
+    expect(fallback).not.toContain("apikey");
     delete process.env.OPEN_METEO_API_KEY;
   });
 });

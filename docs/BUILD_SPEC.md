@@ -1,3 +1,8 @@
+> **Note:** this is the original build specification (decisions from the hackathon planning phases). It is kept as
+> history. For the current system see [ARCHITECTURE.md](../ARCHITECTURE.md) and
+> [PRODUCT_ESSENTIALS.md](../PRODUCT_ESSENTIALS.md); where they differ, those two win (for example, the database is now
+> PostgreSQL, not SQLite).
+
 # PaaniPulse — Revised Build Spec (v2, after Phases 1–5)
 
 This replaces the original build prompt PDF wherever they differ.

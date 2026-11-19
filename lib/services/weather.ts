@@ -70,7 +70,7 @@ const memory = new Map<string, { at: number; result: WeatherResult }>();
 /** Round to ~11 km so nearby farms share a cache entry (and we stay well inside the free-tier limits). */
 const cacheKey = (lat: number, lng: number) => `${lat.toFixed(1)}_${lng.toFixed(1)}`;
 
-export function buildUrl(lat: number, lng: number): string {
+export function buildUrl(lat: number, lng: number, opts: { forceFree?: boolean } = {}): string {
   const p = new URLSearchParams({
     latitude: lat.toFixed(4),
     longitude: lng.toFixed(4),
@@ -83,7 +83,7 @@ export function buildUrl(lat: number, lng: number): string {
   });
   // Free tier needs no key (non-commercial use). For commercial use, Open-Meteo issues an API key
   // that is sent to the "customer-api" host.
-  const key = process.env.OPEN_METEO_API_KEY;
+  const key = opts.forceFree ? undefined : process.env.OPEN_METEO_API_KEY;
   if (key) {
     p.set("apikey", key);
     return `https://customer-api.open-meteo.com/v1/forecast?${p}`;
@@ -161,7 +161,12 @@ export async function getWeather(lat: number, lng: number, opts: { now?: Date } 
   if (hit && Date.now() - hit.at < TTL_MS) return hit.result;
 
   try {
-    const res = await fetch(buildUrl(lat, lng), { signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store" });
+    let res = await fetch(buildUrl(lat, lng), { signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store" });
+    if ((res.status === 401 || res.status === 403 || res.status === 400) && process.env.OPEN_METEO_API_KEY) {
+      // The configured key was rejected (wrong provider or expired): keep working on the free service.
+      console.warn(`OPEN_METEO_API_KEY rejected (HTTP ${res.status}); falling back to the free Open-Meteo endpoint.`);
+      res = await fetch(buildUrl(lat, lng, { forceFree: true }), { signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store" });
+    }
     if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
     const json = await res.json();
     const days = parseOpenMeteo(json);
