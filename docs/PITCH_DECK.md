@@ -7,7 +7,7 @@ deck first; the extra slides in B are the ones marked ➕.
 > (30 pt or more), few words, real screenshots from `docs/screenshots/`. Use the app's colours (emerald `#047857`,
 > sky `#0369a1`) and write key lines in both English and Urdu.
 
-> **The finished 3-minute deck (Version A, 7 slides, speaker notes included) is in [`docs/slides/PaaniPulse-pitch-3min.pptx`](slides/PaaniPulse-pitch-3min.pptx)** (PDF copy beside it). Edit it in PowerPoint or Keynote; the slide order follows the table below.
+> **The finished 3-minute deck (Version A, 7 slides, speaker notes included) is in [`docs/slides/PaaniPulse-pitch-3min.pptx`](slides/PaaniPulse-pitch-3min.pptx)** (PDF copy beside it). The **5-minute mentor version** (10 slides plus 6 hidden appendix slides for Q&A) is [`docs/slides/PaaniPulse-pitch-5min-mentor.pptx`](slides/PaaniPulse-pitch-5min-mentor.pptx): in PowerPoint, right-click an appendix slide in the slide sorter and untick **Hide Slide** to show it. Edit it in PowerPoint or Keynote; the slide order follows the table below.
 
 ## Timing
 

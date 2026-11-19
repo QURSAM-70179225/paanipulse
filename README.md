@@ -203,8 +203,10 @@ editing with a free offline voice; in the app itself, spoken answers need the op
 
 📊 **[Download the 3-minute pitch deck (PPTX)](docs/slides/PaaniPulse-pitch-3min.pptx)** · [PDF version](docs/slides/PaaniPulse-pitch-3min.pdf)
 
-Seven slides: hook → problem → solution → live demo → why trust the numbers → who pays → next steps and ask. Speaker notes with
-timings are in the PPTX. The outline and a longer 5-minute version are in [docs/PITCH_DECK.md](docs/PITCH_DECK.md).
+- **3-minute final pitch**: 7 slides, hook → problem → solution → live demo → why trust the numbers → who pays → next steps and ask.
+- 📊 **[5-minute mentor version (PPTX)](docs/slides/PaaniPulse-pitch-5min-mentor.pptx)** · [PDF](docs/slides/PaaniPulse-pitch-5min-mentor.pdf): 10 slides, adding why existing tools fall short, honest status, and impact and theme fit. Six hidden appendix slides (architecture, maths, competitors, privacy and offline, roadmap, farmer interview) are there for Q&A.
+
+Speaker notes with timings are in both PPTX files. The outline is in [docs/PITCH_DECK.md](docs/PITCH_DECK.md).
 
 ---
 
