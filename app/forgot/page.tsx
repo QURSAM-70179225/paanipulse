@@ -1,6 +1,7 @@
 import { MessageCircle, Sprout, Wrench } from "lucide-react";
 import { SimplePage } from "@/components/account/SimplePage";
-import { ForgotForm } from "@/components/account/SecretForms";
+import { ForgotForm, PhoneResetForm } from "@/components/account/SecretForms";
+import { smsConfigured } from "@/lib/services/sms";
 import { dictFor } from "@/lib/i18n/dict";
 import { getLang } from "@/lib/i18n/server";
 
@@ -14,7 +15,8 @@ export default async function ForgotPage() {
     <SimplePage lang={lang} title={d.forgotTitle} back="/login" backLabel={d.signIn}>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="mb-2 flex items-center gap-2 font-bold"><Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {d.iAmFarmer}</h2>
-        <p className="text-slate-700">{d.forgotFarmer}</p>
+        {smsConfigured() ? <PhoneResetForm d={d} /> : <p className="text-slate-700">{d.forgotFarmer}</p>}
+        {smsConfigured() && <p className="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-600">{d.forgotFarmer}</p>}
         {support && (
           <p className="mt-3 text-slate-700">
             {d.forgotSupport}{" "}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { KeyRound, Mail } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { DictKey } from "@/lib/i18n/dict";
 
 type D = Record<DictKey, string>;
@@ -87,5 +88,48 @@ export function ResetPinButton({ farmerId, name, d }: { farmerId: string; name: 
       </button>
       {msg && <span role="status" className="mt-0.5 text-xs text-slate-600">{msg}</span>}
     </span>
+  );
+}
+
+/** Farmer reset by SMS/WhatsApp code: step 1 ask for the code, step 2 enter it with a new PIN. */
+export function PhoneResetForm({ d }: { d: D }) {
+  const [step, setStep] = useState<"phone" | "code" | "done">("phone");
+  const [phone, setPhone] = useState("");
+  const [code, setCode] = useState("");
+  const [pin, setPin] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  if (step === "done") return <p role="status" className="rounded-xl bg-emerald-50 p-3 text-emerald-900">{d.pinChangedLogin} <Link href="/login" className="font-semibold underline">{d.signIn}</Link></p>;
+  if (step === "phone") {
+    return (
+      <form className="flex flex-col gap-3" onSubmit={async (e) => {
+        e.preventDefault(); setBusy(true); setMsg(null);
+        const r = await post("/api/auth/forgot-phone", { phone });
+        setBusy(false);
+        if (r.ok) setStep("code");
+        else setMsg(r.error === "invalid-phone" ? d.errPhone : r.error === "sms-unavailable" ? d.smsDown : d.errGeneric);
+      }}>
+        <p className="text-slate-700">{d.phoneResetIntro}</p>
+        <label className={label}>{d.phone}<input className={input} dir="ltr" type="tel" inputMode="tel" placeholder={d.phoneHint} required value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" /></label>
+        {msg && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{msg}</p>}
+        <button className={btn} disabled={busy}>{d.sendCode}</button>
+      </form>
+    );
+  }
+  return (
+    <form className="flex flex-col gap-3" onSubmit={async (e) => {
+      e.preventDefault(); setBusy(true); setMsg(null);
+      const r = await post("/api/auth/reset-phone", { phone, code, pin });
+      setBusy(false);
+      if (r.ok) setStep("done"); else setMsg(r.error === "invalid-or-expired" ? d.codeWrong : d.errGeneric);
+    }}>
+      <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900">{d.codeSentPhone}</p>
+      <label className={label}>{d.codeLabel}<input className={cn(input, "num tracking-[0.4em]")} dir="ltr" inputMode="numeric" maxLength={6} pattern="\d{6}" required value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} autoComplete="one-time-code" /></label>
+      <label className={label}>{d.newPinLabel}<input className={cn(input, "num tracking-[0.4em]")} dir="ltr" type="password" inputMode="numeric" minLength={4} maxLength={6} required value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} autoComplete="new-password" /></label>
+      {msg && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{msg}</p>}
+      <button className={btn} disabled={busy}><KeyRound className="h-4 w-4" aria-hidden /> {d.savePin}</button>
+      <button type="button" onClick={() => { setStep("phone"); setCode(""); }} className="text-sm font-semibold text-sky-800 underline">{d.sendCode}</button>
+    </form>
   );
 }

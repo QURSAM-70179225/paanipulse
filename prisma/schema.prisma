@@ -32,6 +32,8 @@ model PasswordResetToken {
   tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
+  /// Wrong guesses against SMS/WhatsApp codes (locks the code after 5).
+  attempts  Int       @default(0)
   createdAt DateTime  @default(now())
 }
 

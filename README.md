@@ -39,6 +39,7 @@ For local Postgres you can also use a free Neon *branch* of your production data
 | `CRON_SECRET` | for the daily 06:00 advisory | Vercel sends it automatically to the cron job |
 | `TELEMETRY_INGEST_KEY` | no | If set, pump drives / the simulator must send it as `x-ingest-key` |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL` | for email password reset | Without: reset links are only written to the server log |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` | for SMS / WhatsApp PIN codes | Without: farmers are told to ask their installer to reset the PIN |
 | `SUPPORT_WHATSAPP` | no | Number shown to farmers who forgot their PIN (e.g. `923001234567`) |
 | `DEMO_MODE` | no (default `true`) | Offline sample weather fallback + one-tap demo accounts. Set `false` for a real launch |
 
@@ -93,8 +94,10 @@ npm run simulate -- --url https://YOUR-APP.onrender.com   # or your vercel.app U
 
 ## Account recovery
 
-- **Farmers (phone + PIN):** the installer who registered them resets the PIN from the installer portal
-  (identity checked in person, no SMS cost). Optional support WhatsApp number on `/forgot`.
+- **Farmers (phone + PIN):** with Twilio configured, `/forgot` texts a 6-digit code (SMS or WhatsApp) to the farmer's
+  own number: valid 10 minutes, single use, locked after 5 wrong guesses, max 3 codes per hour, same answer for
+  unknown numbers. Without Twilio, or as a backup, the installer who registered them resets the PIN from the
+  installer portal (identity checked in person). Optional support WhatsApp number on `/forgot`.
 - **Installers / officials (email):** `/forgot` sends a one-time link valid 30 minutes (only its hash is stored).
 - **Everyone signed in:** `/account` to change PIN / password. Demo accounts can never be changed.
 
