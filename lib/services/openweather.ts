@@ -135,6 +135,9 @@ export function buildFromOpenWeather(args: {
   return { current: cur, hourly, days: [...history, ...forecastDays] };
 }
 
+/** Env values are often pasted with a trailing space/newline or surrounding quotes: strip them. */
+export const cleanKey = (raw: string | undefined) => (raw ?? "").trim().replace(/^["']+|["']+$/g, "").trim();
+
 export interface OwmOptions {
   history: WeatherDay[];
   todayKey: string;
@@ -142,7 +145,7 @@ export interface OwmOptions {
 
 /** Fetch current weather and the 5-day forecast, then convert. Throws on any failure (caller falls back). */
 export async function fetchOpenWeather(lat: number, lng: number, opts: OwmOptions) {
-  const key = process.env.OPENWEATHER_API_KEY;
+  const key = cleanKey(process.env.OPENWEATHER_API_KEY);
   if (!key) throw new Error("OPENWEATHER_API_KEY not set");
   const base = (process.env.OPENWEATHER_BASE_URL || "https://api.openweathermap.org").replace(/\/$/, "");
   const q = new URLSearchParams({ lat: lat.toFixed(4), lon: lng.toFixed(4), units: "metric", appid: key });

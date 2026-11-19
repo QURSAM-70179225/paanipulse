@@ -238,3 +238,13 @@ describe("OpenWeather backup provider", () => {
     expect([owmToWmo(800), owmToWmo(802), owmToWmo(804), owmToWmo(500), owmToWmo(211), owmToWmo(741), owmToWmo(undefined)]).toEqual([0, 2, 3, 61, 95, 45, null]);
   });
 });
+
+import { cleanKey } from "@/lib/services/openweather";
+describe("API key cleaning", () => {
+  it("strips spaces, newlines and quotes pasted with the key", () => {
+    expect(cleanKey('  "abc123def"\n')).toBe("abc123def");
+    expect(cleanKey("'abc123def'")).toBe("abc123def");
+    expect(cleanKey("abc123def")).toBe("abc123def");
+    expect(cleanKey(undefined)).toBe("");
+  });
+});

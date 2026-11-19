@@ -59,6 +59,11 @@ export async function GET(req: Request) {
     tables !== "ok" && `Tables: ${tables}`,
     database === "ok" && tables === "ok" && demoAccounts < 3 && "Demo accounts missing — the seed did not run (database was not empty?)",
   ].filter(Boolean);
-  const notes = "source" in weather && weather.source !== "live" ? [`Weather is "${weather.source}", not live: Open-Meteo did not answer from this server (see weather.lastError for the reason). The app still works. Fix: add OPEN_METEO_API_KEY if you have an Open-Meteo plan, or run "npm run weather:prime" from a laptop that is connected to the production database.`] : [];
+  const failure = "lastError" in weather ? String((weather as { lastError?: { message?: string } }).lastError?.message ?? "") : "";
+  const hints = [
+    /HTTP 429/.test(failure) && "Open-Meteo is rate-limiting this server's shared address (its free daily allowance is used up; it resets daily). The OpenWeather backup or `npm run weather:prime` avoids the problem.",
+    /OpenWeather[^|]*HTTP 401/.test(failure) && "OpenWeather rejected the API key: a new key can take up to ~2 hours to activate. If it is older than that, copy it again from openweathermap.org/api_keys (no spaces or quotes) and redeploy.",
+  ].filter(Boolean) as string[];
+  const notes = "source" in weather && weather.source !== "live" ? [`Weather is "${weather.source}", not live: Open-Meteo did not answer from this server (see weather.lastError for the reason). The app still works. Fix: add OPEN_METEO_API_KEY if you have an Open-Meteo plan, or run "npm run weather:prime" from a laptop that is connected to the production database.`].concat(hints) : [];
   return NextResponse.json({ ...base, ok: problems.length === 0, env, database, tables, demoAccounts, farms, weather, problems, notes }, { status: problems.length ? 503 : 200 });
 }
