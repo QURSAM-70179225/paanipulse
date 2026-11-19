@@ -185,8 +185,9 @@ sequenceDiagram
 
 1. In-memory cache, 30 minutes by default (`WEATHER_CACHE_MINUTES`), shared by farms within about 11 km
 2. Live Open-Meteo call (past 31 days + 7-day forecast, hourly sunlight, temperature, humidity, wind and rain chance, current conditions)
-3. Last good response saved in `WeatherCache`
-4. Built-in offline sample (only when `DEMO_MODE` is not `false`)
+3. **OpenWeatherMap backup** (only with `OPENWEATHER_API_KEY`): real current conditions and 5-day forecast, ET₀ and sunlight *estimated*, history from saved or sample data; labelled "OpenWeather (ET₀ estimated)"
+4. Last good response saved in `WeatherCache`
+5. Built-in offline sample (only when `DEMO_MODE` is not `false`)
 
 If `OPEN_METEO_API_KEY` is set, the commercial host is used; a rejected key falls back to the free host. `OPEN_METEO_BASE_URL` points the app at a self-hosted Open-Meteo.
 

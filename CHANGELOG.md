@@ -3,6 +3,7 @@
 All notable changes. Dates are 2026.
 
 ## [Unreleased]
+- Weather: OpenWeatherMap as a backup provider (`OPENWEATHER_API_KEY`) with estimated ET₀ and sunlight, clearly labelled.
 - Bucket test accepts the solar controller's kW reading (more accurate than the sunlight estimate).
 - Weather: failure reason shown in `/api/health?full=1`; one retry; `npm run weather:prime` stores real weather from a laptop.
 - Docs: bucket-test field guide; printable QR card.

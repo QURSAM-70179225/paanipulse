@@ -182,3 +182,59 @@ describe("SMS texts", () => {
     expect(overrunSms({ ranHours: 1, recommendedHours: 0 })).toContain("zaroorat nahi");
   });
 });
+
+import { buildFromOpenWeather, owmToWmo } from "@/lib/services/openweather";
+import { sampleWeather } from "@/lib/services/sampleWeather";
+describe("OpenWeather backup provider", () => {
+  const todayKey = "2026-11-19";
+  const history = sampleWeather(new Date("2026-11-19T07:00:00Z")).filter((d) => d.date < todayKey);
+  // 3-hourly entries from 14:00 Pakistan time on the 19th for 5 days
+  const start = Date.UTC(2026, 10, 19, 9, 0) / 1000;
+  const list = Array.from({ length: 40 }, (_, i) => {
+    const hourLocal = (14 + i * 3) % 24;
+    return {
+      dt: start + i * 10800,
+      main: { temp: 11 + 11 * Math.max(0, Math.sin((Math.PI * (hourLocal - 6)) / 14)), humidity: 60 },
+      wind: { speed: 3 },
+      clouds: { all: 20 },
+      pop: i === 6 ? 0.8 : 0.1,
+      rain: i === 6 ? { "3h": 4.2 } : undefined,
+      weather: [{ id: 801 }],
+    };
+  });
+  const out = buildFromOpenWeather({
+    current: { dt: start - 1800, main: { temp: 22.4, feels_like: 21.2, humidity: 48 }, wind: { speed: 2.5 }, weather: [{ id: 804 }] },
+    forecast: { list },
+    lat: 31.8,
+    history,
+    todayKey,
+  });
+  it("maps current conditions: m/s → km/h, condition → code, local time", () => {
+    expect(out.current.tempC).toBe(22.4);
+    expect(out.current.windKmh).toBeCloseTo(9, 6);
+    expect(out.current.code).toBe(3);
+    expect(out.current.time).toBe("2026-11-19T13:30"); // 08:30 UTC + 5 h
+  });
+  it("interpolates the 3-hourly forecast to hourly points, starting at the current hour from the observation", () => {
+    expect(out.hourly[0].time).toBe("2026-11-19T13:00");
+    expect(out.hourly[0].tempC).toBe(22.4);
+    expect(out.hourly[1].time).toBe("2026-11-19T14:00");
+    expect(out.hourly).toHaveLength(1 + 39 * 3);
+    expect(out.hourly[2].windKmh).toBeCloseTo(10.8, 6);
+  });
+  it("keeps history before today, then today and the forecast days, with estimated ET0 and radiation", () => {
+    const dates = out.days.map((d) => d.date);
+    expect(dates.slice(0, history.length)).toEqual(history.map((d) => d.date));
+    expect(dates).toContain(todayKey);
+    expect(dates).toEqual([...dates].sort());
+    const today = out.days.find((d) => d.date === todayKey)!;
+    expect(today.et0Mm).toBeGreaterThan(1);
+    expect(today.et0Mm).toBeLessThan(4);
+    expect(today.radiationMj).toBeGreaterThan(8);
+    expect(today.radiationMj).toBeLessThan(17);
+    expect(out.days.reduce((s, d) => s + d.precipMm, 0) - history.reduce((s, d) => s + d.precipMm, 0)).toBeCloseTo(4.2, 6);
+  });
+  it("maps OpenWeather condition ids to the UI's codes", () => {
+    expect([owmToWmo(800), owmToWmo(802), owmToWmo(804), owmToWmo(500), owmToWmo(211), owmToWmo(741), owmToWmo(undefined)]).toEqual([0, 2, 3, 61, 95, 45, null]);
+  });
+});

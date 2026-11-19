@@ -173,6 +173,7 @@ function Header({ s, T, lang, user }: { s: FarmState; T: TFn; lang: Lang; user: 
           <Badge variant="info"><Sun className="h-3 w-3" aria-hidden /> {T("fromSunlight")}</Badge>
         )}
         {s.weatherSource === "live" && <Badge>{T("liveWeather")}</Badge>}
+        {s.weatherSource === "openweather" && <Badge variant="warning">{T("wxOpenWeather")}</Badge>}
         {s.weatherSource === "cached-live" && <Badge variant="warning">{T("savedWeather")}</Badge>}
         {s.weatherSource === "sample" && <Badge variant="warning"><CircleAlert className="h-3 w-3" aria-hidden /> {T("sampleWeather")}</Badge>}
         <Badge variant="outline" className="border-white/50 text-white">{s.farm.isSynthetic ? T("simulated") : T("demoFarm")}</Badge>
@@ -335,7 +336,7 @@ function WeatherCard({ s, T, locale }: { s: FarmState; T: TFn; locale: string })
             feels: T("wxFeels", { t: "{t}" }), humidity: T("wxHumidity"), wind: T("wxWind"), rainToday: T("wxRainToday"), highLow: T("wxHighLow"),
             updated: T("wxUpdated", { t: "{t}" }), offline: T("wxOffline"), kmh: T("kmh"), mm: T("mm"), hourlyTitle: T("wxHourlyTitle"),
             rainChance: T("wxRainChance"), auto: T("wxAuto"), nowLabel: T("wxNowLabel"),
-            sourceLive: T("liveWeather"), sourceSaved: T("savedWeather"), sourceSample: T("sampleWeather"), conditions,
+            sourceLive: T("liveWeather"), sourceSaved: T("savedWeather"), sourceSample: T("sampleWeather"), sourceOpenWeather: T("wxOpenWeather"), conditions,
           }}
         />
 

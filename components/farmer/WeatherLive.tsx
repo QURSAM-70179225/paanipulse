@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 
 export interface LiveCurrent { tempC: number; feelsLikeC: number | null; humidityPct: number | null; windKmh: number | null; code: number | null; time: string | null }
 export interface LiveHour { time: string; tempC: number | null; humidityPct: number | null; windKmh: number | null; rainChancePct: number | null }
-export interface WeatherLiveData { source: "live" | "cached-live" | "sample"; current: LiveCurrent | null; hourly: LiveHour[] }
+export interface WeatherLiveData { source: "live" | "cached-live" | "openweather" | "sample"; current: LiveCurrent | null; hourly: LiveHour[] }
 
 export interface WeatherLiveLabels {
   feels: string; humidity: string; wind: string; rainToday: string; highLow: string; updated: string; offline: string;
   kmh: string; mm: string; hourlyTitle: string; rainChance: string; auto: string; nowLabel: string;
-  sourceLive: string; sourceSaved: string; sourceSample: string;
+  sourceLive: string; sourceSaved: string; sourceSample: string; sourceOpenWeather: string;
   conditions: Record<Condition, string>;
 }
 
@@ -56,7 +56,7 @@ export function WeatherLive({ farmId, initial, today, labels }: {
   const cond = conditionFor(now?.code);
   const CondIcon = cond ? ICON[cond] : Thermometer;
   const when = now?.time ? now.time.slice(11, 16) : null;
-  const sourceLabel = data.source === "live" ? labels.sourceLive : data.source === "cached-live" ? labels.sourceSaved : labels.sourceSample;
+  const sourceLabel = data.source === "live" ? labels.sourceLive : data.source === "cached-live" ? labels.sourceSaved : data.source === "openweather" ? labels.sourceOpenWeather : labels.sourceSample;
   const mini = (Icon: React.ElementType, label: string, value: string) => (
     <div className="rounded-xl bg-slate-50 p-2 text-center">
       <Icon className="mx-auto h-4 w-4 text-sky-700" aria-hidden />

@@ -1,7 +1,8 @@
 /**
  * Weather service: Open-Meteo forecast API (free, no key) with three fallbacks, in order:
  *   1. in-memory cache (30 min by default; WEATHER_CACHE_MINUTES)
- *   2. last successful live response saved in the database (WeatherCache table)
+ *   2. OpenWeatherMap backup (only with OPENWEATHER_API_KEY; ET0 and sunlight are estimated)
+ *   3. last successful live response saved in the database (WeatherCache table)
  *   3. DEMO_MODE offline sample (data/sample-weather.json), clearly flagged as "sample"
  */
 import { z } from "zod";
@@ -9,8 +10,9 @@ import type { WeatherDay } from "@/lib/engine";
 import { pktDateKey, pktDayStart } from "@/lib/dates";
 import { prisma } from "@/lib/db";
 import { sampleWeather } from "./sampleWeather";
+import { fetchOpenWeather } from "./openweather";
 
-export type WeatherSource = "live" | "cached-live" | "sample";
+export type WeatherSource = "live" | "cached-live" | "openweather" | "sample";
 
 /** Conditions right now (Open-Meteo "current"). Null when only the offline sample is available. */
 export interface CurrentWeather {
@@ -48,13 +50,13 @@ const PAST_DAYS = 31;
 const FORECAST_DAYS = 7;
 /** How long a live answer is reused before asking Open-Meteo again (its "current" block updates every ~15 min). */
 const ttlMs = () => (Number(process.env.WEATHER_CACHE_MINUTES) > 0 ? Number(process.env.WEATHER_CACHE_MINUTES) : 30) * 60_000;
-const TIMEOUT_MS = 12_000;
+const TIMEOUT_MS = 8_000;
 
 /** Why the last live attempt failed (shown by /api/health?full=1 so a "sample" badge can be diagnosed). */
 let lastFailure: { at: string; message: string } | null = null;
 export const lastWeatherFailure = () => lastFailure;
 
-/** One request, plus one retry on a network error, timeout, 429 or 5xx (shared cloud IPs are sometimes throttled). */
+/** One request, plus one retry after a quick network error, 429 or 5xx (shared cloud IPs are sometimes throttled). */
 async function fetchWithRetry(url: string): Promise<Response> {
   let lastErr: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -67,6 +69,8 @@ async function fetchWithRetry(url: string): Promise<Response> {
       lastErr = err;
       lastFailure = { at: new Date().toISOString(), message: `${(err as Error).name}: ${(err as Error).message}`.slice(0, 160) };
     }
+    // Retry only after a quick refusal; never after a timeout (that would double the wait for the farmer).
+    if ((lastErr as Error)?.name === "TimeoutError" || (lastErr as Error)?.name === "AbortError") break;
     if (attempt === 0) await new Promise((r) => setTimeout(r, 1500));
   }
   throw lastErr;
@@ -246,6 +250,20 @@ export async function getWeather(lat: number, lng: number, opts: { now?: Date } 
   } catch (err) {
     const disk = await readSavedCache(key);
     const todayKey = pktDateKey(pktDayStart(0, opts.now));
+    if (process.env.OPENWEATHER_API_KEY) {
+      try {
+        // History (days before today) comes from the last saved real weather if it is contiguous up to yesterday, else the sample.
+        const yesterdayKey = pktDateKey(pktDayStart(-1, opts.now));
+        const saved = disk?.days.filter((d) => d.date < todayKey) ?? [];
+        const history = saved.length && saved[saved.length - 1].date === yesterdayKey ? saved : sampleWeather(opts.now).filter((d) => d.date < todayKey);
+        const ow = await fetchOpenWeather(lat, lng, { history, todayKey });
+        const result: WeatherResult = { current: ow.current, hourly: ow.hourly, days: ow.days, source: "openweather", fetchedAt: new Date().toISOString(), lat, lng };
+        memory.set(key, { at: Date.now(), result });
+        return result;
+      } catch (owErr) {
+        lastFailure = { at: new Date().toISOString(), message: `${lastFailure?.message ?? (err as Error).message} | ${(owErr as Error).message}`.slice(0, 300) };
+      }
+    }
     const tomorrowKey = pktDateKey(pktDayStart(1, opts.now));
     const usable = disk && disk.days.some((d) => d.date === todayKey) && disk.days.some((d) => d.date === tomorrowKey);
     if (disk && usable) {

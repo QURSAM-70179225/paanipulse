@@ -277,3 +277,28 @@ describe("pump output in farmer units", () => {
     expect(pumpOutput(0).hoursPerAcre).toBeNull();
   });
 });
+
+import { extraterrestrialRadiationMj, hargreavesEt0, radiationFromCloudCover } from "@/lib/engine";
+describe("weather estimates (backup provider)", () => {
+  it("extraterrestrial radiation matches FAO-56 (Example 8: 20°S on 3 Sept ≈ 32.2 MJ)", () => {
+    expect(extraterrestrialRadiationMj(-20, 246)).toBeCloseTo(32.2, 0);
+  });
+  it("Lahore in mid-November has a plausible Ra, lower than in June", () => {
+    const nov = extraterrestrialRadiationMj(31.8, 323);
+    expect(nov).toBeGreaterThan(18);
+    expect(nov).toBeLessThan(23);
+    expect(extraterrestrialRadiationMj(31.8, 172)).toBeGreaterThan(nov + 8);
+  });
+  it("Hargreaves ET0 for a cool dry November day is ~2–3 mm and grows with the temperature range", () => {
+    const et = hargreavesEt0(11, 24, 31.8, 323);
+    expect(et).toBeGreaterThan(1.8);
+    expect(et).toBeLessThan(3.2);
+    expect(hargreavesEt0(8, 28, 31.8, 323)).toBeGreaterThan(et);
+    expect(hargreavesEt0(20, 20, 31.8, 323)).toBe(0);
+  });
+  it("cloud cover reduces radiation: clear ≈ 75% of Ra, overcast ≈ 25%", () => {
+    expect(radiationFromCloudCover(20, 0)).toBeCloseTo(15, 6);
+    expect(radiationFromCloudCover(20, 1)).toBeCloseTo(5, 6);
+    expect(radiationFromCloudCover(20, 0.5)).toBeCloseTo(10, 6);
+  });
+});

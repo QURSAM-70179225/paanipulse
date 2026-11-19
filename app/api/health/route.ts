@@ -19,6 +19,7 @@ export async function GET(req: Request) {
     DIRECT_URL: !!process.env.DIRECT_URL,
     GROQ_API_KEY: !!process.env.GROQ_API_KEY,
     OPEN_METEO_API_KEY: !!process.env.OPEN_METEO_API_KEY,
+    OPENWEATHER_API_KEY: !!process.env.OPENWEATHER_API_KEY,
     AZURE_SPEECH: !!(process.env.AZURE_SPEECH_KEY && process.env.AZURE_SPEECH_REGION),
     CRON_SECRET: !!process.env.CRON_SECRET,
     DEMO_MODE: (process.env.DEMO_MODE ?? "true").toLowerCase() !== "false",

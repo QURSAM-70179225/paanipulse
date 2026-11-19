@@ -15,6 +15,7 @@ Never commit secrets and never paste them in chats or issues.
 | `AUTHORITY_INVITE_CODE` | for authority sign-up | Code an Irrigation Dept or lender must enter to create an account |
 | `GROQ_API_KEY` | for AI chat and voice input | Without it: rule-based chat answers (same numbers), typing only |
 | `GROQ_MODEL` | no | Default `openai/gpt-oss-120b`; falls back to `openai/gpt-oss-20b` on a rate limit |
+| `OPENWEATHER_API_KEY` | no | **Backup weather.** Key from openweathermap.org (free plan is enough). Used only when Open-Meteo fails: temperature, rain, forecast and hourly data are real, but ET₀ and sunlight are *estimated* from temperature and cloud cover. The dashboard says "OpenWeather (ET₀ estimated)" |
 | `OPEN_METEO_API_KEY` | no | **Only for an Open-Meteo commercial plan.** Not needed for the free tier. See section 4 |
 | `WEATHER_CACHE_MINUTES` | no | How long a live weather answer is reused (default 30). Lower = fresher but more Open-Meteo calls |
 | `OPEN_METEO_BASE_URL` | no | Point the app at a self-hosted Open-Meteo or another compatible server. Leave empty normally |
@@ -57,9 +58,12 @@ Open-Meteo and the answer (daily ET₀, rain, temperatures; hourly sunlight, tem
 
 - **If your key is from Open-Meteo (commercial plan):** add `OPEN_METEO_API_KEY` in Render. The app then uses
   `customer-api.open-meteo.com`. If the key is rejected it automatically falls back to the free host and logs a warning.
-- **If your key is from another provider** (OpenWeatherMap, WeatherAPI, Tomorrow.io, …): do **not** put it in
-  `OPEN_METEO_API_KEY`. The app does not use other providers yet; adding one needs an adapter in
-  `lib/services/weather.ts` that returns daily ET₀, rain, temperatures and hourly solar radiation.
+- **If your key is from OpenWeatherMap:** do **not** put it in `OPEN_METEO_API_KEY`. Put it in **`OPENWEATHER_API_KEY`**.
+  It is a **backup**: when Open-Meteo does not answer, the app asks OpenWeatherMap for current conditions and the
+  5-day / 3-hour forecast, and **estimates** ET₀ (Hargreaves) and sunlight (cloud cover). The days before today come from
+  the last saved real weather, or the sample. New OpenWeatherMap keys can take up to a couple of hours to activate
+  (until then they return HTTP 401).
+- **Another provider** (WeatherAPI, Tomorrow.io, …) is not supported: it would need an adapter in `lib/services/`.
 - **Check it works:** open `/api/health?full=1` and look for `"weather": {"source": "live"}`. `sample` means Open-Meteo
   did not answer from the server; the app keeps working on sample data and the dashboard badge says so.
 
@@ -90,6 +94,7 @@ The demo farmer cannot enable it (its phone number is fake). Without Twilio the 
 | Redirect to `localhost` | Fixed in code; hard-refresh (Ctrl+Shift+R) after redeploying |
 | `Tables: missing` in health | Build command is not `npm run render-build`; fix it and redeploy |
 | `Demo accounts missing` | The database was not empty at first deploy so the seed was skipped; run `npm run seed` against it once |
+| `OpenWeather … HTTP 401` in `weather.lastError` | The OpenWeather key is wrong or not activated yet (wait up to a couple of hours after creating it) |
 | Weather says "Sample" on the live site | Open `/api/health?full=1` and read `weather.lastError` (usually `HTTP 429`: Open-Meteo throttles shared cloud addresses). Fixes: (1) add `OPEN_METEO_API_KEY` if you have an Open-Meteo plan; (2) from a laptop on normal internet run `DATABASE_URL="<production string>" npm run weather:prime`: the site then shows real **Saved weather**; re-run it each morning of an event |
 | Weather badge says "Sample" | Open-Meteo unreachable or rate-limited from the server; check health. Not caused by a missing key |
 | Chat answers look generic | `GROQ_API_KEY` missing or rate-limited (free tier ≈ 8k tokens per minute): ask slowly |
