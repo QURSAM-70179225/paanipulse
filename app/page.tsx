@@ -65,6 +65,10 @@ export default async function Home() {
                   <UserPlus className="h-5 w-5" aria-hidden /> {T("createAccount")}
                 </Link>
               </div>
+              <p className="flex flex-col gap-1 text-sm text-emerald-100 sm:flex-row sm:gap-5">
+                <Link href="/login?as=installer" className="font-semibold underline underline-offset-4 hover:text-white">{T("signInInstaller")}</Link>
+                <Link href="/login?as=authority" className="font-semibold underline underline-offset-4 hover:text-white">{T("signInAuthority")}</Link>
+              </p>
             </div>
           )}
         </div>

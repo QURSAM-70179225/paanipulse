@@ -6,7 +6,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { dictFor, dirFor, type Lang } from "@/lib/i18n/dict";
 import { cn } from "@/lib/utils";
 
-export function AuthPage({ mode, lang, next, demoEnabled }: { mode: "login" | "signup"; lang: Lang; next?: string; demoEnabled: boolean }) {
+export function AuthPage({ mode, lang, next, demoEnabled, initialRole }: { mode: "login" | "signup"; lang: Lang; next?: string; demoEnabled: boolean; initialRole?: "FARMER" | "INSTALLER" | "AUTHORITY" }) {
   const dict = dictFor(lang);
   const ur = lang === "ur";
   return (
@@ -22,7 +22,7 @@ export function AuthPage({ mode, lang, next, demoEnabled }: { mode: "login" | "s
       </header>
       <div className="mx-auto -mt-4 flex max-w-md flex-col gap-4 px-4 pb-10">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <AuthForm mode={mode} dict={dict} next={next} />
+          <AuthForm mode={mode} dict={dict} next={next} initialRole={initialRole} />
         </div>
         {demoEnabled && (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4">

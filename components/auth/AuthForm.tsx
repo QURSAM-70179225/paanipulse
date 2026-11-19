@@ -22,9 +22,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">{label}{children}</label>;
 }
 
-export function AuthForm({ mode, dict, next }: { mode: Mode; dict: Record<DictKey, string>; next?: string }) {
+export function AuthForm({ mode, dict, next, initialRole }: { mode: Mode; dict: Record<DictKey, string>; next?: string; initialRole?: Who }) {
   const T = (k: DictKey) => dict[k];
-  const [who, setWho] = useState<Who>("FARMER");
+  const [who, setWho] = useState<Who>(initialRole ?? "FARMER");
   const [f, setF] = useState({ name: "", phone: "", pin: "", email: "", password: "", organisation: "", inviteCode: "" });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -59,15 +59,16 @@ export function AuthForm({ mode, dict, next }: { mode: Mode; dict: Record<DictKe
   }
 
   const input = "h-12 w-full rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600";
-  const tabs: { id: Who; label: string; icon: React.ElementType }[] = [
-    { id: "FARMER", label: T("iAmFarmer"), icon: Sprout },
-    { id: "INSTALLER", label: T("iAmInstaller"), icon: Wrench },
-    { id: "AUTHORITY", label: T("iAmAuthority"), icon: Building2 },
+  const tabs: { id: Who; label: string; hint: string; icon: React.ElementType }[] = [
+    { id: "FARMER", label: T("iAmFarmer"), hint: T("roleFarmerHint"), icon: Sprout },
+    { id: "INSTALLER", label: T("iAmInstaller"), hint: T("roleInstallerHint"), icon: Wrench },
+    { id: "AUTHORITY", label: T("iAmAuthority"), hint: T("roleAuthorityHint"), icon: Building2 },
   ];
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4" noValidate={false}>
-      <div role="tablist" aria-label="Account type" className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">
+      <p className="text-sm font-semibold text-slate-700">{T("whoAreYou")}</p>
+      <div role="tablist" aria-label={T("whoAreYou")} className="grid grid-cols-3 gap-2">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -75,9 +76,14 @@ export function AuthForm({ mode, dict, next }: { mode: Mode; dict: Record<DictKe
             role="tab"
             aria-selected={who === t.id}
             onClick={() => setWho(t.id)}
-            className={cn("flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-xs font-semibold", who === t.id ? "bg-white text-emerald-900 shadow" : "text-slate-600")}
+            className={cn(
+              "flex min-h-[5.5rem] flex-col items-center justify-center gap-1 rounded-xl border-2 px-1.5 py-2 text-center transition-colors",
+              who === t.id ? "border-emerald-600 bg-emerald-50 text-emerald-900" : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+            )}
           >
-            <t.icon className="h-4 w-4" aria-hidden /> {t.label}
+            <t.icon className="h-6 w-6" aria-hidden />
+            <span className="text-sm font-bold leading-tight">{t.label}</span>
+            <span className="text-[11px] font-medium leading-tight opacity-80">{t.hint}</span>
           </button>
         ))}
       </div>
