@@ -3,7 +3,8 @@
 All notable changes. Dates are 2026.
 
 ## [Unreleased]
-- Docs: demo video and live-site screenshots; mentor session prep.
+- Docs: demo video (2:30, voice-over, spoken question and answer, role sign-in scenes) and live-site screenshots; mentor session prep; pitch deck outline and video storyboard.
+- Sign-in page: large role cards (Farmer / Installer / Irrigation Dept); `?as=installer|authority`; home page links for installers and the department.
 - Weather: OpenWeatherMap as a backup provider (`OPENWEATHER_API_KEY`) with estimated ET₀ and sunlight, clearly labelled.
 - Bucket test accepts the solar controller's kW reading (more accurate than the sunlight estimate).
 - Weather: failure reason shown in `/api/health?full=1`; one retry; `npm run weather:prime` stores real weather from a laptop.

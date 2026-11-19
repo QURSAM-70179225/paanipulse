@@ -21,6 +21,7 @@ voice or for you reading it. Numbers are read off the live screen at recording t
 
 ## Notes
 
+- **The published video (`docs/demo/paanipulse-demo.mp4`, 2:30) has an English voice-over** made with the free offline Kokoro voice and mixed in editing; the farmer's spoken question is played through a fake microphone into the real app, and the assistant's real reply is read aloud with a second voice. Nothing was saved to the live data (chat cleared afterwards).
 - **Voice-over is added in editing.** In the app itself, spoken answers use Azure's Urdu neural voice when it is configured,
   otherwise a recorded file or the phone's own voice. Say "voice-over added" in the video description.
 - **Don't record writes to the live data:** no simulator, no saved bucket-test calibration, and don't press

@@ -193,9 +193,11 @@ One real farmer interview (pump size, run-hours, "about double the water since s
 
 [![Watch the demo video](docs/demo/poster.png)](docs/demo/paanipulse-demo.mp4)
 
-▶ **[Watch the demo (2 min 11 s, MP4)](docs/demo/paanipulse-demo.mp4)**: recorded on the live site with captions.
-Karamat's Urdu advice → this week's waste and chart → pump output → live weather → pump-off alarm → assistant →
-Irrigation Department map → lender report. *The regional wells in the video are simulated demo data.*
+▶ **[Watch the demo (2 min 30 s, MP4, with voice-over)](docs/demo/paanipulse-demo.mp4)**: recorded on the live site, with captions.
+Karamat's Urdu advice → this week's waste → pump output → live weather → pump-off alarm → **the farmer asks by voice and
+the assistant answers aloud** → one sign-in page for farmers, installers and the Irrigation Department → heatmap →
+lender report. *The regional wells in the video are simulated demo data. The narration and the spoken answer were added in
+editing with a free offline voice; in the app itself, spoken answers need the optional Azure Urdu voice or a recorded file.*
 
 ## Pitch slides
 
