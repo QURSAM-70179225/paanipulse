@@ -355,6 +355,7 @@ docs/ guides + screenshots  tests/ Vitest suites                    .github/ sch
 | 📘 [PRODUCT_ESSENTIALS.md](PRODUCT_ESSENTIALS.md) | Problem, users, who pays, built vs simulated, validation status, roadmap, risks, sources |
 | 🏗️ [ARCHITECTURE.md](ARCHITECTURE.md) | System diagram, data model, engine, request flows, security, API list, limitations |
 | 🚀 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Environment variables, Render + Neon, scheduled jobs, troubleshooting |
+| 📊 [docs/PITCH_DECK.md](docs/PITCH_DECK.md) · 🎬 [docs/VIDEO_SCRIPT.md](docs/VIDEO_SCRIPT.md) | Slide-by-slide outline for the 3- and 5-minute pitch; video storyboard and narration |
 | 🎤 [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) · 🧑‍🏫 [docs/MENTOR_PREP.md](docs/MENTOR_PREP.md) | The 3-minute demo; pitches, questions and a readiness checklist for mentor sessions |
 | 🧪 [docs/BUCKET_TEST.md](docs/BUCKET_TEST.md) | How to calibrate and field-check the meter with a drum and a phone (English and Urdu) |
 | 🖨️ [docs/qr/](docs/qr) | Printable A5 card with the QR code to the live site |
