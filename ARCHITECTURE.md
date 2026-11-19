@@ -277,7 +277,7 @@ shared). The alarm cannot run while the phone is locked or the browser is closed
 | `POST /api/farms` | Create a farm (farmer or installer) |
 | `GET /api/farms/[id]` | Farm and pump (no phone number) |
 | `GET /api/farms/[id]/advice?date=` | Run the engine; store `DailyRecord` and `Advisory`; return the full view model |
-| `POST /api/farms/[id]/calibrate` | Bucket test, or `{reset:true}` |
+| `POST /api/farms/[id]/calibrate` | Bucket test (drum litres, seconds, hour, optional controller kW), or `{reset:true}` |
 | `POST/GET /api/farms/[id]/field-check` | Record and list meter field checks |
 | `POST /api/farms/[id]/hours` | Pump hours for a day (0 = today … 7); `add:true` adds to the stored hours (used by the pump timer) |
 | `POST /api/account/sms` | Farmer turns daily advice / over-run texts on or off |

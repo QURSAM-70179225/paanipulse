@@ -15,7 +15,8 @@
     "demo:reset": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma migrate deploy && tsx scripts/seed-if-empty.ts && next build",
-    "render-build": "prisma generate && prisma migrate deploy && tsx scripts/seed-if-empty.ts && next build"
+    "render-build": "prisma generate && prisma migrate deploy && tsx scripts/seed-if-empty.ts && next build",
+    "weather:prime": "tsx scripts/prime-weather.ts"
   },
   "dependencies": {
     "@fontsource/noto-nastaliq-urdu": "^5.3.0",

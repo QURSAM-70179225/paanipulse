@@ -15,6 +15,8 @@ const Body = z.union([
     seconds: z.number().min(1).max(3600),
     /** Local hour of the test (6–18). Pump power at that hour is taken from the sunlight model or telemetry. */
     hour: z.number().int().min(6).max(18),
+    /** Power shown on the solar controller's display during the test (kW). More accurate than the sunlight estimate. */
+    inverterKw: z.number().min(0.3).max(200).nullish(),
   }),
   z.object({ reset: z.literal(true) }),
 ]);
@@ -36,13 +38,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ before, after: { efficiency: p.efficiency, calibrated: p.calibrated } });
     }
 
-    const { volumeL, seconds, hour } = parsed.data;
+    const { volumeL, seconds, hour, inverterKw } = parsed.data;
     // Prefer telemetry power near that hour today; otherwise the sunlight model.
     let powerKw = 0;
     if (pump.hasTelemetry) {
       const last = await prisma.telemetryReading.findFirst({ where: { pumpId: pump.id }, orderBy: { timestamp: "desc" } });
       powerKw = last?.powerKw ?? 0;
     }
+    if (inverterKw) powerKw = inverterKw; // the controller's own reading beats any estimate
     if (powerKw <= 0) powerKw = (await pumpKwAtHour(farm.lat, farm.lng, pump, hour)).pumpKw;
     if (powerKw <= 0) {
       return NextResponse.json({ error: "The pump would not be running at that hour (not enough sun). Do the test around midday." }, { status: 422 });
@@ -51,6 +54,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const p = await prisma.pump.update({ where: { id: pump.id }, data: { efficiency, calibrated: true } });
     return NextResponse.json({
       powerKw,
+      powerSource: inverterKw ? "inverter" : pump.hasTelemetry ? "telemetry" : "sunlight",
       measuredLitresPerHour: Math.round((volumeL / seconds) * 3600),
       before,
       after: { efficiency: p.efficiency, calibrated: p.calibrated },

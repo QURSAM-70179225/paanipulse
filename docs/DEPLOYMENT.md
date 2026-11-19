@@ -90,6 +90,7 @@ The demo farmer cannot enable it (its phone number is fake). Without Twilio the 
 | Redirect to `localhost` | Fixed in code; hard-refresh (Ctrl+Shift+R) after redeploying |
 | `Tables: missing` in health | Build command is not `npm run render-build`; fix it and redeploy |
 | `Demo accounts missing` | The database was not empty at first deploy so the seed was skipped; run `npm run seed` against it once |
+| Weather says "Sample" on the live site | Open `/api/health?full=1` and read `weather.lastError` (usually `HTTP 429`: Open-Meteo throttles shared cloud addresses). Fixes: (1) add `OPEN_METEO_API_KEY` if you have an Open-Meteo plan; (2) from a laptop on normal internet run `DATABASE_URL="<production string>" npm run weather:prime`: the site then shows real **Saved weather**; re-run it each morning of an event |
 | Weather badge says "Sample" | Open-Meteo unreachable or rate-limited from the server; check health. Not caused by a missing key |
 | Chat answers look generic | `GROQ_API_KEY` missing or rate-limited (free tier ≈ 8k tokens per minute): ask slowly |
 | Alarm does not sound | Browsers allow sound only after a tap: press **Start pump timer** (or **Turn on alarm sound**) once, keep the screen on and the volume up |

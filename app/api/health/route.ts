@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getWeather } from "@/lib/services/weather";
+import { getWeather, lastWeatherFailure } from "@/lib/services/weather";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
   let weather: { source: string; days: number; fetchedAt: string } | { error: string };
   try {
     const w = await getWeather(31.8, 74.26);
-    weather = { source: w.source, days: w.days.length, fetchedAt: w.fetchedAt };
+    weather = { source: w.source, days: w.days.length, fetchedAt: w.fetchedAt, ...(w.source !== "live" && lastWeatherFailure() ? { lastError: lastWeatherFailure() } : {}) } as typeof weather;
   } catch (e) {
     weather = { error: (e as Error).message.slice(0, 120) };
   }
@@ -58,6 +58,6 @@ export async function GET(req: Request) {
     tables !== "ok" && `Tables: ${tables}`,
     database === "ok" && tables === "ok" && demoAccounts < 3 && "Demo accounts missing — the seed did not run (database was not empty?)",
   ].filter(Boolean);
-  const notes = "source" in weather && weather.source !== "live" ? [`Weather is "${weather.source}", not live: Open-Meteo did not answer from this server (network or rate limit). The app still works.`] : [];
+  const notes = "source" in weather && weather.source !== "live" ? [`Weather is "${weather.source}", not live: Open-Meteo did not answer from this server (see weather.lastError for the reason). The app still works. Fix: add OPEN_METEO_API_KEY if you have an Open-Meteo plan, or run "npm run weather:prime" from a laptop that is connected to the production database.`] : [];
   return NextResponse.json({ ...base, ok: problems.length === 0, env, database, tables, demoAccounts, farms, weather, problems, notes }, { status: problems.length ? 503 : 200 });
 }

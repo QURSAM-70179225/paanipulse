@@ -122,7 +122,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           labels={{
             title: T("bucketTitle"), intro: T("bucketIntro"), volume: T("bucketVolume"), seconds: T("bucketSeconds"), hour: T("bucketHour"),
             submit: T("bucketSubmit"), result: T("bucketResult"), reset: T("bucketReset"), error: T("bucketError"),
-            efficiencyNow: T("efficiencyNow"), calibrated: T("calibrated"), defaultEstimate: T("defaultEstimate"),
+            efficiencyNow: T("efficiencyNow"), inverter: T("fcInverter"), calibrated: T("calibrated"), defaultEstimate: T("defaultEstimate"),
           }}
         />
         <FieldCheck farmId={s.farm.id} d={dictFor(lang)} initial={{ ...fc, checks: fc.checks.map((c) => ({ ...c, takenAt: c.takenAt.toISOString() })) }} />

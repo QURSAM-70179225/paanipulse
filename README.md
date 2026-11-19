@@ -355,6 +355,8 @@ docs/ guides + screenshots  tests/ Vitest suites                    .github/ sch
 | 🏗️ [ARCHITECTURE.md](ARCHITECTURE.md) | System diagram, data model, engine, request flows, security, API list, limitations |
 | 🚀 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Environment variables, Render + Neon, scheduled jobs, troubleshooting |
 | 🎤 [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | The 3-minute demo and answers to likely questions |
+| 🧪 [docs/BUCKET_TEST.md](docs/BUCKET_TEST.md) | How to calibrate and field-check the meter with a drum and a phone (English and Urdu) |
+| 🖨️ [docs/qr/](docs/qr) | Printable A5 card with the QR code to the live site |
 | 🤝 [CONTRIBUTING.md](CONTRIBUTING.md) · 🔒 [SECURITY.md](SECURITY.md) · 📝 [CHANGELOG.md](CHANGELOG.md) | Working on it, reporting problems, history |
 
 ## Team

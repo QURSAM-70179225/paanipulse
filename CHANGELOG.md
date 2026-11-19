@@ -3,6 +3,9 @@
 All notable changes. Dates are 2026.
 
 ## [Unreleased]
+- Bucket test accepts the solar controller's kW reading (more accurate than the sunlight estimate).
+- Weather: failure reason shown in `/api/health?full=1`; one retry; `npm run weather:prime` stores real weather from a laptop.
+- Docs: bucket-test field guide; printable QR card.
 - Offline mode: last advice saved on the phone and shown by the offline page; pump-hour reports queue offline.
 - Pump timer with loud alarm and full-screen "switch the pump off"; over-run warning on the live meter.
 - Opt-in daily advice and pump over-run alerts by SMS / WhatsApp; hours API accepts today with `add`.

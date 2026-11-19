@@ -18,6 +18,7 @@ export interface BucketLabels {
   reset: string;
   error: string;
   efficiencyNow: string;
+  inverter: string;
   calibrated: string;
   defaultEstimate: string;
 }
@@ -29,6 +30,7 @@ export function BucketTest({ farmId, efficiency, calibrated, labels }: { farmId:
   const [volume, setVolume] = useState(200);
   const [seconds, setSeconds] = useState(21); // ≈ default efficiency at noon, so the demo narrows the range without shifting the headline numbers
   const [hour, setHour] = useState(12);
+  const [inverterKw, setInverterKw] = useState("");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [, start] = useTransition();
@@ -71,10 +73,10 @@ export function BucketTest({ farmId, efficiency, calibrated, labels }: { farmId:
       </CardHeader>
       <CardContent>
         <form
-          className="grid grid-cols-3 gap-2"
+          className="grid grid-cols-2 gap-2"
           onSubmit={(e) => {
             e.preventDefault();
-            post({ volumeL: volume, seconds, hour });
+            post({ volumeL: volume, seconds, hour, inverterKw: inverterKw ? Number(inverterKw) : null });
           }}
         >
           <label className="flex flex-col gap-1 text-xs font-medium text-slate-700">
@@ -89,7 +91,11 @@ export function BucketTest({ farmId, efficiency, calibrated, labels }: { farmId:
             {labels.hour}
             <input className={input} type="number" inputMode="numeric" min={6} max={18} value={hour} onChange={(e) => setHour(Number(e.target.value))} required />
           </label>
-          <Button type="submit" disabled={busy} className="col-span-3 mt-1 h-12 bg-violet-700 hover:bg-violet-800">
+          <label className="flex flex-col gap-1 text-xs font-medium text-slate-700">
+            {labels.inverter}
+            <input className={input} type="number" inputMode="decimal" min={0.3} step="0.1" value={inverterKw} onChange={(e) => setInverterKw(e.target.value)} />
+          </label>
+          <Button type="submit" disabled={busy} className="col-span-2 mt-1 h-12 bg-violet-700 hover:bg-violet-800">
             <FlaskConical className="h-4 w-4" aria-hidden /> {labels.submit}
           </Button>
         </form>

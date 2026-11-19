@@ -48,7 +48,29 @@ const PAST_DAYS = 31;
 const FORECAST_DAYS = 7;
 /** How long a live answer is reused before asking Open-Meteo again (its "current" block updates every ~15 min). */
 const ttlMs = () => (Number(process.env.WEATHER_CACHE_MINUTES) > 0 ? Number(process.env.WEATHER_CACHE_MINUTES) : 30) * 60_000;
-const TIMEOUT_MS = 6000;
+const TIMEOUT_MS = 12_000;
+
+/** Why the last live attempt failed (shown by /api/health?full=1 so a "sample" badge can be diagnosed). */
+let lastFailure: { at: string; message: string } | null = null;
+export const lastWeatherFailure = () => lastFailure;
+
+/** One request, plus one retry on a network error, timeout, 429 or 5xx (shared cloud IPs are sometimes throttled). */
+async function fetchWithRetry(url: string): Promise<Response> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store" });
+      if (res.ok || (res.status !== 429 && res.status < 500)) return res;
+      lastErr = new Error(`HTTP ${res.status}`);
+      lastFailure = { at: new Date().toISOString(), message: `HTTP ${res.status}: ${(await res.text().catch(() => "")).slice(0, 140)}` };
+    } catch (err) {
+      lastErr = err;
+      lastFailure = { at: new Date().toISOString(), message: `${(err as Error).name}: ${(err as Error).message}`.slice(0, 160) };
+    }
+    if (attempt === 0) await new Promise((r) => setTimeout(r, 1500));
+  }
+  throw lastErr;
+}
 
 const OpenMeteoSchema = z.object({
   daily: z.object({
@@ -204,13 +226,16 @@ export async function getWeather(lat: number, lng: number, opts: { now?: Date } 
   if (hit && Date.now() - hit.at < ttlMs()) return hit.result;
 
   try {
-    let res = await fetch(buildUrl(lat, lng), { signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store" });
+    let res = await fetchWithRetry(buildUrl(lat, lng));
     if ((res.status === 401 || res.status === 403 || res.status === 400) && process.env.OPEN_METEO_API_KEY) {
       // The configured key was rejected (wrong provider or expired): keep working on the free service.
       console.warn(`OPEN_METEO_API_KEY rejected (HTTP ${res.status}); falling back to the free Open-Meteo endpoint.`);
-      res = await fetch(buildUrl(lat, lng, { forceFree: true }), { signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store" });
+      res = await fetchWithRetry(buildUrl(lat, lng, { forceFree: true }));
     }
-    if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
+    if (!res.ok) {
+      lastFailure = { at: new Date().toISOString(), message: `HTTP ${res.status}: ${(await res.text().catch(() => "")).slice(0, 140)}` };
+      throw new Error(`Open-Meteo HTTP ${res.status}`);
+    }
     const json = await res.json();
     const days = parseOpenMeteo(json);
     if (days.length < FORECAST_DAYS) throw new Error("Open-Meteo returned too few days");
