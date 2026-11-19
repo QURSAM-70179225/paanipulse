@@ -1,6 +1,6 @@
 /** Virtual water meter: pump hydraulics, PV power and flow integration (pure). */
 import { DEFAULTS } from "./config";
-import { clamp, ftToM, G, J_PER_KWH, RHO_WATER } from "./units";
+import { clamp, CUSEC_M3_PER_H, ftToM, G, J_PER_KWH, KANAL_M2, M2_PER_ACRE, RHO_WATER } from "./units";
 
 export interface PumpSpec {
   ratedKw: number;
@@ -149,4 +149,24 @@ export function flowRangeM3h(pump: PumpSpec, powerKw: number) {
   const band = pump.calibrated ? DEFAULTS.efficiencyBandCalibrated : DEFAULTS.efficiencyBandUncalibrated;
   const q = (e: number) => flowM3sFromPower(powerKw * 1000, clamp(e, 0.1, 0.8), H) * 3600;
   return { low: q(eta - band), mid: q(eta), high: q(eta + band) };
+}
+
+/**
+ * Translate a pump flow (m³/h) into farmer language: litres per minute, cusec, and how much land one hour of
+ * pumping waters when each irrigation delivers `depthMm` of water at the field.
+ * Area = volume / depth. (Efficiency is already inside the depth: it is the depth delivered at the outlet.)
+ */
+export function pumpOutput(flowM3h: number, depthMm: number = DEFAULTS.typicalIrrigationMm) {
+  if (flowM3h <= 0 || depthMm <= 0) return { litresPerMin: 0, m3PerHour: 0, cusec: 0, m2PerHour: 0, acresPerHour: 0, kanalPerHour: 0, hoursPerAcre: null as number | null, hoursPerKanal: null as number | null };
+  const m2PerHour = flowM3h / (depthMm / 1000);
+  return {
+    litresPerMin: (flowM3h * 1000) / 60,
+    m3PerHour: flowM3h,
+    cusec: flowM3h / CUSEC_M3_PER_H,
+    m2PerHour,
+    acresPerHour: m2PerHour / M2_PER_ACRE,
+    kanalPerHour: m2PerHour / KANAL_M2,
+    hoursPerAcre: M2_PER_ACRE / m2PerHour,
+    hoursPerKanal: KANAL_M2 / m2PerHour,
+  };
 }

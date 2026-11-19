@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft, BatteryCharging, CalendarClock, CloudRain, Droplets, Flame, Gauge, History, Leaf, MessageCircle,
+  Cloud, CloudFog, CloudLightning, CloudSun, Ruler, Snowflake, Wind, Waves,
   PowerOff, Radio, Sprout, Sun, Thermometer, Wheat, Zap, Coins, Info, CircleAlert,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -25,6 +26,7 @@ import { dictFor } from "@/lib/i18n/dict";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { VoicePlayer } from "@/components/VoicePlayer";
 import { cn } from "@/lib/utils";
+import { conditionFor, type Condition } from "@/lib/weatherCode";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +67,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
         {s.yesterday && s.yesterday.actualHours > 0 && <YesterdayCard s={s} T={T} L={L} />}
         <HeroCard s={s} T={T} ur={ur} />
         <TodayStats s={s} T={T} L={L} />
+        <PumpOutputCard s={s} T={T} ur={ur} />
         <LiveMeter
           farmId={s.farm.id}
           initialHasTelemetry={s.pump.hasTelemetry}
@@ -100,7 +103,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           }}
         />
         <FieldCheck farmId={s.farm.id} d={dictFor(lang)} initial={{ ...fc, checks: fc.checks.map((c) => ({ ...c, takenAt: c.takenAt.toISOString() })) }} />
-        <WeatherStrip s={s} T={T} locale={locale} />
+        <WeatherCard s={s} T={T} locale={locale} />
         <Link href={`/farmer/${s.farm.id}/chat`} className={cn(buttonVariants({ size: "lg" }), "w-full bg-[#128C7E] hover:bg-[#0e7266]")}>
           <MessageCircle className="h-5 w-5" aria-hidden /> {T("askAssistant")}
         </Link>
@@ -291,15 +294,50 @@ function SpareSunCard({ s, T, ur }: { s: FarmState; T: TFn; ur: boolean }) {
   );
 }
 
-function WeatherStrip({ s, T, locale }: { s: FarmState; T: TFn; locale: string }) {
+const COND_ICON: Record<Condition, React.ElementType> = { clear: Sun, partly: CloudSun, cloudy: Cloud, fog: CloudFog, drizzle: CloudRain, rain: CloudRain, storm: CloudLightning, snow: Snowflake };
+
+function WeatherCard({ s, T, locale }: { s: FarmState; T: TFn; locale: string }) {
   const wd = (d: string) => new Date(`${d}T12:00:00+05:00`).toLocaleDateString(locale, { weekday: "short", timeZone: "Asia/Karachi" });
+  const now = s.weatherNow;
+  const today = s.forecast[0];
+  const cond = conditionFor(now?.code);
+  const CondIcon = cond ? COND_ICON[cond] : Thermometer;
+  const when = now?.time ? now.time.slice(11, 16) : null;
+  const mini = (Icon: React.ElementType, label: string, value: string) => (
+    <div className="rounded-xl bg-slate-50 p-2 text-center">
+      <Icon className="mx-auto h-4 w-4 text-sky-700" aria-hidden />
+      <p className="mt-0.5 text-[11px] leading-tight text-slate-600">{label}</p>
+      <p className="num text-sm font-bold text-slate-900"><bdi dir="ltr">{value}</bdi></p>
+    </div>
+  );
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Thermometer className="h-5 w-5 text-sky-700" aria-hidden /> {T("weather7")}</CardTitle>
+        <CardTitle className="flex items-center gap-2"><Thermometer className="h-5 w-5 text-sky-700" aria-hidden /> {T("wxNowTitle")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="grid grid-cols-7 gap-1 text-center text-xs">
+        {now ? (
+          <div className="flex items-center gap-3">
+            <CondIcon className="h-12 w-12 shrink-0 text-amber-500" aria-hidden />
+            <div>
+              <p className="num text-4xl font-bold text-slate-900"><bdi dir="ltr">{Math.round(now.tempC)}°C</bdi></p>
+              <p className="text-sm text-slate-700">
+                {cond ? T(`wx${cond}` as DictKey) : ""}{now.feelsLikeC !== null ? ` · ${T("wxFeels", { t: Math.round(now.feelsLikeC) })}` : ""}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{T("wxOffline")}</p>
+        )}
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {mini(Thermometer, T("wxHighLow"), today ? `${today.tMax !== null ? Math.round(today.tMax) : "–"}° / ${today.tMin !== null ? Math.round(today.tMin) : "–"}°` : "–")}
+          {mini(CloudRain, T("wxRainToday"), `${(today?.precipMm ?? 0).toFixed(1)} ${T("mm")}`)}
+          {now?.humidityPct != null && mini(Droplets, T("wxHumidity"), `${Math.round(now.humidityPct)}%`)}
+          {now?.windKmh != null && mini(Wind, T("wxWind"), `${Math.round(now.windKmh)} ${T("kmh")}`)}
+        </div>
+        {when && <p className="mt-2 text-xs text-slate-500">{T("wxUpdated", { t: when })} · {s.weatherSource === "live" ? T("liveWeather") : s.weatherSource === "cached-live" ? T("savedWeather") : T("sampleWeather")}</p>}
+
+        <ul className="mt-4 grid grid-cols-7 gap-1 text-center text-xs">
           {s.forecast.map((d, i) => (
             <li key={d.date} className={cn("rounded-lg py-2", i === 0 ? "bg-sky-100" : "bg-slate-50")}>
               <p className="font-semibold leading-tight text-slate-800">{i === 0 ? T("todayShort") : i === 1 ? T("tomorrowShort") : wd(d.date)}</p>
@@ -311,6 +349,27 @@ function WeatherStrip({ s, T, locale }: { s: FarmState; T: TFn; locale: string }
           ))}
         </ul>
         <p className="mt-1 text-end text-xs text-slate-500">{T("mm")}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PumpOutputCard({ s, T, ur }: { s: FarmState; T: TFn; ur: boolean }) {
+  const o = s.today.output;
+  if (o.mid.litresPerMin <= 0) return null;
+  const r10 = (x: number) => Math.round(x / 10) * 10;
+  const inch = (o.depthMm / 25.4).toFixed(0);
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2"><Waves className="h-5 w-5 text-sky-700" aria-hidden /> {T("outTitle")}</CardTitle>
+      </CardHeader>
+      <CardContent className="grid grid-cols-2 gap-3">
+        <Stat icon={Droplets} label={T("outPerMin")} value={`${n0(r10(o.low.litresPerMin))}${ur ? " سے " : "–"}${n0(r10(o.high.litresPerMin))} ${T("litres")}`} sub={`≈ ${n0(r10(o.mid.litresPerMin))} ${T("litres")}${ur ? " فی منٹ" : "/min"}`} tone="text-sky-800" />
+        <Stat icon={Gauge} label={T("outPerHour")} value={`${n0(o.mid.m3PerHour)} m³`} sub={`≈ ${o.mid.cusec.toFixed(2)} ${T("cusec")}`} />
+        <Stat icon={Ruler} label={T("outArea")} value={`${o.mid.kanalPerHour.toFixed(1)} ${T("kanal")}`} sub={`≈ ${o.mid.acresPerHour.toFixed(2)} ${T("acre")}`} tone="text-emerald-800" />
+        <Stat icon={CalendarClock} label={T("outHoursPerAcre")} value={o.mid.hoursPerAcre ? `${o.mid.hoursPerAcre.toFixed(1)} ${T("hours")}` : "–"} sub={`${s.farm.areaAcres} ${T("acres")}: ${o.mid.hoursPerAcre ? n0(o.mid.hoursPerAcre * s.farm.areaAcres) : "–"} ${T("hours")}`} />
+        <p className="col-span-2 text-xs text-slate-500">{T("outNote", { mm: o.depthMm, inch })}</p>
       </CardContent>
     </Card>
   );

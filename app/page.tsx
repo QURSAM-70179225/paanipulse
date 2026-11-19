@@ -39,7 +39,7 @@ export default async function Home() {
             </p>
             <LanguageToggle lang={lang} />
           </div>
-          <h1 className={cn("font-bold leading-tight", ur ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl")}>
+          <h1 className={cn("font-bold leading-tight", ur ? "text-2xl sm:text-4xl" : "text-4xl sm:text-5xl")}>
             {T("heroTitle1")}
             <br />
             {T("heroTitle2")}

@@ -12,7 +12,20 @@ import { sampleWeather } from "./sampleWeather";
 
 export type WeatherSource = "live" | "cached-live" | "sample";
 
+/** Conditions right now (Open-Meteo "current"). Null when only the offline sample is available. */
+export interface CurrentWeather {
+  tempC: number;
+  feelsLikeC: number | null;
+  humidityPct: number | null;
+  windKmh: number | null;
+  /** WMO weather code (0 clear … 3 overcast, 45 fog, 61+ rain, 95+ thunderstorm). */
+  code: number | null;
+  /** Local time of the observation, "YYYY-MM-DDTHH:mm" (Asia/Karachi). */
+  time: string | null;
+}
+
 export interface WeatherResult {
+  current?: CurrentWeather | null;
   days: WeatherDay[];
   source: WeatherSource;
   fetchedAt: string;
@@ -34,6 +47,16 @@ const OpenMeteoSchema = z.object({
     temperature_2m_min: z.array(z.number().nullable()),
     shortwave_radiation_sum: z.array(z.number().nullable()),
   }),
+  current: z
+    .object({
+      time: z.string().optional(),
+      temperature_2m: z.number().nullable().optional(),
+      apparent_temperature: z.number().nullable().optional(),
+      relative_humidity_2m: z.number().nullable().optional(),
+      wind_speed_10m: z.number().nullable().optional(),
+      weather_code: z.number().nullable().optional(),
+    })
+    .optional(),
   hourly: z
     .object({
       time: z.array(z.string()),
@@ -53,6 +76,7 @@ export function buildUrl(lat: number, lng: number): string {
     longitude: lng.toFixed(4),
     daily: "et0_fao_evapotranspiration,precipitation_sum,temperature_2m_max,temperature_2m_min,shortwave_radiation_sum",
     hourly: "shortwave_radiation",
+    current: "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code",
     past_days: String(PAST_DAYS),
     forecast_days: String(FORECAST_DAYS),
     timezone: "Asia/Karachi",
@@ -65,6 +89,21 @@ export function buildUrl(lat: number, lng: number): string {
     return `https://customer-api.open-meteo.com/v1/forecast?${p}`;
   }
   return `https://api.open-meteo.com/v1/forecast?${p}`;
+}
+
+/** Pull the "right now" block out of an Open-Meteo response. Exported for tests. */
+export function parseCurrent(json: unknown): CurrentWeather | null {
+  const parsed = OpenMeteoSchema.safeParse(json);
+  const c = parsed.success ? parsed.data.current : undefined;
+  if (!c || typeof c.temperature_2m !== "number") return null;
+  return {
+    tempC: c.temperature_2m,
+    feelsLikeC: c.apparent_temperature ?? null,
+    humidityPct: c.relative_humidity_2m ?? null,
+    windKmh: c.wind_speed_10m ?? null,
+    code: c.weather_code ?? null,
+    time: c.time ?? null,
+  };
 }
 
 /** Convert an Open-Meteo response to engine WeatherDays. Exported for tests. */
@@ -124,9 +163,10 @@ export async function getWeather(lat: number, lng: number, opts: { now?: Date } 
   try {
     const res = await fetch(buildUrl(lat, lng), { signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store" });
     if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
-    const days = parseOpenMeteo(await res.json());
+    const json = await res.json();
+    const days = parseOpenMeteo(json);
     if (days.length < FORECAST_DAYS) throw new Error("Open-Meteo returned too few days");
-    const result: WeatherResult = { days, source: "live", fetchedAt: new Date().toISOString(), lat, lng };
+    const result: WeatherResult = { current: parseCurrent(json), days, source: "live", fetchedAt: new Date().toISOString(), lat, lng };
     memory.set(key, { at: Date.now(), result });
     await writeSavedCache(key, result);
     return result;
@@ -141,7 +181,7 @@ export async function getWeather(lat: number, lng: number, opts: { now?: Date } 
       return result;
     }
     if (!demoMode()) throw err;
-    const result: WeatherResult = { days: sampleWeather(opts.now), source: "sample", fetchedAt: new Date().toISOString(), lat, lng };
+    const result: WeatherResult = { current: null, days: sampleWeather(opts.now), source: "sample", fetchedAt: new Date().toISOString(), lat, lng };
     // Retry live sooner than the normal TTL when we are on sample data.
     memory.set(key, { at: Date.now() - TTL_MS + 5 * 60 * 1000, result });
     return result;

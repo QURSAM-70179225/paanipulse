@@ -62,6 +62,11 @@ export const DEFAULTS = {
   /** Advice limits. */
   maxPumpHoursPerDay: 12,
   hoursStep: 0.5,
+  /**
+   * Typical depth of ONE flood irrigation of wheat/maize/cotton delivered at the field (mm).
+   * 75 mm = 3 acre-inches, common Punjab practice. Used only to translate pump flow into "area watered per hour".
+   */
+  typicalIrrigationMm: 75,
   /** Value of surplus solar (Rs/kWh) — e-rickshaw battery charging. */
   surplusRsPerKwh: 20,
   /** Nitrate-N concentration in deep percolation (mg/L) for the leaching estimate. Conservative. */

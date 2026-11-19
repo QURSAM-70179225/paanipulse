@@ -260,3 +260,20 @@ describe("critical growth stage (wheat CRI)", () => {
     expect(res.today.advice.reason).toBe("critical-stage");
   });
 });
+
+import { pumpOutput } from "@/lib/engine";
+describe("pump output in farmer units", () => {
+  it("1 cusec (101.94 m³/h) = 1,699 L/min and waters about 0.34 acre per hour (3-inch irrigation)", () => {
+    const o = pumpOutput(101.94, 75);
+    expect(o.cusec).toBeCloseTo(1, 6);
+    expect(o.litresPerMin).toBeCloseTo(1699, 0);
+    expect(o.acresPerHour).toBeCloseTo(0.336, 2); // classic rule: 1 cusec ≈ 3 hours per acre for a 3-inch watering
+    expect(o.hoursPerAcre).toBeCloseTo(2.98, 1);
+  });
+  it("kanal and acre agree (1 acre = 8 kanal) and zero flow is safe", () => {
+    const o = pumpOutput(34, 75);
+    expect(o.kanalPerHour).toBeCloseTo(o.acresPerHour * 8, 3);
+    expect(o.litresPerMin).toBeCloseTo(566.7, 1);
+    expect(pumpOutput(0).hoursPerAcre).toBeNull();
+  });
+});

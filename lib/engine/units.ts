@@ -19,3 +19,8 @@ export const mjToKwh = (mj: number) => mj / MJ_PER_KWH;
 
 export const roundTo = (x: number, step: number) => Math.round(x / step) * step;
 export const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
+
+/** Pakistani land units: 1 kanal = 20 marla = 505.857 m² (so 1 acre = 8 kanal). */
+export const KANAL_M2 = 505.857;
+/** Irrigation flow unit used by Punjab farmers: 1 cusec = 1 ft³/s = 101.94 m³/h. */
+export const CUSEC_M3_PER_H = 101.94;

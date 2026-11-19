@@ -106,3 +106,18 @@ describe("Open-Meteo URL", () => {
     delete process.env.OPEN_METEO_API_KEY;
   });
 });
+
+import { parseCurrent } from "@/lib/services/weather";
+describe("current weather", () => {
+  it("reads temperature, feels-like, humidity, wind and weather code", () => {
+    const c = parseCurrent({
+      daily: { time: [], et0_fao_evapotranspiration: [], precipitation_sum: [], temperature_2m_max: [], temperature_2m_min: [], shortwave_radiation_sum: [] },
+      current: { time: "2026-11-19T11:15", temperature_2m: 22.4, apparent_temperature: 21.1, relative_humidity_2m: 48, wind_speed_10m: 9.3, weather_code: 3 },
+    });
+    expect(c).toEqual({ tempC: 22.4, feelsLikeC: 21.1, humidityPct: 48, windKmh: 9.3, code: 3, time: "2026-11-19T11:15" });
+  });
+  it("returns null when the response has no current block", () => {
+    expect(parseCurrent({ daily: { time: [], et0_fao_evapotranspiration: [], precipitation_sum: [], temperature_2m_max: [], temperature_2m_min: [], shortwave_radiation_sum: [] } })).toBeNull();
+    expect(parseCurrent("garbage")).toBeNull();
+  });
+});

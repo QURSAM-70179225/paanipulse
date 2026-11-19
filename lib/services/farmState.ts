@@ -2,7 +2,7 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import { pktDateKey, pktDayStart } from "@/lib/dates";
-import { CRITICAL_STAGES, DEFAULTS, flowRangeM3h, summarise, surplusIdeas, type CropType } from "@/lib/engine";
+import { CRITICAL_STAGES, DEFAULTS, flowRangeM3h, pumpOutput, summarise, surplusIdeas, type CropType } from "@/lib/engine";
 import { advisoryText } from "./advisoryText";
 import { runFarm } from "./farmSim";
 import { getWeather } from "./weather";
@@ -75,11 +75,14 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
     criticalStage: criticalStage ?? null,
     dataSource: pump.hasTelemetry ? ("telemetry" as const) : ("sunlight" as const),
     weatherSource: weather.source,
+    weatherNow: weather.current ?? null,
     weatherFetchedAt: weather.fetchedAt,
     today: {
       ...sim.today,
       advice,
       flowRange,
+      /** Pump output at midday sun in farmer units (L/min, cusec, area per hour). */
+      output: { low: pumpOutput(flowRange.low), mid: pumpOutput(flowRange.mid), high: pumpOutput(flowRange.high), depthMm: DEFAULTS.typicalIrrigationMm },
       /** Water the crop itself uses today (m³, net — not including irrigation losses). */
       cropUseM3: (sim.today.etc / 1000) * sim.areaM2,
       todaySpareKwh,
