@@ -3,6 +3,7 @@
 All notable changes. Dates are 2026.
 
 ## [Unreleased]
+- DIY Bluetooth soil probe (prototype): ESP32 sketch in `hardware/esp32-soil-probe/`, a "Connect probe" card using Web Bluetooth (Chrome on Android) with an offline queue, and an authenticated `POST /api/farms/{id}/soil`. Tested with a mocked Bluetooth device; firmware not yet tested on hardware. See `docs/SOIL_PROBE_DIY.md`.
 - Optional soil probe (software side, no hardware): `POST /api/soil`, `GET /api/farms/{id}/soil`, a "Soil now" card with a cross-check against the water-balance model, `npm run simulate:soil`, and a `SoilReading` table (migration `20261120072719_soil_readings`). See `docs/SOIL_SENSOR.md`.
 - Docs: business plan (`BUSINESS_PLAN.md`): value-based pricing, revenue wheels, cost model, unit economics, ROI, phases, KPIs, assumptions register, Australia comparison.
 - Docs: simple 7-slide pitch deck (cover with name and logo, problem, idea, existing solutions, what is built, features, close; no demo slide) in `docs/slides/`.
