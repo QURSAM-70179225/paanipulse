@@ -4,6 +4,7 @@
  */
 import type { FarmState } from "./farmState";
 import { CROP_NAMES } from "./advisoryText";
+import { GUIDE, GUIDE_TOPICS, GUIDE_VOICE, matchGuideTopic, type GuideTopic } from "./appGuide";
 
 const r0 = (x: number) => Math.round(x);
 const r1 = (x: number) => Math.round(x * 10) / 10;
@@ -42,6 +43,18 @@ export const TOOL_DEFS = [
       parameters: { type: "object", properties: {}, additionalProperties: false },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "getAppGuide",
+      description: "How to use PaaniPulse and what each feature does: today's advice, confidence line, pump timer and alarm, yesterday's hours, weather, last 7 days, fertiliser card, soil probe and Bluetooth, SMS alert, pump control from the phone, adding several farms, bucket test, water chart, farm set-up, assistant, no-internet use. Use for 'how do I use this app', 'what is the probe', 'how do I add another farm', 'app kaise istemal karun'. Pass a topic for one feature, or omit it for the full overview.",
+      parameters: {
+        type: "object",
+        properties: { topic: { type: "string", enum: [...GUIDE_TOPICS], description: "One feature; omit for the whole app." } },
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 export type ToolName = (typeof TOOL_DEFS)[number]["function"]["name"];
@@ -55,7 +68,18 @@ function nextText(days: number | null) {
   return { en: `in about ${days} days`, roman: `taqreeban ${days} din baad`, ur: `تقریباً ${days} دن بعد` };
 }
 
-export function runTool(name: string, s: FarmState): Record<string, unknown> {
+function appGuide(args: Record<string, unknown>): Record<string, unknown> {
+  const topic = typeof args.topic === "string" && (GUIDE_TOPICS as readonly string[]).includes(args.topic) ? (args.topic as GuideTopic) : null;
+  if (topic) return { topic, title: GUIDE[topic].title, howToUse: GUIDE[topic].how };
+  return {
+    overview: GUIDE_VOICE,
+    topics: GUIDE_TOPICS.map((t) => ({ topic: t, title: GUIDE[t].title })),
+    note: "The app only advises; the farmer decides. Probe and pump control need hardware an installer provides. Say a feature is not connected yet if the farmer has none.",
+  };
+}
+
+export function runTool(name: string, s: FarmState, args: Record<string, unknown> = {}): Record<string, unknown> {
+  if (name === "getAppGuide") return appGuide(args);
   const a = s.today.advice;
   switch (name) {
     case "getTodayAdvice": {
@@ -141,10 +165,23 @@ export function detectScript(text: string): Script {
   return "en";
 }
 
-type Intent = "weather" | "advice" | "weekly" | "savings" | "help";
+type Intent = "weather" | "advice" | "weekly" | "savings" | "guide" | "help";
+
+const HOW_WORDS = /(how (do|to|can|does)|what is|what does|explain|kaise|kya hai|kya karta|kis liye|samjha|istemal|use karun|\buse\b|guide|tutorial|طریقہ|کیسے|کیا ہے|استعمال|ہدایت|سمجھا)/i;
+/** Features that only the guide covers, so the bare word is enough ("probe", "bluetooth", "add a farm"). */
+const GUIDE_ONLY: GuideTopic[] = ["start", "probe", "pumpcontrol", "farms", "timer", "bucket", "chart", "confidence", "setup", "offline", "chat"];
+
+/** Which app-guide topic a question is about, or null when it is a data question ("kal barish hogi?"). */
+export function guideTopicFor(text: string): GuideTopic | null {
+  const topic = matchGuideTopic(text);
+  if (!topic) return null;
+  if (GUIDE_ONLY.includes(topic) || HOW_WORDS.test(text)) return topic;
+  return null;
+}
 
 export function detectIntent(text: string): Intent {
   const t = text.toLowerCase();
+  if (guideTopicFor(t)) return "guide";
   if (/(barish|baarish|rain|mausam|weather|بارش|موسم)/.test(t)) return "weather";
   if (/(zaya|waste|hafte|week|ضائع|ہفتے|nuqsan|nuksan|نقصان)/.test(t)) return "weekly";
   if (/(bijli|kamai|kama|earn|money|paisa|rupay|rupees|solar|dhoop|بجلی|کمائی|کماؤں|روپے|دھوپ|khaad|urea|کھاد|یوریا|fertili)/.test(t)) return "savings";
@@ -158,6 +195,10 @@ export function fallbackAnswer(message: string, s: FarmState): string {
   const sc = detectScript(message);
   const pick = (o: { ur: string; roman: string; en: string }) => o[sc];
   const intent = detectIntent(message);
+  if (intent === "guide") {
+    const topic = guideTopicFor(message) ?? "start";
+    return topic === "start" ? pick(GUIDE_VOICE) : pick(GUIDE[topic].how);
+  }
   if (intent === "advice") {
     const d = runTool("getTodayAdvice", s) as { instruction: { ur: string; roman: string; en: string }; nextIrrigation: { ur: string; roman: string; en: string } | null };
     const next = d.nextIrrigation ? pick({ ur: ` اگلا پانی ${d.nextIrrigation.ur}۔`, roman: ` Agla pani ${d.nextIrrigation.roman}.`, en: ` Next irrigation ${d.nextIrrigation.en}.` }) : "";
@@ -196,8 +237,8 @@ export function fallbackAnswer(message: string, s: FarmState): string {
     });
   }
   return pick({
-    ur: "میں پمپ کے گھنٹے، بارش، اس ہفتے کا پانی اور فالتو بجلی کی کمائی کے بارے میں بتا سکتا ہوں۔ مثلاً پوچھیں: کل بارش ہوگی؟",
-    roman: "Main pump ke ghantay, barish, is hafte ka pani aur faltu bijli ki kamai ke baare mein bata sakta hoon. Maslan poochein: kal barish hogi?",
-    en: "I can tell you pump hours, rain, this week's water use and earnings from spare solar. For example, ask: will it rain tomorrow?",
+    ur: "میں پمپ کے گھنٹے، بارش، پانی، فالتو بجلی کی کمائی اور اس ایپ کے ہر حصے کے استعمال کے بارے میں بتا سکتا ہوں۔ مثلاً پوچھیں: کل بارش ہوگی؟ یا: ایپ کیسے استعمال کروں؟",
+    roman: "Main pump ke ghantay, barish, pani, faltu bijli ki kamai aur app ke har hissay ke istemal ke baare mein bata sakta hoon. Maslan poochein: kal barish hogi? ya: app kaise istemal karun?",
+    en: "I can tell you pump hours, rain, water use, earnings from spare solar, and how to use every part of this app. For example, ask: will it rain tomorrow? or: how do I use this app?",
   });
 }
