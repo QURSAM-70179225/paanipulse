@@ -64,8 +64,7 @@ Bluetooth, the lender report, the Irrigation Department map, SMS, spare-energy i
 and on measuring the advice.
 
 **Is it narrow enough or stuck?** The product is narrow in who it serves (solar tube wells, Punjab) but wide in features. The
-risk is not that it is stuck; it is that it is unproven. *(The mentor note "LUMS say it is sorted" is unclear to us: if it means
-the problem and scope are accepted, good, but we should ask what exactly was meant.)*
+risk is not that it is stuck; it is that it is unproven.
 
 ---
 
