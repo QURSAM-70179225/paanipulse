@@ -120,6 +120,8 @@ Farmers use it **free** at first. A farmer premium of about Rs 200–500 a month
 
 ## 7. Business model (hypotheses to test)
 
+> The full business plan (pricing, costs, ROI, phases, KPIs) is in [BUSINESS_PLAN.md](BUSINESS_PLAN.md).
+
 - **Installers:** about Rs 1,000–2,000 per pump per year, bundled into the sale or service.
 - **Lenders / government:** per-well annual fee for verified use and regional data.
 - **Farmers:** free; optional premium later.
