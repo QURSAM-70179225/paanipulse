@@ -2,7 +2,7 @@
  * Template advisory text in Urdu script, Roman Urdu and English.
  * Every number comes from the engine; this is also the fallback when the LLM is unavailable.
  */
-import type { AdviceKind, CropType } from "@/lib/engine";
+import type { AdviceKind, CropType, RainDeclined } from "@/lib/engine";
 
 export const CROP_NAMES: Record<CropType, { ur: string; roman: string; en: string }> = {
   wheat: { ur: "گندم", roman: "gandum", en: "wheat" },
@@ -25,6 +25,10 @@ export interface AdvisoryFacts {
   weekSpareKwh: number;
   weekWastedKwh: number;
   surplusRsPerKwh: number;
+  /** Set when forecast rain would have covered the need but was not trusted enough to skip irrigation. */
+  rainDeclined?: RainDeclined;
+  /** Open-loop instruction for this field on an irrigate day: depth at the field and total volume. */
+  waterPlan?: { grossMm: number; areaAcres: number; totalM3: number };
   /** Set when today's / next irrigation is driven by a critical growth stage. */
   criticalStage?: { ur: string; roman: string; en: string };
 }
@@ -32,6 +36,7 @@ export interface AdvisoryFacts {
 const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
 const fmtH = (h: number) => (Number.isInteger(h) ? String(h) : h.toFixed(1));
 const fmt0 = (x: number) => Math.round(x).toLocaleString("en-US");
+const fmtAcres = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1));
 
 function whenNext(days: number | null) {
   if (days === null) return null;
@@ -77,10 +82,28 @@ export function advisoryText(f: AdvisoryFacts) {
       ro.push(`Baqi ${fmtH(rest)} ghantay kal.`);
       en.push(`The remaining ${fmtH(rest)} hours tomorrow.`);
     }
+    if (f.waterPlan && f.waterPlan.grossMm > 0) {
+      const mm = fmt0(f.waterPlan.grossMm), m3 = fmt0(f.waterPlan.totalM3), ac = fmtAcres(f.waterPlan.areaAcres);
+      ur.push(`تقریباً ${mm} ملی میٹر پانی دیں، یعنی آپ کے ${ac} ایکڑ کے لیے تقریباً ${m3} کیوبک میٹر۔`);
+      ro.push(`Taqreeban ${mm} mm pani dein, yani aap ke ${ac} acre ke liye taqreeban ${m3} cubic meter.`);
+      en.push(`Give about ${mm} mm of water, about ${m3} m³ for your ${ac} acres.`);
+    }
+    if (f.rainDeclined === "weather") {
+      ur.push(`آج موسم کا ڈیٹا تازہ نہیں، اس لیے بارش کی پیش گوئی پر بھروسا نہ کریں۔`);
+      ro.push(`Aaj mausam ka data taaza nahi, is liye barish ki pesh goi par bharosa na karein.`);
+      en.push(`Weather data is not live today, so do not rely on a rain forecast.`);
+    } else if (f.rainDeclined) {
+      ur.push(`بارش کی پیش گوئی ہے مگر پیش گوئی غلط بھی ہو سکتی ہے، اس لیے احتیاطاً آج پانی دیں۔`);
+      ro.push(`Barish ki pesh goi hai magar ghalat bhi ho sakti hai, is liye ehtiyaatan aaj pani dein.`);
+      en.push(`Rain is forecast, but forecasts can be wrong, so water today to be safe.`);
+    }
   } else if (f.kind === "skip-rain") {
     ur.push(`آج پمپ نہ چلائیں، کل بارش ہو سکتی ہے۔`);
     ro.push(`Aaj pump na chalayen, kal barish ho sakti hai.`);
     en.push(`Do not run the pump today; rain is expected tomorrow.`);
+    ur.push(`اگر بارش نہ آئی تو کل ایپ دیکھیں، وہ پانی دینے کا کہے گی۔`);
+    ro.push(`Agar barish na aayi to kal app dekhen, woh pani dene ka kahegi.`);
+    en.push(`If the rain does not come, check the app tomorrow: it will tell you to water.`);
   } else {
     ur.push(`آج پمپ بند رکھیں، زمین میں نمی کافی ہے۔`);
     ro.push(`Aaj pump band rakhein, zameen mein nami kafi hai.`);

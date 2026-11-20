@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft, BatteryCharging, CalendarClock, CloudRain, Droplets, Flame, Gauge, History, Leaf, MessageCircle,
   Ruler, Waves,
-  PowerOff, Radio, Sprout, Sun, Thermometer, Wheat, Zap, Coins, Info, CircleAlert,
+  PowerOff, Radio, Sprout, Sun, Thermometer, Wheat, Zap, Coins, Info, CircleAlert, ShieldAlert, ShieldCheck,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { canAccessFarm, getSession } from "@/lib/auth/session";
@@ -230,6 +230,24 @@ function HeroCard({ s, T, ur }: { s: FarmState; T: TFn; ur: boolean }) {
         </p>
       )}
       {a.kind === "irrigate" && a.totalHours > a.hoursToday && <p className="mt-2 text-sm text-white/90">{T("adviceRemainder", { total: hrs(a.totalHours) })}</p>}
+      {a.kind === "irrigate" && s.waterPlan && s.waterPlan.grossMm > 0 && (
+        <div className="mt-3 rounded-xl bg-white/15 px-3 py-2 text-sm">
+          <p className="font-semibold">{T("planTitle")}</p>
+          <p className="mt-0.5">
+            {T("planLine", {
+              mm: Math.round(s.waterPlan.grossMm),
+              ai: s.waterPlan.acreInches.toFixed(1),
+              acres: Number.isInteger(s.waterPlan.areaAcres) ? s.waterPlan.areaAcres : s.waterPlan.areaAcres.toFixed(1),
+              m3: Math.round(s.waterPlan.totalM3).toLocaleString("en-US"),
+              l: Math.round(s.waterPlan.totalM3 * 1000).toLocaleString("en-US"),
+            })}
+          </p>
+          <p className="mt-1 text-xs text-white/80">{T("planNote")}</p>
+        </div>
+      )}
+      {a.kind === "irrigate" && a.rainDeclined && (
+        <p className="mt-2 rounded-xl bg-white/15 px-3 py-2 text-sm">{T(a.rainDeclined === "weather" ? "rainBetWeather" : "rainBetSafe")}</p>
+      )}
       {a.kind !== "irrigate" && next !== null && (
         <p className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-sm">
           <CalendarClock className="h-4 w-4 shrink-0" aria-hidden />
@@ -246,7 +264,31 @@ function HeroCard({ s, T, ur }: { s: FarmState; T: TFn; ur: boolean }) {
         unavailableLabel={T("voiceUnavailable")}
       />
       <p className="mt-3 text-xs text-white/80">{T("soilMoisture", { used: Math.round(s.today.depletionStartMm), raw: Math.round(s.today.rawMm) })}</p>
+      <ConfidenceLine s={s} T={T} />
     </section>
+  );
+}
+
+const CONF_REASON_KEY = {
+  "weather-sample": "confWeatherSample", "weather-cached": "confWeatherCached", "weather-estimated": "confWeatherEstimated",
+  "pump-uncalibrated": "confPump", "hours-missing": "confHours", "rain-forecast": "confRain",
+} as const;
+
+/** How sure the advice is, and why not. The app is open loop (it advises, the farmer acts), so it says when its inputs are weak. */
+function ConfidenceLine({ s, T }: { s: FarmState; T: TFn }) {
+  const c = s.confidence;
+  const Icon = c.level === "high" ? ShieldCheck : ShieldAlert;
+  return (
+    <div className={cn("mt-3 rounded-xl px-3 py-2 text-xs", c.level === "low" ? "bg-red-600/80" : "bg-white/15")}>
+      <p className="flex items-center gap-1.5 font-semibold">
+        <Icon className="h-4 w-4 shrink-0" aria-hidden /> {T("confTitle")} {T(c.level === "high" ? "confHigh" : c.level === "medium" ? "confMedium" : "confLow")}
+      </p>
+      {c.reasons.length > 0 && (
+        <ul className="mt-1 list-disc ps-5 leading-6 text-white/90">
+          {c.reasons.map((r) => <li key={r}>{T(CONF_REASON_KEY[r])}</li>)}
+        </ul>
+      )}
+    </div>
   );
 }
 

@@ -322,6 +322,7 @@ and they need a reason to be chosen over a competitor.
 | | Installer retention after 12 months | Above 80% |
 | **Green** | m³ of water saved; kWh of solar energy freed | Section 8, "society" row |
 | **Reliable** | Advisories delivered by 06:30; app uptime; forecast error | 99% delivered; 99.5% uptime |
+| | Share of days an agronomist agrees with the advice; **false-skip rate** (rain forecast, no rain); days rated High / Medium / Low confidence | Targets set in phase 1; zero unreviewed harm events |
 | **Technical** | Meter error against a real flow measurement | Within the stated ± band |
 
 ---
@@ -400,6 +401,8 @@ Sources: [NSW Natural Resources Access Regulator, metering](https://www.nrar.nsw
 |---|---|---|
 | No installer will pay | Wheel 1 fails | Test price early; fall back to lenders or a grant-funded pilot |
 | Meter inaccurate | Credibility lost | Field check first; show ranges; calibrate by bucket test |
+| **Wrong advice damages a field** | A farmer is harmed and trust ends | Open loop (the farmer acts); conservative rain rule; confidence line; no fertiliser doses without sign-off; accuracy gates before any paid tier or automation. See [docs/OPEN_LOOP_AND_RISK.md](docs/OPEN_LOOP_AND_RISK.md) |
+| Forecast is wrong | Crop stress if watering is skipped | "Rain is a bet" rule (1.5× margin, safe buffer, critical-stage block), next-day recalculation |
 | Farmers ignore the advice | No saving, so no value | Alarm, relay pilot, installer follow-up; track adherence |
 | Direct saving too small | Farmer will not pay | Farmer stays free; the installer pays; sell the service, not the saving |
 | Costs rise (SMS, weather, AI) | Margin falls | Local SMS, opt-in only; commercial weather plan priced in; cache everything |

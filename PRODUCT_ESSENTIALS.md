@@ -69,7 +69,8 @@ Farmers use it **free** at first. A farmer premium of about Rs 200–500 a month
 
 | Area | Status |
 |---|---|
-| Crop water need, soil-water balance, pump physics, savings (unit-tested, 60 tests) | Built |
+| Crop water need, soil-water balance, pump physics, savings (unit-tested) | Built |
+| Water to give for the field (depth, volume, hours); conservative rain rule; "how sure is this advice" line | Built |
 | Farmer dashboard: yesterday vs need, today's advice, weekly waste, 7-day chart, spare-sunshine income ideas, live weather, pump output (L/min, area per hour) | Built |
 | Urdu / English across the app (Urdu is right-to-left with a Nastaliq font) | Built |
 | Urdu voice note (neural TTS when configured, recorded file or browser voice otherwise) and Urdu voice input (Whisper) | Built |
@@ -99,6 +100,8 @@ Farmers use it **free** at first. A farmer premium of about Rs 200–500 a month
 2. **Honest ranges, not false precision.** Flow is shown as a range with a "default estimate / calibrated" badge.
 3. **The farmer owns the data.** Authorities see only district-level, anonymised data from farms that consented; locations are blurred to about 1 km.
 4. **Works when the network does not.** Cached weather, template messages and a recorded voice note keep the demo alive.
+5. **Open loop: we advise, the farmer acts.** The app tells the farmer how much water his field needs (depth, volume for his acres, pump hours) but never switches the pump. Closed-loop control needs far more reliable data and is deliberately not built.
+6. **Rain is a bet, and every input has a confidence.** Forecast rain excuses an irrigation only with a clear margin, a safe buffer, real data and no critical growth stage. Each day's advice says how sure it is. Details: [docs/OPEN_LOOP_AND_RISK.md](docs/OPEN_LOOP_AND_RISK.md).
 
 ## 6. Validation status (be honest about this)
 

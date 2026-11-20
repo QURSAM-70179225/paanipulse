@@ -106,6 +106,7 @@ export function simulateFarm(
   actualHours: Record<string, number>,
   todayKey: string,
   initialDepletionFraction = 0,
+  opts: { weatherReliable?: boolean } = {},
 ): SimulationResult {
   const crop = CROPS[farm.crop];
   const areaM2 = acresToM2(farm.areaAcres);
@@ -143,6 +144,7 @@ export function simulateFarm(
         irrigationEfficiency: eff,
         flowM3PerHour: flow,
         hoursAvailableToday: d.solar.pumpableHours,
+        weatherReliable: opts.weatherReliable,
       });
     }
     const horizon = perDay.slice(i, i + 7).map((x) => x.etcMm - x.effRainMm);
@@ -162,6 +164,8 @@ export function simulateFarm(
       hoursAvailableToday: d.solar.pumpableHours,
       fallbackNetUseMm: d.etcMm,
       critical,
+      tawMm: d.taw,
+      weatherReliable: opts.weatherReliable,
     });
   };
 

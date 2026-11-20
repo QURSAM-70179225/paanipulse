@@ -168,9 +168,9 @@ export function fallbackAnswer(message: string, s: FarmState): string {
     const tmax = d.days[1]?.maxTempC ?? "";
     return d.rainExpectedTomorrow
       ? pick({
-          ur: `جی ہاں، کل تقریباً ${d.rainTomorrowMm} ملی میٹر بارش کا امکان ہے۔ کل پمپ چلانے کی ضرورت نہیں۔`,
-          roman: `Ji haan, kal taqreeban ${d.rainTomorrowMm} mm barish ka imkaan hai. Kal pump chalane ki zaroorat nahi.`,
-          en: `Yes, about ${d.rainTomorrowMm} mm of rain is expected tomorrow. No need to run the pump tomorrow.`,
+          ur: `جی ہاں، کل تقریباً ${d.rainTomorrowMm} ملی میٹر بارش کا امکان ہے۔ مگر پیش گوئی غلط بھی ہو سکتی ہے: اگر بارش نہ آئے تو کل صبح ایپ دیکھیں۔`,
+          roman: `Ji haan, kal taqreeban ${d.rainTomorrowMm} mm barish ka imkaan hai. Par barish ki pesh goi ghalat bhi ho sakti hai: agar barish na aaye to kal subah app dekhen.`,
+          en: `Yes, about ${d.rainTomorrowMm} mm of rain is expected tomorrow. Forecasts can be wrong: if the rain does not come, check the app tomorrow morning.`,
         })
       : pick({
           ur: `کل بارش کا امکان نہیں۔ زیادہ سے زیادہ درجہ حرارت ${tmax} ڈگری۔`,

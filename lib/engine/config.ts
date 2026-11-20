@@ -59,6 +59,16 @@ export const DEFAULTS = {
   /** PV performance ratio and pump start threshold (fraction of rated kW). */
   performanceRatio: 0.75,
   startThreshold: 0.2,
+  /**
+   * Rain is a bet, not a fact. Irrigation is skipped for forecast rain only if the forecast rain is at least this many
+   * times the water the soil needs, so a smaller-than-forecast shower still refills it.
+   */
+  rainSkipSafetyFactor: 1.5,
+  /**
+   * If the forecast rain does not come, depletion one day later must still stay inside this share of the gap between
+   * RAW (stress starts) and TAW (wilting point). 0.5 = never wait past the halfway point.
+   */
+  rainWaitBufferFraction: 0.5,
   /** Advice limits. */
   maxPumpHoursPerDay: 12,
   hoursStep: 0.5,

@@ -9,3 +9,4 @@ export * from "./savings";
 export * from "./simulate";
 export * from "./weatherEstimate";
 export * from "./soil";
+export * from "./confidence";

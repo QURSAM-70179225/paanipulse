@@ -225,6 +225,7 @@ Speaker notes with timings are in both PPTX files. The outline is in [docs/PITCH
 - **Pump timer and alarm**; **live meter** with an over-run warning (when a drive is connected).
 - **Offline mode**; opt-in **daily advice by SMS / WhatsApp**; installable on the home screen.
 - **Bucket test** and **meter field check**; **4-step farm set-up** with a map and typical-pump defaults.
+- **Open-loop water plan**: depth, volume for the field's area and pump hours; a conservative "rain is a bet" rule; a "how sure is this advice" line. See [docs/OPEN_LOOP_AND_RISK.md](docs/OPEN_LOOP_AND_RISK.md).
 - **Soil probe card** (optional, software only, tested with a simulator; no probe hardware connected): see [docs/SOIL_SENSOR.md](docs/SOIL_SENSOR.md).
 </details>
 

@@ -2,7 +2,7 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import { pktDateKey, pktDayStart } from "@/lib/dates";
-import { CRITICAL_STAGES, DEFAULTS, flowRangeM3h, pumpOutput, summarise, surplusIdeas, type CropType } from "@/lib/engine";
+import { adviceConfidence, CRITICAL_STAGES, DEFAULTS, flowRangeM3h, pumpOutput, summarise, surplusIdeas, type CropType } from "@/lib/engine";
 import { advisoryText } from "./advisoryText";
 import { runFarm } from "./farmSim";
 import { getWeather, nextHours } from "./weather";
@@ -19,7 +19,8 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
   const todayKey = pktDateKey(pktDayStart(0, now));
   const hours = Object.fromEntries(farm.dailyRecords.map((r) => [pktDateKey(r.date), r.actualHours]));
   const yesterdayReported = pktDateKey(pktDayStart(-1, now)) in hours;
-  const sim = runFarm(farm, pump, hours, weather.days, todayKey);
+  // Offline sample weather is not real data: never let a forecast (sample) rain skip an irrigation.
+  const sim = runFarm(farm, pump, hours, weather.days, todayKey, { weatherReliable: weather.source !== "sample" });
 
   const week = summarise(sim.days, 7);
   const yesterday = sim.days[sim.days.length - 1];
@@ -37,6 +38,8 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
     totalHours: advice.totalHours,
     daysUntilNext: advice.daysUntilNext,
     rainTomorrowMm: forecast[1]?.precipMm ?? 0,
+    rainDeclined: advice.rainDeclined,
+    waterPlan: advice.kind === "irrigate" ? { grossMm: advice.grossMm, areaAcres: farm.areaAcres, totalM3: (advice.grossMm / 1000) * sim.areaM2 } : undefined,
     yesterdayHours: yesterday?.actualHours ?? 0,
     yesterdayNeededHours: yesterday?.recommendedHours ?? 0,
     weekUreaKg: week.ureaKg,
@@ -62,6 +65,18 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
       lat: farm.lat,
       lng: farm.lng,
     },
+    /** How far to trust today's advice, and why not (shown on the farmer dashboard). */
+    confidence: adviceConfidence({
+      weatherSource: weather.source,
+      pumpCalibrated: pump.calibrated,
+      hasTelemetry: pump.hasTelemetry,
+      hoursReported: yesterdayReported,
+      rainForecastInvolved: !!advice.rainDeclined && advice.rainDeclined !== "weather",
+    }),
+    /** Open-loop water instruction for this field: depth, volume and hours (set only on an irrigate day). */
+    waterPlan: advice.kind === "irrigate"
+      ? { netMm: advice.netMm, grossMm: advice.grossMm, acreInches: advice.grossMm / 25.4, areaAcres: farm.areaAcres, totalM3: (advice.grossMm / 1000) * sim.areaM2, hoursToday: advice.hoursToday, totalHours: advice.totalHours }
+      : null,
     pump: {
       id: pump.id,
       ratedKw: pump.ratedKw,

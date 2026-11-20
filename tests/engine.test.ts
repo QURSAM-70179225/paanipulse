@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  acresToM2, adviseFlooded, adviseFromBalance, balanceStep, calibrateEfficiency, effectiveRain, etc, flowM3sFromPower,
+  acresToM2, adviceConfidence, adviseFlooded, adviseFromBalance, balanceStep, calibrateEfficiency, effectiveRain, etc, flowM3sFromPower,
   flowRangeM3h, ftToM, grossNeedM3, hourlyGhiFromDaily, kcForDay, kwhPerM3, leachedNKg, modeAIntegrate, modeBDay,
   netNeedMm, pumpInputKw, pvPowerKw, rawMm, recommendedHours, rootDepthM, simulateFarm, summarise, tawMm, totalHeadM,
   ureaEquivalent, wastedKwh, type WeatherDay,
@@ -159,15 +159,52 @@ describe("advice", () => {
     expect(a.hoursToday).toBe(8);
     expect(a.totalHours).toBeGreaterThan(8);
   });
-  it("skips irrigation if tomorrow's rain covers the refill", () => {
-    const a = adviseFromBalance({ ...common, depletionStartMm: 24, rawMm: 25, forecastNetUseMm: [2, -20], effRainTomorrowMm: 30 });
+  // Rain is a bet: skipping needs the forecast to beat the need by 1.5×, a safe buffer if it misses, a reliable forecast,
+  // and no critical growth stage. Need here = 24 + 2 = 26 mm.
+  const rainy = { ...common, depletionStartMm: 24, rawMm: 25, tawMm: 60, forecastNetUseMm: [2, -50], fallbackNetUseMm: 4, effRainTomorrowMm: 50 };
+  it("skips irrigation only when forecast rain clearly exceeds the need", () => {
+    const a = adviseFromBalance(rainy);
     expect(a.kind).toBe("skip-rain");
+    expect(a.rainDeclined).toBeUndefined();
+  });
+  it("does NOT skip when the forecast only just covers the need (margin)", () => {
+    const a = adviseFromBalance({ ...rainy, effRainTomorrowMm: 30 });
+    expect(a.kind).toBe("irrigate");
+    expect(a.rainDeclined).toBe("margin");
+  });
+  it("does NOT skip on offline sample weather", () => {
+    const a = adviseFromBalance({ ...rainy, weatherReliable: false });
+    expect(a.kind).toBe("irrigate");
+    expect(a.rainDeclined).toBe("weather");
+  });
+  it("never skips for rain at a critical growth stage", () => {
+    const a = adviseFromBalance({ ...rainy, depletionStartMm: 10, rawMm: 25, critical: { id: "cri", startInDays: 0, endInDays: 3, minDepletionMm: 8 }, forecastNetUseMm: [2, -50] });
+    expect(a.kind).toBe("irrigate");
+    expect(a.rainDeclined).toBe("critical");
+  });
+  it("does NOT skip when waiting one more day without rain would leave the safe buffer", () => {
+    // end of today 26 mm + a dry day of 20 mm = 46 > RAW 25 + half of (TAW 60 − RAW 25) = 42.5
+    const a = adviseFromBalance({ ...rainy, fallbackNetUseMm: 20 });
+    expect(a.kind).toBe("irrigate");
+    expect(a.rainDeclined).toBe("buffer");
+  });
+  it("states the water to give: net depth, and gross depth at the field after losses", () => {
+    const a = adviseFromBalance({ ...common, depletionStartMm: 30, rawMm: 25, forecastNetUseMm: [2, 2, 2], effRainTomorrowMm: 0 });
+    expect(a.netMm).toBeCloseTo(32, 6);
+    expect(a.grossMm).toBeCloseTo(32 / 0.55, 6);
+    expect(adviseFromBalance({ ...common, depletionStartMm: 0, rawMm: 10, forecastNetUseMm: [2, 2], effRainTomorrowMm: 0 }).grossMm).toBe(0);
   });
   it("flooded rice uses the daily-need model", () => {
     const a = adviseFlooded({ ...common, netNeedTodayMm: 8, effRainTomorrowMm: 0 });
     expect(a.kind).toBe("irrigate");
     expect(a.hoursToday).toBe(8); // needs ≈19.6 h, capped by sun hours
-    expect(adviseFlooded({ ...common, netNeedTodayMm: 8, effRainTomorrowMm: 9 }).kind).toBe("skip-rain");
+    expect(adviseFlooded({ ...common, netNeedTodayMm: 8, effRainTomorrowMm: 14 }).kind).toBe("skip-rain");
+  });
+  it("flooded rice does not skip for a forecast that only just covers the need, or on sample weather", () => {
+    const close = adviseFlooded({ ...common, netNeedTodayMm: 8, effRainTomorrowMm: 9 });
+    expect(close.kind).toBe("irrigate");
+    expect(close.rainDeclined).toBe("margin");
+    expect(adviseFlooded({ ...common, netNeedTodayMm: 8, effRainTomorrowMm: 20, weatherReliable: false }).rainDeclined).toBe("weather");
   });
 });
 
@@ -300,5 +337,27 @@ describe("weather estimates (backup provider)", () => {
     expect(radiationFromCloudCover(20, 0)).toBeCloseTo(15, 6);
     expect(radiationFromCloudCover(20, 1)).toBeCloseTo(5, 6);
     expect(radiationFromCloudCover(20, 0.5)).toBeCloseTo(10, 6);
+  });
+});
+
+describe("advice confidence", () => {
+  const good = { weatherSource: "live" as const, pumpCalibrated: true, hasTelemetry: false, hoursReported: true, rainForecastInvolved: false };
+  it("is high only when every input is strong", () => {
+    expect(adviceConfidence(good)).toEqual({ level: "high", reasons: [] });
+  });
+  it("is low on offline sample weather", () => {
+    const c = adviceConfidence({ ...good, weatherSource: "sample" });
+    expect(c.level).toBe("low");
+    expect(c.reasons).toContain("weather-sample");
+  });
+  it("is medium for a saved or estimated forecast, an uncalibrated pump, missing hours, or a rain-dependent day", () => {
+    expect(adviceConfidence({ ...good, weatherSource: "cached-live" }).level).toBe("medium");
+    expect(adviceConfidence({ ...good, weatherSource: "openweather" }).level).toBe("medium");
+    expect(adviceConfidence({ ...good, pumpCalibrated: false }).reasons).toEqual(["pump-uncalibrated"]);
+    expect(adviceConfidence({ ...good, hoursReported: false }).reasons).toEqual(["hours-missing"]);
+    expect(adviceConfidence({ ...good, rainForecastInvolved: true }).level).toBe("medium");
+  });
+  it("does not penalise calibration or missing hours when pump-drive telemetry is connected", () => {
+    expect(adviceConfidence({ ...good, pumpCalibrated: false, hoursReported: false, hasTelemetry: true }).level).toBe("high");
   });
 });

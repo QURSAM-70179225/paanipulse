@@ -21,6 +21,6 @@ export function toFarmInput(farm: Farm, pump: Pump): FarmInput {
   };
 }
 
-export function runFarm(farm: Farm, pump: Pump, hours: Record<string, number>, weather: WeatherDay[], todayKey: string) {
-  return simulateFarm(toFarmInput(farm, pump), weather, hours, todayKey);
+export function runFarm(farm: Farm, pump: Pump, hours: Record<string, number>, weather: WeatherDay[], todayKey: string, opts: { weatherReliable?: boolean } = {}) {
+  return simulateFarm(toFarmInput(farm, pump), weather, hours, todayKey, 0, opts);
 }
