@@ -23,8 +23,8 @@ services:
         sync: false
       - key: AZURE_SPEECH_KEY
         sync: false
-      - key: AZURE_SPEECH_REGION
-        value: centralindia
+      - key: AZURE_SPEECH_REGION   # the Speech resource's region, e.g. eastus (student subscriptions can't use every region)
+        sync: false
       - key: AUTHORITY_INVITE_CODE
         sync: false
       - key: DEMO_MODE

@@ -11,7 +11,7 @@ import type { FarmState } from "./farmState";
 export type VoiceLang = "ur" | "en" | "pa";
 export const VOICE_LANGS: VoiceLang[] = ["ur", "en", "pa"];
 export type VoiceScript = { ur: string; urRoman: string; en: string; pa: string; paRoman: string };
-export type CardId = "advice" | "yesterday" | "today" | "output" | "week" | "spare" | "weather";
+export type CardId = "report" | "advice" | "yesterday" | "today" | "output" | "week" | "spare" | "weather";
 
 type Say = "ur" | "urRoman" | "en" | "pa" | "paRoman";
 
@@ -417,9 +417,19 @@ function weather(s: FarmState): VoiceScript {
   });
 }
 
+/** The "how many hours did the pump run yesterday?" question: asks it and says which buttons to press. */
+const REPORT: VoiceScript = {
+  ur: "کل آپ نے پمپ کتنے گھنٹے چلایا؟ نیچے گھنٹوں والا نمبر دبائیں: صفر، دو، چار، چھ یا آٹھ۔ اگر پمپ بالکل نہیں چلا تو صفر دبائیں۔ اس سے آپ کا پانی میٹر اور مشورہ درست رہتا ہے۔",
+  urRoman: "Kal aap ne pump kitne ghantay chalaaya? Neeche ghanton waala number dabaayen: sifar, do, chaar, chhe ya aath. Agar pump bilkul nahin chala to sifar dabaayen. Is se aap ka paani meter aur mashwara durust rehta hai.",
+  en: "How many hours did you run the pump yesterday? Press the number of hours below: zero, two, four, six or eight. If the pump did not run at all, press zero. This keeps your water meter and advice correct.",
+  pa: "ਕੱਲ੍ਹ ਤੁਸੀਂ ਪੰਪ ਕਿੰਨੇ ਘੰਟੇ ਚਲਾਇਆ? ਹੇਠਾਂ ਘੰਟਿਆਂ ਵਾਲਾ ਨੰਬਰ ਦਬਾਓ: ਸਿਫ਼ਰ, ਦੋ, ਚਾਰ, ਛੇ ਜਾਂ ਅੱਠ। ਜੇ ਪੰਪ ਬਿਲਕੁਲ ਨਹੀਂ ਚੱਲਿਆ ਤਾਂ ਸਿਫ਼ਰ ਦਬਾਓ। ਇਸ ਨਾਲ ਤੁਹਾਡਾ ਪਾਣੀ ਮੀਟਰ ਤੇ ਸਲਾਹ ਠੀਕ ਰਹਿੰਦੀ ਹੈ।",
+  paRoman: "Kall tusi pump kinne ghante chalaaya? Hethaan ghanteyaan waala number dabao: sifar, do, chaar, chhe ya aath. Je pump bilkul nahin chalya taan sifar dabao. Is naal tuhaada paani meter te salaah theek rehndi ae.",
+};
+
 /** One guided voice note per dashboard card (null where the card isn't shown). */
 export function cardScripts(s: FarmState): Record<CardId, VoiceScript | null> {
   return {
+    report: REPORT,
     advice: advice(s),
     yesterday: yesterday(s),
     today: today(s),

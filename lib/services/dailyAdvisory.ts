@@ -24,6 +24,27 @@ export async function hoursFromTelemetry(pumpId: string, dayOffset: number, now:
   return Math.round(modeAIntegrate(pump, readings.map((r) => ({ timestamp: r.timestamp, powerKw: r.powerKw }))).hours * 2) / 2;
 }
 
+type FarmStateNN = NonNullable<Awaited<ReturnType<typeof getFarmState>>>;
+
+/**
+ * Store the last 14 simulated days. The installer portal, the well report and the authority map read these stored
+ * records, so this also runs (in the background) whenever a farmer opens their dashboard: the numbers on every page
+ * then come from the same calculation instead of drifting until the next daily job.
+ */
+export async function storeRecentDays(farmId: string, state: FarmStateNN) {
+  for (const d of state.days.slice(-14)) {
+    const data = {
+      et0: d.et0, etc: d.etc, rainMm: d.rainMm, depletionMm: d.depletionEndMm, needM3: d.needM3, pumpedM3: d.pumpedM3,
+      recommendedHours: d.recommendedHours, excessM3: d.excessM3, wastedKwh: d.wastedKwh, pvKwh: d.pvKwh, spareKwh: d.spareKwh,
+    };
+    await prisma.dailyRecord.upsert({
+      where: { farmId_date: { farmId, date: toDate(d.date) } },
+      create: { farmId, date: toDate(d.date), actualHours: d.actualHours, ...data },
+      update: data,
+    });
+  }
+}
+
 export async function runDailyForFarm(farmId: string, now = new Date()) {
   const pump = await prisma.pump.findFirst({ where: { farmId } });
   if (!pump) return { farmId, skipped: "no pump" };
@@ -44,17 +65,7 @@ export async function runDailyForFarm(farmId: string, now = new Date()) {
   // 2. Recompute recent history with today's weather and store it.
   const state = await getFarmState(farmId, now);
   if (!state) return { farmId, skipped: "not found" };
-  for (const d of state.days.slice(-14)) {
-    const data = {
-      et0: d.et0, etc: d.etc, rainMm: d.rainMm, depletionMm: d.depletionEndMm, needM3: d.needM3, pumpedM3: d.pumpedM3,
-      recommendedHours: d.recommendedHours, excessM3: d.excessM3, wastedKwh: d.wastedKwh, pvKwh: d.pvKwh, spareKwh: d.spareKwh,
-    };
-    await prisma.dailyRecord.upsert({
-      where: { farmId_date: { farmId, date: toDate(d.date) } },
-      create: { farmId, date: toDate(d.date), actualHours: d.actualHours, ...data },
-      update: data,
-    });
-  }
+  await storeRecentDays(farmId, state);
 
   // Today's recommended hours: used by the pump over-run alert and the dashboard.
   const today = toDate(state.today.date);

@@ -87,6 +87,13 @@ describe("card voice notes", () => {
     expect(cardScripts(farm({ actual: 3, needed: 4 })).yesterday!.en).toContain("Well done");
   });
 
+  it("asks the hours question out loud and says which buttons to press", () => {
+    const r = cardScripts(farm()).report!;
+    expect(r.en).toContain("press zero");
+    expect(r.pa).toMatch(GURMUKHI);
+    expect(r.ur).toMatch(ARABIC);
+  });
+
   it("reads tomorrow's rain into the today and weather cards", () => {
     expect(cardScripts(farm({ rainTomorrow: 5 })).today!.en).toContain("Rain is likely tomorrow");
     expect(cardScripts(farm({ rainTomorrow: 5 })).weather!.en).toContain("Rain is expected tomorrow");
