@@ -288,6 +288,7 @@ shared). The alarm cannot run while the phone is locked or the browser is closed
 | `GET /api/farms/[id]/live` | Today's live meter from telemetry |
 | `POST /api/telemetry` | JSON array, `{readings:[]}`, CSV body or multipart CSV upload |
 | `POST /api/soil` | One soil-probe reading, an array, or `{readings:[]}` (optional add-on, see [docs/SOIL_SENSOR.md](docs/SOIL_SENSOR.md)) |
+| `PUT / PATCH / DELETE /api/farms/{id}/fertiliser` | Save the fertiliser rate the farmer got from a soil test or officer, mark urea doses applied, or remove the plan (see [docs/LAND_UNITS_AND_FERTILISER.md](docs/LAND_UNITS_AND_FERTILISER.md)) |
 | `GET /api/farms/{id}/soil` | Latest probe reading, 24 h series, status and cross-check against the water-balance model |
 | `POST /api/chat`, `DELETE /api/chat?farmId=` | Streamed AI chat; clear history |
 | `POST /api/tts`, `POST /api/stt` | Text to speech (mp3), speech to text (Whisper) |

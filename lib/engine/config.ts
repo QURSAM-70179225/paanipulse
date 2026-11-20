@@ -69,6 +69,8 @@ export const DEFAULTS = {
    * RAW (stress starts) and TAW (wilting point). 0.5 = never wait past the halfway point.
    */
   rainWaitBufferFraction: 0.5,
+  /** Hold a urea dose if this much rain (mm, today + tomorrow) is forecast: rain can wash it off. General rule, confirm with an agronomist. */
+  fertRainHoldMm: 10,
   /** Advice limits. */
   maxPumpHoursPerDay: 12,
   hoursStep: 0.5,

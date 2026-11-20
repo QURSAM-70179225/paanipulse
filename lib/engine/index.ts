@@ -12,3 +12,5 @@ export * from "./soil";
 export * from "./confidence";
 export * from "./soils";
 export * from "./lookup";
+export * from "./landUnits";
+export * from "./fertiliser";

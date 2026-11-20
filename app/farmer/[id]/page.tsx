@@ -20,6 +20,8 @@ import { PumpChart } from "@/components/farmer/PumpChart";
 import { BucketTest } from "@/components/farmer/BucketTest";
 import { LiveMeter } from "@/components/farmer/LiveMeter";
 import { SoilNow } from "@/components/farmer/SoilNow";
+import { FertiliserPlan } from "@/components/farmer/FertiliserPlan";
+import { areaText } from "@/lib/i18n/area";
 import { ReportHours } from "@/components/farmer/ReportHours";
 import { FieldCheck } from "@/components/farmer/FieldCheck";
 import { fieldCheckSummary } from "@/lib/services/fieldCheck";
@@ -129,6 +131,20 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           </CardContent>
         </Card>
         <SpareSunCard s={s} T={T} ur={ur} />
+        <FertiliserPlan
+          farmId={s.farm.id}
+          areaLabel={areaText(s.farm.areaAcres, s.farm.areaUnit, T)}
+          fert={s.fert}
+          labels={{
+            title: T("fertTitle"), intro: T("fertIntro"), enter: T("fertEnter"), change: T("fertChange"), cancel: T("fertCancel"), save: T("fertSave"),
+            urea: T("fertUrea"), dap: T("fertDap"), sop: T("fertSop"), perAcre: T("fertPerAcre"), splits: T("fertSplits"), splitsN: T("fertSplitsN"), splitsOne: T("fertSplitsOne"), bagsShort: T("fertBagsShort"),
+            source: T("fertSource"), srcSoil: T("fertSrcSoil"), srcOfficer: T("fertSrcOfficer"), srcOther: T("fertSrcOther"), confirm: T("fertConfirm"),
+            tooHigh: T("fertTooHigh"), empty: T("fertEmpty"), error: T("errGeneric"), totals: T("fertTotals"), bags: T("fertBags"), schedule: T("fertSchedule"),
+            atSowing: T("fertAtSowing"), dose: T("fertDose"), markApplied: T("fertMarkApplied"), undo: T("fertUndo"), applied: T("fertApplied"),
+            hintApply: T("fertHintApply"), hintRain: T("fertHintRain"), hintWait: T("fertHintWait"), hintDone: T("fertHintDone"),
+            disclaimer: T("fertDisclaimer"), savedBy: T("fertSavedBy"),
+          }}
+        />
         <BucketTest
           farmId={s.farm.id}
           efficiency={s.pump.efficiency}
@@ -177,7 +193,7 @@ function Header({ s, T, lang, user }: { s: FarmState; T: TFn; lang: Lang; user: 
       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-emerald-50">
         <span className="inline-flex items-center gap-1"><Wheat className="h-4 w-4" aria-hidden /> {ur ? crop.ur : crop.en}</span>
         <span className="inline-flex items-center gap-1"><Sprout className="h-4 w-4" aria-hidden /> {T("day")} <span className="num">{s.today.daysSinceSowing}</span></span>
-        <span><span className="num">{s.farm.areaAcres}</span> {T("acres")}</span>
+        <span className="num">{areaText(s.farm.areaAcres, s.farm.areaUnit, T)}</span>
         <span className="inline-flex items-center gap-1"><Zap className="h-4 w-4" aria-hidden /> <bdi dir="ltr" className="num">{s.pump.ratedKw} kW · {s.pump.pvKwp} kWp</bdi></span>
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -237,7 +253,7 @@ function HeroCard({ s, T, ur }: { s: FarmState; T: TFn; ur: boolean }) {
             {T("planLine", {
               mm: Math.round(s.waterPlan.grossMm),
               ai: s.waterPlan.acreInches.toFixed(1),
-              acres: Number.isInteger(s.waterPlan.areaAcres) ? s.waterPlan.areaAcres : s.waterPlan.areaAcres.toFixed(1),
+              area: areaText(s.waterPlan.areaAcres, s.farm.areaUnit, T),
               m3: Math.round(s.waterPlan.totalM3).toLocaleString("en-US"),
               l: Math.round(s.waterPlan.totalM3 * 1000).toLocaleString("en-US"),
             })}

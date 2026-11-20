@@ -85,6 +85,10 @@ model Farm {
   areaAcres        Float
   /// "sand" | "sandy-loam" | "loam" | "clay": sets how much water the soil holds. Default loam = the earlier fixed value.
   soilType         String         @default("loam")
+  /// How the farmer thinks of his land: "acre" | "kanal" | "marla" | "murabba" | "ghumaon". areaAcres stays the stored value.
+  areaUnit         String         @default("acre")
+  /// Fertiliser rate the farmer or installer entered from a soil test or agriculture officer (not a recommendation by the app).
+  fertPlan         Json?
   irrigationMethod String // flood | furrow | sprinkler | drip
   isSynthetic      Boolean        @default(false)
   dataConsent      Boolean        @default(true)

@@ -2,7 +2,7 @@
  * Template advisory text in Urdu script, Roman Urdu and English.
  * Every number comes from the engine; this is also the fallback when the LLM is unavailable.
  */
-import type { AdviceKind, CropType, RainDeclined } from "@/lib/engine";
+import { areaNumber, type AdviceKind, type CropType, type LandUnit, type RainDeclined } from "@/lib/engine";
 
 export const CROP_NAMES: Record<CropType, { ur: string; roman: string; en: string }> = {
   wheat: { ur: "گندم", roman: "gandum", en: "wheat" },
@@ -28,15 +28,22 @@ export interface AdvisoryFacts {
   /** Set when forecast rain would have covered the need but was not trusted enough to skip irrigation. */
   rainDeclined?: RainDeclined;
   /** Open-loop instruction for this field on an irrigate day: depth at the field and total volume. */
-  waterPlan?: { grossMm: number; areaAcres: number; totalM3: number };
+  waterPlan?: { grossMm: number; areaAcres: number; areaUnit?: LandUnit; totalM3: number };
   /** Set when today's / next irrigation is driven by a critical growth stage. */
   criticalStage?: { ur: string; roman: string; en: string };
 }
 
+const UNIT_NAMES: Record<LandUnit, { ur: string; roman: string; en: string }> = {
+  acre: { ur: "ایکڑ", roman: "acre", en: "acre" },
+  kanal: { ur: "کنال", roman: "kanal", en: "kanal" },
+  marla: { ur: "مرلہ", roman: "marla", en: "marla" },
+  murabba: { ur: "مربع", roman: "murabba", en: "murabba" },
+  ghumaon: { ur: "گھماؤں", roman: "ghumaon", en: "ghumaon" },
+};
+
 const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
 const fmtH = (h: number) => (Number.isInteger(h) ? String(h) : h.toFixed(1));
 const fmt0 = (x: number) => Math.round(x).toLocaleString("en-US");
-const fmtAcres = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1));
 
 function whenNext(days: number | null) {
   if (days === null) return null;
@@ -83,10 +90,11 @@ export function advisoryText(f: AdvisoryFacts) {
       en.push(`The remaining ${fmtH(rest)} hours tomorrow.`);
     }
     if (f.waterPlan && f.waterPlan.grossMm > 0) {
-      const mm = fmt0(f.waterPlan.grossMm), m3 = fmt0(f.waterPlan.totalM3), ac = fmtAcres(f.waterPlan.areaAcres);
-      ur.push(`تقریباً ${mm} ملی میٹر پانی دیں، یعنی آپ کے ${ac} ایکڑ کے لیے تقریباً ${m3} کیوبک میٹر۔`);
-      ro.push(`Taqreeban ${mm} mm pani dein, yani aap ke ${ac} acre ke liye taqreeban ${m3} cubic meter.`);
-      en.push(`Give about ${mm} mm of water, about ${m3} m³ for your ${ac} acres.`);
+      const unit = f.waterPlan.areaUnit ?? "acre";
+      const mm = fmt0(f.waterPlan.grossMm), m3 = fmt0(f.waterPlan.totalM3), ac = areaNumber(f.waterPlan.areaAcres, unit), u = UNIT_NAMES[unit];
+      ur.push(`تقریباً ${mm} ملی میٹر پانی دیں، یعنی آپ کی ${ac} ${u.ur} کے لیے تقریباً ${m3} کیوبک میٹر۔`);
+      ro.push(`Taqreeban ${mm} mm pani dein, yani aap ki ${ac} ${u.roman} ke liye taqreeban ${m3} cubic meter.`);
+      en.push(`Give about ${mm} mm of water, about ${m3} m³ for your ${ac} ${u.en}.`);
     }
     if (f.rainDeclined === "weather") {
       ur.push(`آج موسم کا ڈیٹا تازہ نہیں، اس لیے بارش کی پیش گوئی پر بھروسا نہ کریں۔`);

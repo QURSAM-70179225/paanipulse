@@ -42,6 +42,7 @@ export async function POST(req: Request) {
         cropType: b.cropType,
         sowingDate: b.sowingDate,
         areaAcres: b.areaAcres,
+        areaUnit: b.areaUnit,
         irrigationMethod: b.irrigationMethod,
         soilType: b.soilType,
         dataConsent: b.dataConsent,
