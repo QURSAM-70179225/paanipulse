@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { ClipboardCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { queueReport } from "@/lib/offline";
 
-export function ReportHours({ farmId, labels }: { farmId: string; labels: { title: string; help: string; other: string; save: string; thanks: string; hours: string; error: string; queued: string } }) {
+export function ReportHours({ farmId, labels, listen }: { farmId: string; listen?: ReactNode; labels: { title: string; help: string; other: string; save: string; thanks: string; hours: string; error: string; queued: string } }) {
   const router = useRouter();
   const [custom, setCustom] = useState("");
   const [state, setState] = useState<"idle" | "busy" | "done" | "error" | "queued">("idle");
@@ -33,6 +33,7 @@ export function ReportHours({ farmId, labels }: { farmId: string; labels: { titl
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><ClipboardCheck className="h-5 w-5 text-amber-700" aria-hidden /> {labels.title}</CardTitle>
         <p className="text-sm text-slate-600">{labels.help}</p>
+        {listen && <div className="flex">{listen}</div>}
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div className="grid grid-cols-5 gap-2">

@@ -65,10 +65,10 @@ export default async function Home() {
                   <UserPlus className="h-5 w-5" aria-hidden /> {T("createAccount")}
                 </Link>
               </div>
-              <p className="flex flex-col gap-1 text-sm text-emerald-100 sm:flex-row sm:gap-5">
-                <Link href="/login?as=installer" className="font-semibold underline underline-offset-4 hover:text-white">{T("signInInstaller")}</Link>
-                <Link href="/login?as=authority" className="font-semibold underline underline-offset-4 hover:text-white">{T("signInAuthority")}</Link>
-                <Link href="/water-chart" className="font-semibold underline underline-offset-4 hover:text-white">{T("chartLink")}</Link>
+              <p className="flex flex-col items-start gap-1 text-sm text-emerald-100 sm:flex-row sm:gap-5">
+                <Link href="/login?as=installer" className="inline-flex min-h-11 items-center py-1 font-semibold leading-loose underline underline-offset-8 hover:text-white">{T("signInInstaller")}</Link>
+                <Link href="/login?as=authority" className="inline-flex min-h-11 items-center py-1 font-semibold leading-loose underline underline-offset-8 hover:text-white">{T("signInAuthority")}</Link>
+                <Link href="/water-chart" className="inline-flex min-h-11 items-center py-1 font-semibold leading-loose underline underline-offset-8 hover:text-white">{T("chartLink")}</Link>
               </p>
             </div>
           )}

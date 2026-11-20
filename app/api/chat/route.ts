@@ -16,8 +16,21 @@ const Body = z.object({ farmId: z.string().min(1).max(64), message: z.string().t
 const SCRIPT_RULE: Record<Script, string> = {
   ur: "Write your whole reply in Urdu script (اردو). Do not use Latin letters except units like mm.",
   roman: "Write your whole reply in Roman Urdu (Urdu written in Latin letters, like 'Aaj pump band rakhein'). Do NOT use Urdu script and do NOT reply in English.",
-  en: "Write your whole reply in simple English.",
+  en: "Write your whole reply in simple English. Do not mix in any Urdu or Roman Urdu words (say 'keep the pump off', not 'pump band rakhein').",
 };
+
+/**
+ * Tools return ready-made sentences in all three scripts ({ en, roman, ur }). Hand the model only the reply's own
+ * script: given all three, it sometimes copied a Roman Urdu sentence into an English answer.
+ */
+function inScript(value: unknown, script: Script): unknown {
+  if (Array.isArray(value)) return value.map((v) => inScript(v, script));
+  if (!value || typeof value !== "object") return value;
+  const o = value as Record<string, unknown>;
+  const keys = Object.keys(o);
+  if (keys.length === 3 && ["en", "roman", "ur"].every((k) => typeof o[k] === "string")) return o[script];
+  return Object.fromEntries(keys.map((k) => [k, inScript(o[k], script)]));
+}
 
 function systemPrompt(farmerName: string, crop: string, district: string, script: Script) {
   return [
@@ -27,7 +40,7 @@ function systemPrompt(farmerName: string, crop: string, district: string, script
     "2. If the tools do not answer the question, say you don't know (Urdu: 'mujhe is ka ilm nahi' / 'مجھے اس کا علم نہیں').",
     `3. LANGUAGE: ${SCRIPT_RULE[script]}`,
     "4. Use very simple words and at most 3 short sentences (up to 5 for a how-to-use answer). No markdown, no lists, no tables, no emojis.",
-    "5. When the decision is keep-off or skip-rain, say clearly to keep the pump off (e.g. 'pump band rakhein') — never say 'run the pump 0 hours'. Prefer the tool's ready-made 'instruction' text.",
+    "5. When the decision is keep-off or skip-rain, say clearly to keep the pump off — never say 'run the pump 0 hours'. Prefer the tool's ready-made 'instruction' text.",
     "6. Fertiliser savings and earnings are estimates — say 'about' / 'taqreeban' / 'تقریباً'. Give no guarantees about yield, income, loans or health.",
     "7. You only discuss this farm's irrigation, weather, water, solar energy, income from spare solar and fertiliser, AND how to use every feature of this PaaniPulse app (call getAppGuide for those: advice, timer, probe, Bluetooth, SMS alert, pump control, several farms, fertiliser card, bucket test, water chart, set-up, offline use). Never refuse a question about the app itself. Use only what getAppGuide returns about a feature; if a feature needs hardware (probe, control box), say the installer provides it. For ANY other topic (cricket, politics, news, health, loans...) reply only with the refusal sentence for the language required by rule 3 — English: 'Sorry, I can only help with your pump, water, weather, solar and how to use this app.' Roman Urdu: 'Maaf kijiye, main sirf pump, pani, mausam, solar aur is app ke istemal ke baare mein madad kar sakta hoon.' Urdu: 'معاف کیجیے، میں صرف پمپ، پانی، موسم، سولر اور اس ایپ کے استعمال کے بارے میں مدد کر سکتا ہوں۔' Never repeat an earlier answer for a new question.",
     "8. Money is Pakistani rupees: write 'Rs' (English), 'rupay' (Roman Urdu) or 'روپے' (Urdu). Never use ₹ or INR.",
@@ -68,7 +81,7 @@ export async function POST(req: Request) {
             { role: "user", content: message },
           ];
           const attempt = (model?: string) =>
-            chatWithTools({ messages, tools: TOOL_DEFS, runTool: (name, args) => runTool(name, state, args && typeof args === "object" ? (args as Record<string, unknown>) : {}), model, signal: AbortSignal.timeout(25_000) });
+            chatWithTools({ messages, tools: TOOL_DEFS, runTool: (name, args) => inScript(runTool(name, state, args && typeof args === "object" ? (args as Record<string, unknown>) : {}), script), model, signal: AbortSignal.timeout(25_000) });
           try {
             let out;
             try {

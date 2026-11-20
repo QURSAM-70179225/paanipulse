@@ -14,4 +14,6 @@ jobs:
       - name: Wake the app (free Render instances sleep)
         run: curl -fsS --retry 6 --retry-delay 15 --max-time 90 "${{ secrets.APP_URL }}/api/health"
       - name: Run daily advisory
-        run: curl -fsS --max-time 120 -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "${{ secrets.APP_URL }}/api/cron/daily-advisory"
+        # Block scalar: a plain YAML value can't contain ": " (as in "Authorization: Bearer"), which made GitHub reject this file.
+        run: |
+          curl -fsS --max-time 120 -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "${{ secrets.APP_URL }}/api/cron/daily-advisory"

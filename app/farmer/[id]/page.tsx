@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 import {
   ArrowLeft, BatteryCharging, BookOpen, CalendarClock, CloudRain, Droplets, Flame, Gauge, History, Leaf, MessageCircle,
   Ruler, Waves,
@@ -10,6 +11,7 @@ import { canAccessFarm, getSession } from "@/lib/auth/session";
 import type { SessionUser } from "@/lib/auth/token";
 import { AccountBar } from "@/components/auth/AccountBar";
 import { getFarmState, type FarmState } from "@/lib/services/farmState";
+import { storeRecentDays } from "@/lib/services/dailyAdvisory";
 import { CROP_NAMES } from "@/lib/services/advisoryText";
 import { dirFor, isLang, t, type DictKey, type Lang } from "@/lib/i18n/dict";
 import { getLang } from "@/lib/i18n/server";
@@ -75,6 +77,8 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
   const hasSoilProbe = (await prisma.soilReading.count({ where: { farmId: id } })) > 0;
   const ownFarms = user.role === "FARMER" ? await prisma.farm.findMany({ where: { ownerId: user.id }, orderBy: { createdAt: "asc" }, select: { id: true, nickname: true, district: true, cropType: true, variety: true } }) : [];
   if (!s) notFound();
+  // Keep the stored history (read by the installer portal, report and authority map) in step with what the farmer sees.
+  if (!s.farm.isSynthetic) after(() => storeRecentDays(id, s).catch(() => {}));
   const T: TFn = (k, v) => t(lang, k, v);
   const ur = lang === "ur";
   const locale = ur ? "ur-PK" : "en-GB";
@@ -110,6 +114,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
         {!s.yesterdayReported && !s.pump.hasTelemetry && (
           <ReportHours
             farmId={s.farm.id}
+            listen={listen("report")}
             labels={{ title: T("reportTitle"), help: T("reportHelp"), other: T("reportOther"), save: T("reportSave"), thanks: T("reportThanks"), hours: T("hours"), error: T("errGeneric"), queued: T("queuedSaved") }}
           />
         )}

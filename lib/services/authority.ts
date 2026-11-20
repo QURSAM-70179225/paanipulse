@@ -68,7 +68,8 @@ export async function getAuthorityData(f: AuthorityFilters) {
     },
   });
 
-  const allRows: FarmRow[] = farms.map((farm) => {
+  // A well with no records in the window has nothing to report yet; counting it would show an empty "0 m³" row.
+  const allRows: FarmRow[] = farms.filter((farm) => farm.dailyRecords.length > 0).map((farm) => {
     const s = (k: "pumpedM3" | "needM3" | "excessM3" | "wastedKwh") => farm.dailyRecords.reduce((acc, r) => acc + (r[k] ?? 0), 0);
     const pumped = s("pumpedM3");
     const need = s("needM3");
@@ -126,6 +127,8 @@ export async function getAuthorityData(f: AuthorityFilters) {
     filters: f,
     window: { start: start.toISOString(), end: end.toISOString(), days: f.days },
     simulated: rows.some((r) => r.synthetic),
+    syntheticWells: rows.filter((r) => r.synthetic).length,
+    realWells: rows.filter((r) => !r.synthetic).length,
     kpis: {
       wells: rows.length,
       extractionM3: pumped,

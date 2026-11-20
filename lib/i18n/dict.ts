@@ -139,7 +139,7 @@ const en = {
   // authority
   authTitle: "Groundwater extraction dashboard",
   authSubtitle: "Solar tube wells across central Punjab · anonymised, district level",
-  simulatedBanner: "Simulated demo data — 150 synthetic wells plus 1 demo farm. Not real measurements.",
+  simulatedBanner: "Simulated demo data — {sim} synthetic wells plus {real} demo or registered farms. Not real measurements.",
   filterDistrict: "District",
   filterCrop: "Crop",
   filterPeriod: "Period",
@@ -755,7 +755,7 @@ const ur: Record<DictKey, string> = {
   voiceLangTitle: "آواز",
   authTitle: "زیرِ زمین پانی کے اخراج کا ڈیش بورڈ",
   authSubtitle: "وسطی پنجاب کے سولر ٹیوب ویل · بغیر نام، ضلع کی سطح پر",
-  simulatedBanner: "فرضی ڈیمو ڈیٹا — 150 فرضی ٹیوب ویل اور 1 ڈیمو کھیت۔ اصل پیمائش نہیں۔",
+  simulatedBanner: "فرضی ڈیمو ڈیٹا — {sim} فرضی ٹیوب ویل اور {real} ڈیمو یا رجسٹرڈ کھیت۔ اصل پیمائش نہیں۔",
   filterDistrict: "ضلع",
   filterCrop: "فصل",
   filterPeriod: "مدت",

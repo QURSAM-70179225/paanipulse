@@ -88,7 +88,7 @@ export function AuthorityDashboard({ initial, lang, dict, user }: { initial: Aut
 
       {data.simulated && (
         <div role="note" className="border-b border-amber-300 bg-amber-100 px-4 py-2 text-center text-sm font-medium text-amber-950">
-          <AlertTriangle className="me-1 inline h-4 w-4" aria-hidden /> {T("simulatedBanner")}
+          <AlertTriangle className="me-1 inline h-4 w-4" aria-hidden /> {T("simulatedBanner", { sim: data.syntheticWells, real: data.realWells })}
         </div>
       )}
 
