@@ -1,5 +1,6 @@
 /** Shared validation for creating a farm (farmer onboarding and installer registration). */
 import { z } from "zod";
+import { cleanNickname } from "./farmLabel";
 import { cleanVariety, MATURITY } from "@/lib/engine/varieties";
 import { SOIL_TYPES } from "@/lib/engine/soils";
 import { LAND_UNITS } from "@/lib/engine/landUnits";
@@ -37,6 +38,8 @@ export const FarmCreate = z.object({
   ratedKw: z.number().min(0.5).max(100),
   pvKwp: z.number().min(0.5).max(150),
   staticDepthFt: z.number().min(5).max(800),
+  /** Optional name for this farm. Unusable text is stored as "no name". */
+  nickname: z.string().max(60).nullish().transform((v) => cleanNickname(v)),
   language: z.enum(["ur", "en"]).default("ur"),
   dataConsent: z.boolean().default(true),
   /** Installer registrations only: the farmer's account. */

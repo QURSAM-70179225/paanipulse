@@ -4,11 +4,13 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bluetooth, BluetoothConnected } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { enqueue, parseHistoryLine, parseReading, PROBE, shouldUpload, toUpload, type UploadReading } from "@/lib/bluetooth/probe";
 
 export interface ProbeLabels {
   title: string; intro: string; connect: string; connecting: string; disconnect: string; connected: string; live: string;
   unsupported: string; uploaded: string; waiting: string; notFound: string; lost: string; prototype: string; history: string;
+  notConnected: string; needs: string;
 }
 
 /** Minimal Web Bluetooth typings (not in the default TypeScript DOM lib). */
@@ -48,6 +50,7 @@ function writeQueue(farmId: string, q: UploadReading[]) {
  * PaaniPulse. Readings that cannot be sent (no internet) wait in the phone's storage and are sent later.
  */
 export function ProbeConnect({ farmId, hasReadings, labels }: { farmId: string; hasReadings: boolean; labels: ProbeLabels }) {
+  // With no readings yet the card is shown "dull" (muted, dashed): visible so people know it exists, with the Connect button still usable.
   const router = useRouter();
   const [supported, setSupported] = useState(true);
   const [state, setState] = useState<"idle" | "connecting" | "connected">("idle");
@@ -181,12 +184,13 @@ export function ProbeConnect({ farmId, hasReadings, labels }: { farmId: string; 
 
   const minsAgo = lastSentAt ? Math.max(0, Math.round((Date.now() - lastSentAt) / 60_000)) : null;
   return (
-    <Card className="border-sky-300">
+    <Card className={cn(hasReadings || state === "connected" ? "border-sky-300" : "border-dashed bg-slate-50 opacity-80")}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           {state === "connected" ? <BluetoothConnected className="h-5 w-5 text-sky-700" aria-hidden /> : <Bluetooth className="h-5 w-5 text-slate-500" aria-hidden />} {labels.title}
         </CardTitle>
         <p className="text-sm text-slate-600">{labels.intro}</p>
+        {!hasReadings && state !== "connected" && <p className="text-sm font-semibold text-slate-700">{labels.notConnected} <span className="font-normal">{labels.needs}</span></p>}
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {!supported ? (

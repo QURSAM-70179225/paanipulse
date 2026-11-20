@@ -74,6 +74,8 @@ model AudioCache {
 model Farm {
   id               String         @id @default(cuid())
   farmerName       String
+  /// A name the farmer gives this farm ("North field"), so several farms in one account can be told apart.
+  nickname         String?
   phone            String?
   language         String         @default("ur") // "ur" | "en"
   lat              Float

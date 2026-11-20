@@ -4,6 +4,7 @@ import { badRequest, forbidden, serverError, unauthorized } from "@/lib/api/http
 import { getSession, hashSecret } from "@/lib/auth/session";
 import { normalisePhone } from "@/lib/auth/token";
 import { FarmCreate } from "@/lib/services/farmInput";
+import { MAX_FARMS_PER_ACCOUNT } from "@/lib/services/farmLabel";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,9 @@ export async function POST(req: Request) {
   if (!parsed.success) return badRequest(parsed.error);
   const b = parsed.data;
   try {
+    if (user.role === "FARMER" && (await prisma.farm.count({ where: { ownerId: user.id } })) >= MAX_FARMS_PER_ACCOUNT) {
+      return NextResponse.json({ error: "too-many-farms" }, { status: 409 });
+    }
     let ownerId: string | null = user.role === "FARMER" ? user.id : null;
     let farmerName = user.name;
     if (user.role === "INSTALLER") {
@@ -46,6 +50,7 @@ export async function POST(req: Request) {
         irrigationMethod: b.irrigationMethod,
         soilType: b.soilType,
         variety: b.variety,
+        nickname: b.nickname,
         maturity: b.maturity,
         dataConsent: b.dataConsent,
         isSynthetic: false,

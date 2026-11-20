@@ -31,7 +31,7 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
   const [v, setV] = useState({
     farmerName: "", phone: "", pin: "",
     district: d0.name as string, lat: d0.lat as number, lng: d0.lng as number,
-    cropType: "wheat", sowingDate: new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10), areaValue: 10, areaUnit: "acre" as LandUnit, soilType: "loam", variety: "", varietyOther: "", maturity: "normal", irrigationMethod: "flood",
+    nickname: "", cropType: "wheat", sowingDate: new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10), areaValue: 10, areaUnit: "acre" as LandUnit, soilType: "loam", variety: "", varietyOther: "", maturity: "normal", irrigationMethod: "flood",
     ratedKw: TYPICAL_PUMP.ratedKw, pvKwp: TYPICAL_PUMP.pvKwp, staticDepthFt: d0.typicalDepthFt as number,
     dataConsent: true,
   });
@@ -61,14 +61,14 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          district: v.district, lat: v.lat, lng: v.lng, cropType: v.cropType, sowingDate: v.sowingDate, areaAcres: acres, areaUnit: v.areaUnit,
+          district: v.district, nickname: v.nickname, lat: v.lat, lng: v.lng, cropType: v.cropType, sowingDate: v.sowingDate, areaAcres: acres, areaUnit: v.areaUnit,
           soilType: v.soilType, variety: v.variety === VARIETY_OTHER ? v.varietyOther : v.variety, maturity: v.maturity, irrigationMethod: v.irrigationMethod, ratedKw: v.ratedKw, pvKwp: v.pvKwp, staticDepthFt: v.staticDepthFt, language: lang, dataConsent: v.dataConsent,
           ...(mode === "installer" ? { farmer: { name: v.farmerName, phone: v.phone, pin: v.pin } } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error === "invalid-phone" ? T("errPhone") : data.error === "phone-taken" ? T("errTaken") : T("errGeneric"));
+        setError(data.error === "invalid-phone" ? T("errPhone") : data.error === "phone-taken" ? T("errTaken") : data.error === "too-many-farms" ? T("farmTooMany") : T("errGeneric"));
         return;
       }
       window.location.assign(mode === "installer" ? "/installer" : `/farmer/${data.id}`);
@@ -110,6 +110,10 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
 
       {step === "location" && (
         <div className="flex flex-col gap-3">
+          <label className={label}>
+            {T("farmNameLabel")}
+            <input className={input} type="text" maxLength={40} placeholder={T("farmNamePlaceholder")} value={v.nickname} onChange={(e) => up({ nickname: e.target.value })} />
+          </label>
           <label className={label}>
             {T("district")}
             <select

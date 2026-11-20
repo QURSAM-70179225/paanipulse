@@ -78,6 +78,10 @@ farmer can always use. The app cannot give these.
 - **No dry-run or overload logic in the app.** That belongs in the hardware.
 - **Clock and time zones:** times on screen are Pakistan time; the run length is counted in seconds on the box.
 
+## Several farms and motors
+
+Each farm has its own pump and control box, so one account can control several motors separately (see [MULTI_FARM.md](MULTI_FARM.md)). One motor per farm is supported; a second motor needs a second farm.
+
 ## Where the code is
 
 | | |

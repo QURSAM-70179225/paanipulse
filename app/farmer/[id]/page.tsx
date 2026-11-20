@@ -24,6 +24,9 @@ import { FertiliserPlan } from "@/components/farmer/FertiliserPlan";
 import { areaText } from "@/lib/i18n/area";
 import { ProbeConnect } from "@/components/farmer/ProbeConnect";
 import { PumpControl } from "@/components/farmer/PumpControl";
+import { PumpControlPlaceholder } from "@/components/farmer/PumpControlPlaceholder";
+import { FarmSwitcher } from "@/components/farmer/FarmSwitcher";
+import { farmLabel } from "@/lib/services/farmLabel";
 import { pumpControlAvailable } from "@/lib/services/pumpControl";
 import { ReportHours } from "@/components/farmer/ReportHours";
 import { FieldCheck } from "@/components/farmer/FieldCheck";
@@ -49,15 +52,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: `Farm ${id} · PaaniPulse` };
 }
 
-export default async function FarmPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ probe?: string }> }) {
+export default async function FarmPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const showProbe = (await searchParams).probe === "1";
   const user = await getSession();
   if (!user || !(await canAccessFarm(user, id))) notFound();
   const farmLang = (await prisma.farm.findUnique({ where: { id }, select: { language: true } }))?.language;
   const lang = await getLang(isLang(farmLang) ? farmLang : "ur");
   const s = await getFarmState(id);
   const hasSoilProbe = (await prisma.soilReading.count({ where: { farmId: id } })) > 0;
+  const ownFarms = user.role === "FARMER" ? await prisma.farm.findMany({ where: { ownerId: user.id }, orderBy: { createdAt: "asc" }, select: { id: true, nickname: true, district: true, cropType: true, variety: true } }) : [];
   if (!s) notFound();
   const T: TFn = (k, v) => t(lang, k, v);
   const ur = lang === "ur";
@@ -76,7 +79,7 @@ export default async function FarmPage({ params, searchParams }: { params: Promi
           texts: { ur: s.advisory.textUrdu, roman: s.advisory.textRomanUrdu, en: s.advisory.textEnglish },
         }}
       />
-      <Header s={s} T={T} lang={lang} user={user} />
+      <Header s={s} T={T} lang={lang} user={user} farms={ownFarms.map((f) => ({ id: f.id, label: farmLabel(f, lang) }))} />
       <div className="flex flex-col gap-4 px-4 pt-4">
         {!s.yesterdayReported && !s.pump.hasTelemetry && (
           <ReportHours
@@ -98,6 +101,12 @@ export default async function FarmPage({ params, searchParams }: { params: Promi
               actions: { start: T("pumpLogStart"), stop: T("pumpLogStop"), "auto-stop-on": T("pumpLogAutoOn"), "auto-stop-off": T("pumpLogAutoOff"), enable: T("pumpLogEnable"), disable: T("pumpLogDisable") },
               actors: { farmer: T("pumpActorFarmer"), installer: T("pumpActorInstaller"), "auto-full": T("pumpActorAuto"), timer: T("pumpActorTimer") },
             }}
+          />
+        )}
+        {!(pumpControlAvailable() && s.pump.controlEnabled) && (
+          <PumpControlPlaceholder
+            reason={pumpControlAvailable() ? "not-enabled" : "unavailable"}
+            labels={{ title: T("pumpCtlTitle"), start: T("pumpCtlStart"), stop: T("pumpCtlStop"), notAvail: T("pumpCtlNotAvail"), notOn: T("pumpCtlNotOn"), needs: T("pumpCtlNeeds"), off: T("pumpCtlOff") }}
           />
         )}
         <PumpTimer
@@ -122,17 +131,15 @@ export default async function FarmPage({ params, searchParams }: { params: Promi
             overrunTitle: T("overrunTitle"), overrunNone: T("overrunNone"), overrunHours: T("overrunHours"), soundOn: T("alarmSoundOn"), soundOff: T("alarmSoundOff"),
           }}
         />
-        {(hasSoilProbe || showProbe) && (
-          <ProbeConnect
+        <ProbeConnect
             farmId={s.farm.id}
             hasReadings={hasSoilProbe}
             labels={{
               title: T("probeTitle"), intro: T("probeIntro"), connect: T("probeConnect"), connecting: T("probeConnecting"), disconnect: T("probeDisconnect"),
               connected: T("probeConnected"), live: T("probeLive"), unsupported: T("probeUnsupported"), uploaded: T("probeUploaded"), waiting: T("probeWaiting"),
-              notFound: T("probeNotFound"), lost: T("probeLost"), prototype: T("probePrototype"), history: T("probeHistory"),
+              notFound: T("probeNotFound"), lost: T("probeLost"), prototype: T("probePrototype"), history: T("probeHistory"), notConnected: T("probeNotConnected"), needs: T("probeNeeds"),
             }}
-          />
-        )}
+        />
         {hasSoilProbe && (
           <SoilNow
             farmId={s.farm.id}
@@ -200,16 +207,13 @@ export default async function FarmPage({ params, searchParams }: { params: Promi
           </p>
           <p>{T("consent")}</p>
           <Link href={`/report/${s.farm.id}`} className="font-semibold text-sky-800 underline">{T("openReportLink")}</Link>
-          {!(hasSoilProbe || showProbe) && (
-            <Link href={`/farmer/${s.farm.id}?probe=1`} className="inline-flex min-h-10 items-center font-semibold text-sky-800 underline">{T("probeLink")}</Link>
-          )}
         </footer>
       </div>
     </main>
   );
 }
 
-function Header({ s, T, lang, user }: { s: FarmState; T: TFn; lang: Lang; user: SessionUser }) {
+function Header({ s, T, lang, user, farms }: { s: FarmState; T: TFn; lang: Lang; user: SessionUser; farms: { id: string; label: string }[] }) {
   const crop = CROP_NAMES[s.farm.crop];
   const ur = lang === "ur";
   return (
@@ -221,8 +225,9 @@ function Header({ s, T, lang, user }: { s: FarmState; T: TFn; lang: Lang; user: 
         <LanguageToggle lang={lang} />
       </div>
       <AccountBar user={user} signOutLabel={T("signOut")} className="mt-2 justify-between text-emerald-50" />
-      <h1 className="mt-2 text-2xl font-bold">{s.farm.farmerName}</h1>
-      <p className="text-emerald-50">{s.farm.tehsil ? `${s.farm.tehsil}, ` : ""}{s.farm.district}</p>
+      {farms.length > 0 && <FarmSwitcher farms={farms} currentId={s.farm.id} labels={{ farm: T("farmSwitchLabel"), add: T("addFarm"), all: T("farmAll") }} />}
+      <h1 className="mt-2 text-2xl font-bold">{s.farm.nickname || s.farm.farmerName}</h1>
+      <p className="text-emerald-50">{s.farm.nickname ? `${s.farm.farmerName} · ` : ""}{s.farm.tehsil ? `${s.farm.tehsil}, ` : ""}{s.farm.district}</p>
       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-emerald-50">
         <span className="inline-flex items-center gap-1"><Wheat className="h-4 w-4" aria-hidden /> {ur ? crop.ur : crop.en}{s.farm.variety ? <bdi dir="ltr"> · {s.farm.variety}</bdi> : null}</span>
         <span className="inline-flex items-center gap-1"><Sprout className="h-4 w-4" aria-hidden /> {T("day")} <span className="num">{s.today.daysSinceSowing}</span></span>
