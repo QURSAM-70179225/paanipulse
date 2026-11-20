@@ -31,8 +31,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
     await prisma.dailyRecord.upsert({
       where: { farmId_date: { farmId: id, date } },
-      create: { farmId: id, date, actualHours: hours },
-      update: { actualHours: hours },
+      create: { farmId: id, date, actualHours: hours, hoursReported: true },
+      update: { actualHours: hours, hoursReported: true },
     });
     return NextResponse.json({ ok: true, date: key, hours });
   } catch (err) {

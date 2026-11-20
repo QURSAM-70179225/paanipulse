@@ -61,6 +61,7 @@ async function writeRecords(farmId: string, hours: Record<string, number>) {
       farmId,
       date: new Date(`${d.date}T00:00:00+05:00`),
       actualHours: d.actualHours,
+      hoursReported: true, // demo history counts as already answered
       et0: d.et0,
       etc: d.etc,
       rainMm: d.rainMm,

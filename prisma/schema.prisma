@@ -194,6 +194,9 @@ model DailyRecord {
   farm             Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
   date             DateTime // local date at 00:00 Asia/Karachi stored as UTC instant
   actualHours      Float // pump hours actually run (farmer-reported or telemetry)
+  /// True once the farmer (or the drive's telemetry) gave this day's hours. Records the daily job or the advice
+  /// route create ahead of time hold 0 hours as a placeholder and must not hide the "how many hours?" question.
+  hoursReported    Boolean  @default(false)
   // Engine outputs (filled from Milestone 2 onwards)
   et0              Float?
   etc              Float?

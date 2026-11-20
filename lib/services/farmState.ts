@@ -20,7 +20,9 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
   const weather = await getWeather(farm.lat, farm.lng, { now });
   const todayKey = pktDateKey(pktDayStart(0, now));
   const hours = Object.fromEntries(farm.dailyRecords.map((r) => [pktDateKey(r.date), r.actualHours]));
-  const yesterdayReported = pktDateKey(pktDayStart(-1, now)) in hours;
+  const yKey = pktDateKey(pktDayStart(-1, now));
+  // A record alone isn't an answer: the daily job pre-creates records with 0 hours.
+  const yesterdayReported = farm.dailyRecords.some((r) => pktDateKey(r.date) === yKey && r.hoursReported);
   // Offline sample weather is not real data: never let a forecast (sample) rain skip an irrigation.
   const sim = runFarm(farm, pump, hours, weather.days, todayKey, { weatherReliable: weather.source !== "sample" });
 

@@ -56,8 +56,8 @@ export async function runDailyForFarm(farmId: string, now = new Date()) {
     if (h !== null) {
       await prisma.dailyRecord.upsert({
         where: { farmId_date: { farmId, date: toDate(yKey) } },
-        create: { farmId, date: toDate(yKey), actualHours: h },
-        update: { actualHours: h },
+        create: { farmId, date: toDate(yKey), actualHours: h, hoursReported: true },
+        update: { actualHours: h, hoursReported: true },
       });
     }
   }
