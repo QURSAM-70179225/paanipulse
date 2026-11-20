@@ -3,13 +3,16 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/db";
 
-export const VOICES = { ur: "ur-PK-UzmaNeural", en: "en-IN-NeerjaNeural" } as const;
+/** Punjabi is pa-IN (Gurmukhi script): Azure has no Pakistani Punjabi (Shahmukhi) voice. */
+export const VOICES = { ur: "ur-PK-UzmaNeural", en: "en-IN-NeerjaNeural", pa: "pa-IN-VaaniNeural" } as const;
+const LOCALES = { ur: "ur-PK", en: "en-IN", pa: "pa-IN" } as const;
+export type TtsLang = keyof typeof VOICES;
 
 const escapeXml = (s: string) => s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[c]!);
 
 export const ttsConfigured = () => !!(process.env.AZURE_SPEECH_KEY && process.env.AZURE_SPEECH_REGION);
 
-export async function synthesize(text: string, lang: "ur" | "en"): Promise<Buffer | null> {
+export async function synthesize(text: string, lang: TtsLang): Promise<Buffer | null> {
   const voice = VOICES[lang];
   const key = createHash("sha1").update(`${voice}|${text}`).digest("hex");
   try {
@@ -20,7 +23,7 @@ export async function synthesize(text: string, lang: "ur" | "en"): Promise<Buffe
   }
   if (!ttsConfigured()) return null;
   const region = process.env.AZURE_SPEECH_REGION!;
-  const ssml = `<speak version="1.0" xml:lang="${lang === "ur" ? "ur-PK" : "en-IN"}"><voice name="${voice}"><prosody rate="-8%">${escapeXml(text)}</prosody></voice></speak>`;
+  const ssml = `<speak version="1.0" xml:lang="${LOCALES[lang]}"><voice name="${voice}"><prosody rate="-8%">${escapeXml(text)}</prosody></voice></speak>`;
   try {
     const res = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
       method: "POST",

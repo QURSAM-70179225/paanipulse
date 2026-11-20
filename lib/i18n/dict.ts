@@ -134,6 +134,8 @@ const en = {
   thinking: "typing…",
   backToFarm: "Back to farm",
   voiceUnavailable: "Voice not available on this device — read the message instead.",
+  cardListen: "Listen",
+  voiceLangTitle: "Voice",
   // authority
   authTitle: "Groundwater extraction dashboard",
   authSubtitle: "Solar tube wells across central Punjab · anonymised, district level",
@@ -749,6 +751,8 @@ const ur: Record<DictKey, string> = {
   thinking: "لکھ رہا ہے…",
   backToFarm: "کھیت پر واپس",
   voiceUnavailable: "اس فون پر آواز دستیاب نہیں — پیغام پڑھ لیں۔",
+  cardListen: "سنیں",
+  voiceLangTitle: "آواز",
   authTitle: "زیرِ زمین پانی کے اخراج کا ڈیش بورڈ",
   authSubtitle: "وسطی پنجاب کے سولر ٹیوب ویل · بغیر نام، ضلع کی سطح پر",
   simulatedBanner: "فرضی ڈیمو ڈیٹا — 150 فرضی ٹیوب ویل اور 1 ڈیمو کھیت۔ اصل پیمائش نہیں۔",
