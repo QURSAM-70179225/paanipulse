@@ -100,6 +100,7 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
       efficiency: pump.efficiency,
       calibrated: pump.calibrated,
       hasTelemetry: pump.hasTelemetry,
+      controlEnabled: pump.controlEnabled,
     },
     yesterdayReported,
     criticalStage: criticalStage ?? null,

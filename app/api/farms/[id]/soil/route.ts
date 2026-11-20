@@ -6,6 +6,7 @@ import { SoilReadingSchema, soilBodyToArray } from "@/lib/services/soilIngest";
 import { CROPS, crossCheck, depletedFraction, fieldFilled, isFresh, salinityLevel, soilLimits, soilStatus, type CropType } from "@/lib/engine";
 import { getFarmState } from "@/lib/services/farmState";
 import { checkFieldFull } from "@/lib/services/fieldFullAlert";
+import { autoStopIfFull } from "@/lib/services/pumpControl";
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +97,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (valid.length) {
       const latestAt = valid.reduce((m, r) => { const t = r.timestamp ?? new Date(now); return t > m ? t : m; }, new Date(0));
       await checkFieldFull([{ farmId: id, latestAt }]).catch((e) => console.error("field-full check failed", e));
+      await autoStopIfFull([{ farmId: id, latestAt }]).catch((e) => console.error("auto-stop check failed", e));
     }
     return NextResponse.json({ accepted: valid.length, rejected: parsed.data.length - valid.length });
   } catch (err) {

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { badRequest, serverError } from "@/lib/api/http";
 import { SoilReadingsSchema, soilBodyToArray } from "@/lib/services/soilIngest";
 import { checkFieldFull } from "@/lib/services/fieldFullAlert";
+import { autoStopIfFull } from "@/lib/services/pumpControl";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +54,9 @@ export async function POST(req: Request) {
         const t = r.timestamp ?? new Date(now);
         if (!newest.has(r.farmId) || t > newest.get(r.farmId)!) newest.set(r.farmId, t);
       }
-      await checkFieldFull([...newest].map(([farmId, latestAt]) => ({ farmId, latestAt }))).catch((e) => console.error("field-full check failed", e));
+      const batches = [...newest].map(([farmId, latestAt]) => ({ farmId, latestAt }));
+      await checkFieldFull(batches).catch((e) => console.error("field-full check failed", e));
+      await autoStopIfFull(batches).catch((e) => console.error("auto-stop check failed", e));
     }
     return NextResponse.json({ accepted: valid.length, rejected: parsed.data.length - valid.length });
   } catch (err) {

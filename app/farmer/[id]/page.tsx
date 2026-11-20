@@ -23,6 +23,8 @@ import { SoilNow } from "@/components/farmer/SoilNow";
 import { FertiliserPlan } from "@/components/farmer/FertiliserPlan";
 import { areaText } from "@/lib/i18n/area";
 import { ProbeConnect } from "@/components/farmer/ProbeConnect";
+import { PumpControl } from "@/components/farmer/PumpControl";
+import { pumpControlAvailable } from "@/lib/services/pumpControl";
 import { ReportHours } from "@/components/farmer/ReportHours";
 import { FieldCheck } from "@/components/farmer/FieldCheck";
 import { fieldCheckSummary } from "@/lib/services/fieldCheck";
@@ -84,6 +86,20 @@ export default async function FarmPage({ params, searchParams }: { params: Promi
         )}
         {s.yesterday && s.yesterday.actualHours > 0 && <YesterdayCard s={s} T={T} L={L} />}
         <HeroCard s={s} T={T} ur={ur} />
+        {pumpControlAvailable() && s.pump.controlEnabled && (
+          <PumpControl
+            farmId={s.farm.id}
+            advisedHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
+            labels={{
+              title: T("pumpCtlTitle"), on: T("pumpCtlOn"), off: T("pumpCtlOff"), left: T("pumpCtlLeft"), offline: T("pumpCtlOffline"), never: T("pumpCtlNever"),
+              hours: T("pumpCtlHours"), start: T("pumpCtlStart"), stop: T("pumpCtlStop"), confirm: T("pumpCtlConfirm"), auto: T("pumpCtlAuto"), autoNote: T("pumpCtlAutoNote"),
+              safety: T("pumpCtlSafety"), errOffline: T("pumpCtlErrOffline"), errBusy: T("pumpCtlErrBusy"), errHours: T("pumpCtlErrHours"), errDisabled: T("pumpCtlErrDisabled"),
+              errGeneric: T("errGeneric"), log: T("pumpCtlLog"),
+              actions: { start: T("pumpLogStart"), stop: T("pumpLogStop"), "auto-stop-on": T("pumpLogAutoOn"), "auto-stop-off": T("pumpLogAutoOff"), enable: T("pumpLogEnable"), disable: T("pumpLogDisable") },
+              actors: { farmer: T("pumpActorFarmer"), installer: T("pumpActorInstaller"), "auto-full": T("pumpActorAuto"), timer: T("pumpActorTimer") },
+            }}
+          />
+        )}
         <PumpTimer
           farmId={s.farm.id}
           recommendedHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}

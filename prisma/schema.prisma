@@ -121,7 +121,33 @@ model Pump {
   hasTelemetry    Boolean            @default(false)
   /// Local date (YYYY-MM-DD) of the last "pump ran too long" SMS, so it is sent at most once a day.
   lastOverrunAlert String?
+  /// Remote start/stop (PROTOTYPE, off by default). Needs a relay or starter fitted by a qualified electrician.
+  controlEnabled   Boolean            @default(false)
+  desiredOn        Boolean            @default(false)
+  /// Hard stop: the pump must be off by this time whatever else happens. The control box enforces it on its own clock.
+  offAt            DateTime?
+  /// Stop (never start) automatically when a soil probe shows enough water.
+  autoStopWhenFull Boolean            @default(false)
+  /// What the control box last reported, and when it last spoke to the server.
+  deviceOn         Boolean?
+  deviceSeenAt     DateTime?
+  controlLog       PumpControlLog[]
   telemetry       TelemetryReading[]
+}
+
+/// Audit trail of every start, stop and automatic stop.
+model PumpControlLog {
+  id     String   @id @default(cuid())
+  pumpId String
+  pump   Pump     @relation(fields: [pumpId], references: [id], onDelete: Cascade)
+  at     DateTime @default(now())
+  /// "farmer" | "installer" | "auto-full" | "timer" | "device"
+  actor  String
+  /// "start" | "stop" | "auto-stop-on" | "auto-stop-off" | "enable" | "disable"
+  action String
+  detail String?
+
+  @@index([pumpId, at])
 }
 
 model TelemetryReading {

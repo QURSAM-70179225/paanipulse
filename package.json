@@ -13,6 +13,7 @@
     "simulate": "tsx scripts/simulate-telemetry.ts",
     "water:chart": "tsx scripts/water-chart.ts",
     "simulate:soil": "tsx scripts/simulate-soil.ts",
+    "simulate:pump": "tsx scripts/simulate-pump-device.ts",
     "simulate:reset": "tsx scripts/simulate-telemetry.ts --reset",
     "demo:reset": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
