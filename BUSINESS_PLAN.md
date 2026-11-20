@@ -127,6 +127,8 @@ sell **"your pump's daily advice"** and **"after-sales service for installers"**
 | **Customer 2** | Lenders and aarhtis | Proof the financed pump works; income signal for repayment | Later |
 | **Customer 3** | Irrigation Department, Agriculture Department | Water accounting for subsidised wells | At scale |
 
+> Customer segments, market size, business type (B2B2C), scope, risks and the "ready to buy" ladder are in [docs/CUSTOMER_AND_SCOPE.md](docs/CUSTOMER_AND_SCOPE.md). The primary customer is the installer, not the farmer.
+
 ---
 
 ## 5. Value and pricing

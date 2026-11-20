@@ -363,6 +363,7 @@ docs/ guides + screenshots  tests/ Vitest suites                    .github/ sch
 
 | | |
 |---|---|
+| 🎯 [docs/CUSTOMER_AND_SCOPE.md](docs/CUSTOMER_AND_SCOPE.md) | Primary and secondary customers, B2B2C, market size, scope, risks, and whether customers are ready to buy |
 | 💼 [BUSINESS_PLAN.md](BUSINESS_PLAN.md) | Business plan: pricing from farmer value, revenue "wheels", cost model, unit economics and ROI, phases, KPIs, assumptions, risks |
 | 📘 [PRODUCT_ESSENTIALS.md](PRODUCT_ESSENTIALS.md) | Problem, users, who pays, built vs simulated, validation status, roadmap, risks, sources |
 | 🏗️ [ARCHITECTURE.md](ARCHITECTURE.md) | System diagram, data model, engine, request flows, security, API list, limitations |
