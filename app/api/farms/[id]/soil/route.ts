@@ -3,8 +3,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { badRequest, guardFarm, serverError } from "@/lib/api/http";
 import { SoilReadingSchema, soilBodyToArray } from "@/lib/services/soilIngest";
-import { CROPS, crossCheck, depletedFraction, isFresh, salinityLevel, soilLimits, soilStatus, type CropType } from "@/lib/engine";
+import { CROPS, crossCheck, depletedFraction, fieldFilled, isFresh, salinityLevel, soilLimits, soilStatus, type CropType } from "@/lib/engine";
 import { getFarmState } from "@/lib/services/farmState";
+import { checkFieldFull } from "@/lib/services/fieldFullAlert";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       sensorFraction: +sensorFraction.toFixed(2),
       modelFraction: modelFraction === null ? null : +modelFraction.toFixed(2),
       status: soilStatus(sensorFraction, p),
+      // Water has reached the probe: a farmer who is away can go and switch the pump off (see fieldFull.ts).
+      filled: fieldFilled(readings.map((r) => ({ at: r.timestamp, pct: r.moisturePct })), now, limits).filled,
       // Only compare a fresh reading with the model.
       check: fresh && modelFraction !== null ? crossCheck(modelFraction, sensorFraction) : null,
       salinity: last.ecDsM == null ? null : salinityLevel(last.ecDsM),
@@ -89,6 +92,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           source: r.source,
         })),
       });
+    }
+    if (valid.length) {
+      const latestAt = valid.reduce((m, r) => { const t = r.timestamp ?? new Date(now); return t > m ? t : m; }, new Date(0));
+      await checkFieldFull([{ farmId: id, latestAt }]).catch((e) => console.error("field-full check failed", e));
     }
     return NextResponse.json({ accepted: valid.length, rejected: parsed.data.length - valid.length });
   } catch (err) {

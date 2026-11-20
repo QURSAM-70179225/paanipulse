@@ -265,6 +265,7 @@ shared). The alarm cannot run while the phone is locked or the browser is closed
 | `/api/installer/reset-pin` | Installer, only for farmers of farms they installed |
 | `/api/authority/*` | Authority only |
 | `/api/telemetry` | Anyone, **unless `TELEMETRY_INGEST_KEY` is set** (then the `x-ingest-key` header is required); unknown pump ids are rejected |
+| `/api/soil` (POST) after saving | May send the "enough water" SMS (`lib/services/fieldFullAlert.ts`): opt-in, fresh readings only, at most one per farm every 3 hours; open endpoint unless `TELEMETRY_INGEST_KEY` is set (see [docs/FIELD_FULL_ALERT.md](docs/FIELD_FULL_ALERT.md)) |
 | `/api/soil` (POST) | Same rule as `/api/telemetry`: open unless `TELEMETRY_INGEST_KEY` is set; unknown farm ids are rejected. See [docs/SOIL_SENSOR.md](docs/SOIL_SENSOR.md) |
 | `/api/cron/daily-advisory` | Bearer `CRON_SECRET` |
 | `/api/weather`, `/api/health` | Public (health only reports yes/no flags and counts, never secret values) |

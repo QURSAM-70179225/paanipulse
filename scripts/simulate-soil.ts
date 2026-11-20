@@ -7,6 +7,7 @@
  *   npm run simulate:soil -- --url http://localhost:3100 --interval 2 --speed 20
  *   npm run simulate:soil -- --scenario dry       # start already dry (probe says: irrigate)
  *   npm run simulate:soil -- --scenario wet       # start wet (probe says: do not irrigate)
+ *   npm run simulate:soil -- --scenario filling   # an irrigation fills the soil; the last readings are full (triggers the "enough water" alert)
  *   npm run simulate:soil -- --irrigate           # an irrigation event half way through
  *   npm run simulate:soil -- --reset              # delete the simulated readings for the farm
  *
@@ -22,11 +23,11 @@ const URL_BASE = arg("url", "http://localhost:3000");
 const FARM_ID = arg("farm", "karamat");
 const INTERVAL_S = Number(arg("interval", "3"));
 const SIM_MINUTES = Number(arg("speed", "20"));
-const SCENARIO = arg("scenario", "drying") as "drying" | "dry" | "wet";
+const SCENARIO = arg("scenario", "drying") as "drying" | "dry" | "wet" | "filling";
 const IRRIGATE = process.argv.includes("--irrigate");
-const START: Record<typeof SCENARIO, number> = { drying: 26, dry: 17.5, wet: 30 };
+const START: Record<typeof SCENARIO, number> = { drying: 26, dry: 17.5, wet: 30, filling: 20 };
 /** How fast the soil dries: a wet field barely loses water. */
-const DRYING: Record<typeof SCENARIO, number> = { drying: 1, dry: 1, wet: 0.3 };
+const DRYING: Record<typeof SCENARIO, number> = { drying: 1, dry: 1, wet: 0.3, filling: 0.3 };
 
 async function reset() {
   const prisma = new PrismaClient();
@@ -49,6 +50,12 @@ async function stream() {
     const sun = Math.max(0, Math.sin((Math.PI * (hour - 7)) / 10)); // 0 at night, 1 at midday
     moisture -= (0.02 + 0.09 * sun) * (SIM_MINUTES / 20) * DRYING[SCENARIO]; // drying: faster in sunshine
     if (IRRIGATE && i === Math.round(ticksPerDay * 0.55)) moisture += 7; // irrigation event
+    // "filling": an irrigation. Over about 100 minutes, ending 40 minutes before the end of the day, water reaches the probe and the
+    // soil fills up; it then stays full, so the "enough water" alert fires on the last readings.
+    if (SCENARIO === "filling") {
+      const minutesLeft = (ticksPerDay - 1 - i) * SIM_MINUTES;
+      if (minutesLeft > 40 && minutesLeft <= 140) moisture += (29.5 - 20) / Math.round(100 / SIM_MINUTES);
+    }
     moisture = Math.min(30, Math.max(16, moisture));
     const reading = {
       farmId: FARM_ID,

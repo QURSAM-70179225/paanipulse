@@ -3,6 +3,7 @@
 All notable changes. Dates are 2026.
 
 ## [Unreleased]
+- "Enough water" alert: when a soil probe shows the soil got wetter and is now near field capacity, the farmer gets one SMS (opt-in, at most one every 3 hours) and the Soil now card shows a banner, so he can go and switch the pump off. 4G probe firmware sketch (untested on hardware), `--scenario filling` in the soil simulator, migration `farm_full_alert`. See `docs/FIELD_FULL_ALERT.md`.
 - Docs: `docs/CUSTOMER_AND_SCOPE.md` (customer segments, business type, scope, risks, the "ready to buy" ladder and next experiments).
 - Water chart (look-up, open loop): public `/water-chart` page and `npm run water:chart`; soil type (sand, sandy loam, loam, clay) in farm set-up and in the daily advice (default loam, so existing farms are unchanged; migration `soil_type`). Cost comparison of open loop versus sensor-based in the business plan. Mentor-feedback status in `docs/OPEN_LOOP_AND_RISK.md`.
 - Open loop and risk: the farmer dashboard and voice note now say how much water to give the field (mm, acre-inch, m³ for the farm's area, pump hours). Forecast rain now skips an irrigation only with a 1.5× margin, a safe buffer, real weather and no critical growth stage; otherwise "water today to be safe". New "how sure is this advice" line (high / medium / low). Chat no longer says a forecast removes the need to irrigate. Design and risk notes in `docs/OPEN_LOOP_AND_RISK.md`.

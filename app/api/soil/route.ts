@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { badRequest, serverError } from "@/lib/api/http";
 import { SoilReadingsSchema, soilBodyToArray } from "@/lib/services/soilIngest";
+import { checkFieldFull } from "@/lib/services/fieldFullAlert";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,15 @@ export async function POST(req: Request) {
           source: r.source,
         })),
       });
+    }
+    // Warn the farmer by SMS if water has reached the probe (never blocks or fails ingestion).
+    if (valid.length) {
+      const newest = new Map<string, Date>();
+      for (const r of valid) {
+        const t = r.timestamp ?? new Date(now);
+        if (!newest.has(r.farmId) || t > newest.get(r.farmId)!) newest.set(r.farmId, t);
+      }
+      await checkFieldFull([...newest].map(([farmId, latestAt]) => ({ farmId, latestAt }))).catch((e) => console.error("field-full check failed", e));
     }
     return NextResponse.json({ accepted: valid.length, rejected: parsed.data.length - valid.length });
   } catch (err) {

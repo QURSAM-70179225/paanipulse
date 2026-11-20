@@ -27,6 +27,8 @@ export interface SoilLabels {
   chartAria: string;
   zoneDry: string;
   zoneWet: string;
+  filled: string;
+  filledNote: string;
 }
 
 interface Soil {
@@ -37,6 +39,7 @@ interface Soil {
   sensorFraction?: number;
   modelFraction?: number | null;
   status?: "wet" | "ok" | "dry";
+  filled?: boolean;
   check?: "agree" | "sensor-wetter" | "sensor-drier" | null;
   salinity?: "normal" | "high" | null;
   readyFraction?: number;
@@ -103,6 +106,12 @@ export function SoilNow({ farmId, labels }: { farmId: string; labels: SoilLabels
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {d.filled && (
+          <div role="alert" className="mb-3 rounded-xl bg-emerald-600 p-3 text-white">
+            <p className="font-bold">{labels.filled}</p>
+            <p className="mt-0.5 text-sm text-emerald-50">{labels.filledNote}</p>
+          </div>
+        )}
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-xs font-medium text-slate-600">{labels.moisture}</p>

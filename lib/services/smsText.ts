@@ -33,3 +33,8 @@ export function overrunSms(f: { ranHours: number; recommendedHours: number }): s
       : `PaaniPulse: Pump ${h(f.ranHours)} ghantay chal chuka (zaroorat ${h(f.recommendedHours)}). Ab pump band karein, pani zaya ho raha hai.`;
   return text.slice(0, 160);
 }
+
+/** Sent when a soil probe shows water has reached it, so a farmer who is away can go and switch the pump off. */
+export function fullSms(): string {
+  return "PaaniPulse: Mitti mein pani kafi ho gaya hai. Agar pump chal raha hai to ja kar band kar dein. Khait bhi dekh lein.".slice(0, 160);
+}

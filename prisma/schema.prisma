@@ -89,6 +89,8 @@ model Farm {
   areaUnit         String         @default("acre")
   /// Fertiliser rate the farmer or installer entered from a soil test or agriculture officer (not a recommendation by the app).
   fertPlan         Json?
+  /// When the last "enough water has reached the probe" SMS was sent (at most one every few hours).
+  lastFullAlertAt  DateTime?
   irrigationMethod String // flood | furrow | sprinkler | drip
   isSynthetic      Boolean        @default(false)
   dataConsent      Boolean        @default(true)

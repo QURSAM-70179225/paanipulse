@@ -126,6 +126,7 @@ export default async function FarmPage({ params, searchParams }: { params: Promi
               nutrients: T("soilNutrients"), nutrientsNote: T("soilNutrientsNote"), simulated: T("soilSimulated"), updated: T("soilUpdated"),
               stale: T("soilStale"), agree: T("soilAgree"), sensorWetter: T("soilSensorWetter"), sensorDrier: T("soilSensorDrier"),
               secondOpinion: T("soilSecondOpinion"), chartAria: T("soilChartAria"), zoneDry: T("soilZoneDry"), zoneWet: T("soilZoneWet"),
+              filled: T("soilFilled"), filledNote: T("soilFilledNote"),
             }}
           />
         )}
