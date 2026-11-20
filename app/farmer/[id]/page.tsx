@@ -22,6 +22,7 @@ import { LiveMeter } from "@/components/farmer/LiveMeter";
 import { SoilNow } from "@/components/farmer/SoilNow";
 import { FertiliserPlan } from "@/components/farmer/FertiliserPlan";
 import { areaText } from "@/lib/i18n/area";
+import { ProbeConnect } from "@/components/farmer/ProbeConnect";
 import { ReportHours } from "@/components/farmer/ReportHours";
 import { FieldCheck } from "@/components/farmer/FieldCheck";
 import { fieldCheckSummary } from "@/lib/services/fieldCheck";
@@ -46,8 +47,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: `Farm ${id} · PaaniPulse` };
 }
 
-export default async function FarmPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function FarmPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ probe?: string }> }) {
   const { id } = await params;
+  const showProbe = (await searchParams).probe === "1";
   const user = await getSession();
   if (!user || !(await canAccessFarm(user, id))) notFound();
   const farmLang = (await prisma.farm.findUnique({ where: { id }, select: { language: true } }))?.language;
@@ -104,6 +106,17 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             overrunTitle: T("overrunTitle"), overrunNone: T("overrunNone"), overrunHours: T("overrunHours"), soundOn: T("alarmSoundOn"), soundOff: T("alarmSoundOff"),
           }}
         />
+        {(hasSoilProbe || showProbe) && (
+          <ProbeConnect
+            farmId={s.farm.id}
+            hasReadings={hasSoilProbe}
+            labels={{
+              title: T("probeTitle"), intro: T("probeIntro"), connect: T("probeConnect"), connecting: T("probeConnecting"), disconnect: T("probeDisconnect"),
+              connected: T("probeConnected"), live: T("probeLive"), unsupported: T("probeUnsupported"), uploaded: T("probeUploaded"), waiting: T("probeWaiting"),
+              notFound: T("probeNotFound"), lost: T("probeLost"), prototype: T("probePrototype"), history: T("probeHistory"),
+            }}
+          />
+        )}
         {hasSoilProbe && (
           <SoilNow
             farmId={s.farm.id}

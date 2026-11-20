@@ -228,6 +228,7 @@ Speaker notes with timings are in both PPTX files. The outline is in [docs/PITCH
 - **Water chart** (`/water-chart`, public, no sensors, no internet): crop + stage + soil + season + land → how often and how much water. Plus a soil-type choice in farm set-up. See [docs/WATER_CHART.md](docs/WATER_CHART.md).
 - **Open-loop water plan**: depth, volume for the field's area and pump hours; a conservative "rain is a bet" rule; a "how sure is this advice" line. See [docs/OPEN_LOOP_AND_RISK.md](docs/OPEN_LOOP_AND_RISK.md).
 - **Land in your own unit** (acre, kanal, marla, murabba, ghumaon) and **Fertiliser for your land**: you enter the rate from your soil test or officer, the app totals it for your land and times the doses with your irrigation. See [docs/LAND_UNITS_AND_FERTILISER.md](docs/LAND_UNITS_AND_FERTILISER.md).
+- **DIY Bluetooth soil probe** (prototype: ESP32 sketch plus a "Connect probe" card for Chrome on Android): see [docs/SOIL_PROBE_DIY.md](docs/SOIL_PROBE_DIY.md). Firmware not yet run on real hardware.
 - **Soil probe card** (optional, software only, tested with a simulator; no probe hardware connected): see [docs/SOIL_SENSOR.md](docs/SOIL_SENSOR.md).
 </details>
 

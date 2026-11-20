@@ -85,7 +85,7 @@ removes only simulator readings.
 
 Options, from cheapest to most costly (to be validated with an installer; none is built):
 
-1. **Bluetooth to the farmer's phone**, which uploads when it has signal. Best for poor village internet, with no
+1. **Bluetooth to the farmer's phone**, which uploads when it has signal. A prototype of this is built: see [SOIL_PROBE_DIY.md](SOIL_PROBE_DIY.md). Best for poor village internet, with no
    gateway to buy.
 2. **LoRa to a gateway** at the installer's or a neighbour's site: low power and long range, but a gateway and its upkeep.
 3. **A SIM or GSM module in the probe**: simplest to deploy, but a recurring data cost per device.

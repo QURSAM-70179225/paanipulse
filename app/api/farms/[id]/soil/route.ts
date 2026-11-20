@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { guardFarm, serverError } from "@/lib/api/http";
+import { badRequest, guardFarm, serverError } from "@/lib/api/http";
+import { SoilReadingSchema, soilBodyToArray } from "@/lib/services/soilIngest";
 import { CROPS, crossCheck, depletedFraction, isFresh, salinityLevel, soilLimits, soilStatus, type CropType } from "@/lib/engine";
 import { getFarmState } from "@/lib/services/farmState";
 
@@ -51,6 +53,44 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       limits,
       series: readings.map((r) => ({ t: r.timestamp.toISOString(), m: +r.moisturePct.toFixed(1) })),
     });
+  } catch (err) {
+    return serverError(err);
+  }
+}
+
+const BrowserReadings = z.array(SoilReadingSchema.omit({ farmId: true })).min(1).max(500);
+
+/**
+ * Readings uploaded from the signed-in farmer's own phone (for example, relayed from a Bluetooth probe).
+ * The farm comes from the URL and the session, so no ingest key is needed in the browser.
+ */
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const denied = await guardFarm(id);
+  if (denied) return denied;
+  const parsed = BrowserReadings.safeParse(soilBodyToArray(await req.json().catch(() => null)));
+  if (!parsed.success) return badRequest(parsed.error);
+  try {
+    const now = Date.now();
+    // Drop timestamps more than 10 minutes in the future (a wrong phone or device clock).
+    const valid = parsed.data.filter((r) => (r.timestamp?.getTime() ?? now) <= now + 600_000);
+    if (valid.length) {
+      await prisma.soilReading.createMany({
+        data: valid.map((r) => ({
+          farmId: id,
+          deviceId: r.deviceId,
+          timestamp: r.timestamp ?? new Date(now),
+          moisturePct: r.moisture_pct,
+          temperatureC: r.temperature_c,
+          ecDsM: r.ec_ds_m,
+          nitrogenMgKg: r.n_mg_kg,
+          phosphorusMgKg: r.p_mg_kg,
+          potassiumMgKg: r.k_mg_kg,
+          source: r.source,
+        })),
+      });
+    }
+    return NextResponse.json({ accepted: valid.length, rejected: parsed.data.length - valid.length });
   } catch (err) {
     return serverError(err);
   }
