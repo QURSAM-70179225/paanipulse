@@ -96,6 +96,7 @@ model Farm {
   advisories       Advisory[]
   chatMessages     ChatMessage[]
   fieldChecks      FieldCheck[]
+  soilReadings     SoilReading[]
 }
 
 model Pump {
@@ -124,6 +125,27 @@ model TelemetryReading {
   frequencyHz Float
 
   @@index([pumpId, timestamp])
+}
+
+/// Optional soil probe reading (moisture, temperature, salinity, indicative nutrients) sent to POST /api/soil.
+model SoilReading {
+  id             String   @id @default(cuid())
+  farmId         String
+  farm           Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  deviceId       String?
+  timestamp      DateTime
+  /// Volumetric water content, percent.
+  moisturePct    Float
+  temperatureC   Float?
+  /// Bulk electrical conductivity, dS/m (salinity indicator).
+  ecDsM          Float?
+  nitrogenMgKg   Float?
+  phosphorusMgKg Float?
+  potassiumMgKg  Float?
+  /// "sensor" | "simulator" | "manual"
+  source         String   @default("sensor")
+
+  @@index([farmId, timestamp])
 }
 
 model DailyRecord {

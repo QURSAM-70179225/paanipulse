@@ -25,7 +25,7 @@ Never commit secrets and never paste them in chats or issues.
 | `RESEND_API_KEY`, `EMAIL_FROM` | no | Sends password-reset emails to installers and officials. Without: links appear only in the server log |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` | no | SMS or WhatsApp PIN codes for farmers (`TWILIO_FROM` is a number or `whatsapp:+1…`). Without: farmers ask their installer |
 | `SUPPORT_WHATSAPP` | no | Number shown on the forgot-PIN page, e.g. `923001234567` |
-| `TELEMETRY_INGEST_KEY` | before real drives | If set, devices and the simulator must send it as the `x-ingest-key` header. Leave empty for the demo |
+| `TELEMETRY_INGEST_KEY` | before real drives | If set, devices (pump drives and soil probes) and the simulators must send it as the `x-ingest-key` header. Leave empty for the demo |
 | `DEMO_MODE` | no (default `true`) | Keeps the one-tap demo accounts and the offline sample-weather fallback. Set `false` for a real public launch |
 
 ## 2. Render + Neon

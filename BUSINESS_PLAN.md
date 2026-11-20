@@ -304,7 +304,7 @@ and they need a reason to be chosen over a competitor.
 | **0. Prototype (done)** | Hackathon | Engine, farmer, installer and authority apps, Urdu and English, offline mode, alarm, live site, tests, docs, demo video, pitch decks | A working demo |
 | **1. Prove the meter** | Weeks 1–2 | Drum-and-stopwatch field check on one real pump; the farmer contact plus 5–10 neighbours, free; collect competitor prices; ask installers about price | Measured error within the stated band; 5+ farmers open the advice |
 | **2. Installer pilot** | Months 1–3 | 3–5 installers, 100–300 pumps; local SMS provider; commercial weather plan; track KPIs (section 11) | At least 1 installer **pays**; hours pumped fall |
-| **3. Grow wheel 1, test wheel 2** | Months 4–12 | About 1,000 pumps; a lender pilot; a smart-relay pilot with the farmer's permission | About 1,500 paying pumps in sight; one lender signs |
+| **3. Grow wheel 1, test wheel 2** | Months 4–12 | About 1,000 pumps; a lender pilot; a smart-relay pilot with the farmer's permission; an **optional soil probe** sold through installers (software side built, see [docs/SOIL_SENSOR.md](docs/SOIL_SENSOR.md); hardware cost not in the base case) | About 1,500 paying pumps in sight; one lender signs |
 | **4. Wheel 3 and extensions** | Year 2 onwards | Irrigation Department pilot; more crops (rice, maize, cotton, sugarcane); spare-energy uses (drying, cold storage) | Department contract |
 
 ---

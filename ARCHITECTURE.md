@@ -263,6 +263,7 @@ shared). The alarm cannot run while the phone is locked or the browser is closed
 | `/api/installer/reset-pin` | Installer, only for farmers of farms they installed |
 | `/api/authority/*` | Authority only |
 | `/api/telemetry` | Anyone, **unless `TELEMETRY_INGEST_KEY` is set** (then the `x-ingest-key` header is required); unknown pump ids are rejected |
+| `/api/soil` (POST) | Same rule as `/api/telemetry`: open unless `TELEMETRY_INGEST_KEY` is set; unknown farm ids are rejected. See [docs/SOIL_SENSOR.md](docs/SOIL_SENSOR.md) |
 | `/api/cron/daily-advisory` | Bearer `CRON_SECRET` |
 | `/api/weather`, `/api/health` | Public (health only reports yes/no flags and counts, never secret values) |
 
@@ -284,6 +285,8 @@ shared). The alarm cannot run while the phone is locked or the browser is closed
 | `POST /api/account/sms` | Farmer turns daily advice / over-run texts on or off |
 | `GET /api/farms/[id]/live` | Today's live meter from telemetry |
 | `POST /api/telemetry` | JSON array, `{readings:[]}`, CSV body or multipart CSV upload |
+| `POST /api/soil` | One soil-probe reading, an array, or `{readings:[]}` (optional add-on, see [docs/SOIL_SENSOR.md](docs/SOIL_SENSOR.md)) |
+| `GET /api/farms/{id}/soil` | Latest probe reading, 24 h series, status and cross-check against the water-balance model |
 | `POST /api/chat`, `DELETE /api/chat?farmId=` | Streamed AI chat; clear history |
 | `POST /api/tts`, `POST /api/stt` | Text to speech (mp3), speech to text (Whisper) |
 | `GET /api/weather?lat=&lng=` | Weather for a point (cached) |
@@ -330,7 +333,7 @@ flowchart LR
   measurement, and no real farm has used it.
 - The login rate limiter and the weather memory cache are **per server instance**; a multi-instance deployment needs a
   shared store.
-- `/api/telemetry` is open unless `TELEMETRY_INGEST_KEY` is set. Set it before connecting real drives.
+- `/api/telemetry` and `/api/soil` are open unless `TELEMETRY_INGEST_KEY` is set. Set it before connecting real drives or probes.
 - `/api/weather` and `/api/health?full=1` are public and not rate-limited.
 - The pump alarm needs the app open and the phone awake; it cannot switch the motor off (no hardware). Over-run SMS needs a connected drive, runs per server instance and is checked at most every 5 minutes per pump.
 - No email verification and no separate CSRF token (cookies are `SameSite=Lax`).

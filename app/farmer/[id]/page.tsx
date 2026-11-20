@@ -19,6 +19,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { PumpChart } from "@/components/farmer/PumpChart";
 import { BucketTest } from "@/components/farmer/BucketTest";
 import { LiveMeter } from "@/components/farmer/LiveMeter";
+import { SoilNow } from "@/components/farmer/SoilNow";
 import { ReportHours } from "@/components/farmer/ReportHours";
 import { FieldCheck } from "@/components/farmer/FieldCheck";
 import { fieldCheckSummary } from "@/lib/services/fieldCheck";
@@ -50,6 +51,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
   const farmLang = (await prisma.farm.findUnique({ where: { id }, select: { language: true } }))?.language;
   const lang = await getLang(isLang(farmLang) ? farmLang : "ur");
   const s = await getFarmState(id);
+  const hasSoilProbe = (await prisma.soilReading.count({ where: { farmId: id } })) > 0;
   if (!s) notFound();
   const T: TFn = (k, v) => t(lang, k, v);
   const ur = lang === "ur";
@@ -100,6 +102,18 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             overrunTitle: T("overrunTitle"), overrunNone: T("overrunNone"), overrunHours: T("overrunHours"), soundOn: T("alarmSoundOn"), soundOff: T("alarmSoundOff"),
           }}
         />
+        {hasSoilProbe && (
+          <SoilNow
+            farmId={s.farm.id}
+            labels={{
+              title: T("soilTitle"), moisture: T("soilProbeMoisture"), dry: T("soilDry"), ok: T("soilOk"), wet: T("soilWet"), temp: T("soilTemp"),
+              salinity: T("soilSalinity"), salinityHigh: T("soilSalinityHigh"), salinityNormal: T("soilSalinityNormal"),
+              nutrients: T("soilNutrients"), nutrientsNote: T("soilNutrientsNote"), simulated: T("soilSimulated"), updated: T("soilUpdated"),
+              stale: T("soilStale"), agree: T("soilAgree"), sensorWetter: T("soilSensorWetter"), sensorDrier: T("soilSensorDrier"),
+              secondOpinion: T("soilSecondOpinion"), chartAria: T("soilChartAria"), zoneDry: T("soilZoneDry"), zoneWet: T("soilZoneWet"),
+            }}
+          />
+        )}
         <WeekCard s={s} T={T} L={L} />
         <Card>
           <CardHeader>
