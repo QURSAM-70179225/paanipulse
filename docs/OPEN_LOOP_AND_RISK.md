@@ -6,6 +6,22 @@ than cleverness. Each section says what is **built**, what is **planned**, and w
 
 ---
 
+## Mentor feedback: where each point stands
+
+The mentors (Dr. Usman and Dr. Salman) praised the app and had one main criticism: **be more open loop**. Their points and the status:
+
+| Mentor point | Status |
+|---|---|
+| Closed loop needs too much data, must be very reliable, and costs more | **Agreed.** The core advice already works with no sensor: it uses crop, sowing date, area, method, pump and a weather feed. Sensors (pump drive, soil probe) are optional extras. Cost comparison: [BUSINESS_PLAN.md](../BUSINESS_PLAN.md) section 8b. |
+| Build **look-up charts** from crop, growth stage, soil type, area and season | **Built** (this branch): the [water chart](WATER_CHART.md) and the public `/water-chart` page. |
+| **Output the water quantity** the farmer should apply | **Built**: the chart gives mm, litres and pump hours; the dashboard "Water for your field" gives the same for today. |
+| **Soil type** as an input | **Built** (this branch): a soil-type choice in farm set-up (sand, sandy loam, loam, clay), used by the daily advice. Default is loam, the old fixed value, so existing farms are unchanged. |
+| Land area | Built. Units (kanal, marla, murabba) are on a separate branch. |
+| Season and weather from an API, not hardware | **Built**: Open-Meteo with an OpenWeather backup and offline fallbacks. |
+| Keep an **optional** low-cost sensor (hybrid) | **Built as optional**: the soil probe is a second opinion that never changes the advised hours. |
+| Use **FAO** methods (Kc × ET₀) | **Built**: FAO-56 throughout; every chart value cites it. |
+| Explain the **precision-for-cost trade** and show **cost before and after** | Written: [BUSINESS_PLAN.md](../BUSINESS_PLAN.md) section 8b (hardware prices are illustrative until WIT quotes). The size of the precision loss is **not yet measured**. |
+
 ## 1. Open loop, not closed loop
 
 | | **Open loop** (what we do) | **Closed loop** (what we do not do) |

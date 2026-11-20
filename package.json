@@ -11,6 +11,7 @@
     "test": "vitest run",
     "db:reset": "prisma migrate reset --force",
     "simulate": "tsx scripts/simulate-telemetry.ts",
+    "water:chart": "tsx scripts/water-chart.ts",
     "simulate:soil": "tsx scripts/simulate-soil.ts",
     "simulate:reset": "tsx scripts/simulate-telemetry.ts --reset",
     "demo:reset": "tsx prisma/seed.ts",

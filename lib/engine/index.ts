@@ -10,3 +10,5 @@ export * from "./simulate";
 export * from "./weatherEstimate";
 export * from "./soil";
 export * from "./confidence";
+export * from "./soils";
+export * from "./lookup";

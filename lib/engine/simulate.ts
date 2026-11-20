@@ -9,6 +9,7 @@ import { kwhPerM3, modeBDay, totalHeadM, type PumpSpec } from "./pump";
 import { leachedNKg, ureaEquivalent, wastedKwh } from "./savings";
 import { dayOfYear, hourlyGhiFromDaily } from "./solar";
 import { acresToM2, m3OverAreaToMm, mmOverAreaToM3, mjToKwh } from "./units";
+import { awcForSoil } from "./soils";
 import { balanceStep, rawMm, rootDepthM, tawMm } from "./waterBalance";
 
 export interface WeatherDay {
@@ -30,6 +31,8 @@ export interface FarmInput {
   sowingDate: string;
   areaAcres: number;
   irrigationMethod: IrrigationMethod;
+  /** Soil type: sets how much water the root zone holds. Absent = loam (the original fixed value). */
+  soilType?: string;
   lat: number;
   pump: PumpSpec;
 }
@@ -121,7 +124,7 @@ export function simulateFarm(
     const kc = kcForDay(farm.crop, dss);
     const etcMm = etcOf(kc, w.et0Mm);
     const effRainMm = effectiveRain(w.precipMm);
-    const taw = tawMm(rootDepthM(farm.crop, dss));
+    const taw = tawMm(rootDepthM(farm.crop, dss), awcForSoil(farm.soilType));
     const raw = rawMm(taw, dss < 0 ? 0.5 : crop.p);
     const ghi = w.hourlyGhi ?? hourlyGhiFromDaily(mjToKwh(w.radiationMj), farm.lat, dayOfYear(dateUtc(w.date)));
     const solar = modeBDay(farm.pump, ghi);

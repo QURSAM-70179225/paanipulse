@@ -1,5 +1,6 @@
 /** Shared validation for creating a farm (farmer onboarding and installer registration). */
 import { z } from "zod";
+import { SOIL_TYPES } from "@/lib/engine/soils";
 
 export const DISTRICTS = [
   { name: "Sheikhupura", lat: 31.71, lng: 73.98, typicalDepthFt: 90 },
@@ -25,6 +26,7 @@ export const FarmCreate = z.object({
   sowingDate: z.coerce.date().refine((d) => d.getTime() < Date.now() + 86_400_000 && d.getTime() > Date.now() - 400 * 86_400_000, "sowing date must be within the last ~13 months"),
   areaAcres: z.number().min(0.5).max(500),
   irrigationMethod: z.enum(["flood", "furrow", "sprinkler", "drip"]),
+  soilType: z.enum(SOIL_TYPES).default("loam"),
   ratedKw: z.number().min(0.5).max(100),
   pvKwp: z.number().min(0.5).max(150),
   staticDepthFt: z.number().min(5).max(800),

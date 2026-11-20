@@ -280,6 +280,38 @@ illustration leaves out: free pilots, installer onboarding and a relay pilot.
 
 ---
 
+## 8b. Open loop versus sensor-based: the cost comparison
+
+The mentors' advice was to be **open loop** by default (calculate the water from what the farmer knows plus weather
+data) and keep any sensor **optional**, because sensor-based (closed-loop) systems need continuous, reliable data and
+cost far more. The comparison below shows why. **The hardware prices are illustrative only: we have no quote.** WIT's
+WaterSense price is not public; ask WIT for a quote. Replace these numbers when you have one.
+
+| | **Open loop (what we ship)** | **Sensor-based (closed loop)** |
+|---|---|---|
+| Hardware per field | none | one or more soil sensors, with a box, battery and radio or SIM |
+| Data needed | crop, stage, soil, area, weather from a free-to-start feed | continuous readings from every field |
+| If data is wrong or missing | the answer still comes from the chart and the weather | the advice can be wrong or absent |
+| Our cost per pump per year | about **Rs 719** (variable cost, section 7) | Rs 719 **plus** the hardware below, plus connectivity and replacement |
+| Who pays for hardware | no one | farmer, installer or us |
+
+**Hardware cost per field per year**, if a sensor lasts 3 years (illustrative prices, hardware only):
+
+| Sensor price (illustrative) | Per year | Compared with the whole open-loop running cost (Rs 719) | As a share of the farmer's base-case saving (Rs 3,600 a season, section 5) |
+|---|---|---|---|
+| Rs 10,000 | Rs 3,333 | 4.6 times | 93% |
+| Rs 20,000 | Rs 6,667 | 9.3 times | 185% |
+| Rs 35,000 | Rs 11,667 | 16 times | 324% |
+
+**Reading this:** even at the low price, one sensor per field would cost about as much each year as the farmer saves in a
+whole season, and far more than our entire running cost. That is the cost argument for open loop. It also means that
+**the installer fee of Rs 1,500 per pump per year could not cover a sensor**, so a sensor can only be an optional paid
+extra for farmers who want it (section 10, phase 3).
+
+**What we give up.** Open loop is less precise than live soil data: it cannot see a leaking channel, a patchy field or a
+soil that differs from its type. The trade is a little precision for a large drop in cost and complexity. How much
+precision is lost is **not yet measured**. The pilot will compare the advice with real soil-moisture readings.
+
 ## 9. Go-to-market and acquisition
 
 **Channel: installers.** An installer registers each farmer at the point of sale (the installer portal is built), so the

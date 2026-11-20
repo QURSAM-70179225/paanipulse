@@ -17,6 +17,7 @@ const CROPS = [
   { id: "sugarcane", en: "Sugarcane", ur: "گنا" },
 ] as const;
 const METHODS = ["flood", "furrow", "sprinkler", "drip"] as const;
+const SOIL_OPTIONS = [["sand", "soilSand"], ["sandy-loam", "soilSandyLoam"], ["loam", "soilLoam"], ["clay", "soilClay"]] as const;
 
 export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installer"; lang: Lang; dict: Record<DictKey, string> }) {
   const T = (k: DictKey, v?: Record<string, string | number>) => Object.entries(v ?? {}).reduce((a, [x, y]) => a.replaceAll(`{${x}}`, String(y)), dict[k]);
@@ -26,7 +27,7 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
   const [v, setV] = useState({
     farmerName: "", phone: "", pin: "",
     district: d0.name as string, lat: d0.lat as number, lng: d0.lng as number,
-    cropType: "wheat", sowingDate: new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10), areaAcres: 10, irrigationMethod: "flood",
+    cropType: "wheat", sowingDate: new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10), areaAcres: 10, soilType: "loam", irrigationMethod: "flood",
     ratedKw: TYPICAL_PUMP.ratedKw, pvKwp: TYPICAL_PUMP.pvKwp, staticDepthFt: d0.typicalDepthFt as number,
     dataConsent: true,
   });
@@ -54,7 +55,7 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           district: v.district, lat: v.lat, lng: v.lng, cropType: v.cropType, sowingDate: v.sowingDate, areaAcres: v.areaAcres,
-          irrigationMethod: v.irrigationMethod, ratedKw: v.ratedKw, pvKwp: v.pvKwp, staticDepthFt: v.staticDepthFt, language: lang, dataConsent: v.dataConsent,
+          soilType: v.soilType, irrigationMethod: v.irrigationMethod, ratedKw: v.ratedKw, pvKwp: v.pvKwp, staticDepthFt: v.staticDepthFt, language: lang, dataConsent: v.dataConsent,
           ...(mode === "installer" ? { farmer: { name: v.farmerName, phone: v.phone, pin: v.pin } } : {}),
         }),
       });
@@ -147,6 +148,11 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
               </button>
             ))}
           </div>
+          <label className={label}>{T("chartSoil")}
+            <select className={input} value={v.soilType} onChange={(e) => up({ soilType: e.target.value })}>
+              {SOIL_OPTIONS.map(([id, key]) => <option key={id} value={id}>{T(key)}</option>)}
+            </select>
+          </label>
         </div>
       )}
 

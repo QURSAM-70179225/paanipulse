@@ -3,6 +3,7 @@
 All notable changes. Dates are 2026.
 
 ## [Unreleased]
+- Water chart (look-up, open loop): public `/water-chart` page and `npm run water:chart`; soil type (sand, sandy loam, loam, clay) in farm set-up and in the daily advice (default loam, so existing farms are unchanged; migration `soil_type`). Cost comparison of open loop versus sensor-based in the business plan. Mentor-feedback status in `docs/OPEN_LOOP_AND_RISK.md`.
 - Open loop and risk: the farmer dashboard and voice note now say how much water to give the field (mm, acre-inch, m³ for the farm's area, pump hours). Forecast rain now skips an irrigation only with a 1.5× margin, a safe buffer, real weather and no critical growth stage; otherwise "water today to be safe". New "how sure is this advice" line (high / medium / low). Chat no longer says a forecast removes the need to irrigate. Design and risk notes in `docs/OPEN_LOOP_AND_RISK.md`.
 - Optional soil probe (software side, no hardware): `POST /api/soil`, `GET /api/farms/{id}/soil`, a "Soil now" card with a cross-check against the water-balance model, `npm run simulate:soil`, and a `SoilReading` table (migration `20261120072719_soil_readings`). See `docs/SOIL_SENSOR.md`.
 - Docs: business plan (`BUSINESS_PLAN.md`): value-based pricing, revenue wheels, cost model, unit economics, ROI, phases, KPIs, assumptions register, Australia comparison.

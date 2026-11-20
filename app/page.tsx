@@ -68,6 +68,7 @@ export default async function Home() {
               <p className="flex flex-col gap-1 text-sm text-emerald-100 sm:flex-row sm:gap-5">
                 <Link href="/login?as=installer" className="font-semibold underline underline-offset-4 hover:text-white">{T("signInInstaller")}</Link>
                 <Link href="/login?as=authority" className="font-semibold underline underline-offset-4 hover:text-white">{T("signInAuthority")}</Link>
+                <Link href="/water-chart" className="font-semibold underline underline-offset-4 hover:text-white">{T("chartLink")}</Link>
               </p>
             </div>
           )}

@@ -83,6 +83,8 @@ model Farm {
   cropType         String // wheat | rice | maize | cotton | sugarcane
   sowingDate       DateTime
   areaAcres        Float
+  /// "sand" | "sandy-loam" | "loam" | "clay": sets how much water the soil holds. Default loam = the earlier fixed value.
+  soilType         String         @default("loam")
   irrigationMethod String // flood | furrow | sprinkler | drip
   isSynthetic      Boolean        @default(false)
   dataConsent      Boolean        @default(true)

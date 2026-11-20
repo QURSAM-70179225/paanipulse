@@ -361,3 +361,18 @@ describe("advice confidence", () => {
     expect(adviceConfidence({ ...good, pumpCalibrated: false, hoursReported: false, hasTelemetry: true }).level).toBe("high");
   });
 });
+
+describe("soil type in the farm simulation", () => {
+  const weather = Array.from({ length: 12 }, (_, i) => ({ date: `2026-11-${String(i + 1).padStart(2, "0")}`, et0Mm: 3, precipMm: 0, radiationMj: 14 }));
+  const farm = { crop: "wheat" as const, sowingDate: "2026-10-25", areaAcres: 5, irrigationMethod: "flood" as const, lat: 31.7, pump: { ratedKw: 11, pvKwp: 14, staticDepthFt: 90 } };
+  it("is identical to the old behaviour when the soil is loam or not given", () => {
+    const a = simulateFarm(farm, weather, {}, "2026-11-12");
+    const b = simulateFarm({ ...farm, soilType: "loam" }, weather, {}, "2026-11-12");
+    expect(b.today.tawMm).toBe(a.today.tawMm);
+  });
+  it("a sandy field has a smaller root-zone store than a clay field", () => {
+    const sand = simulateFarm({ ...farm, soilType: "sand" }, weather, {}, "2026-11-12");
+    const clay = simulateFarm({ ...farm, soilType: "clay" }, weather, {}, "2026-11-12");
+    expect(sand.today.tawMm).toBeLessThan(clay.today.tawMm);
+  });
+});

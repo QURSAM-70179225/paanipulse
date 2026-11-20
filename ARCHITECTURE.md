@@ -130,6 +130,7 @@ Pure functions, all unit-tested. Units are SI inside; acres and feet are convert
 | `solar.ts` | Day length; hourly irradiance from a daily total |
 | `pump.ts` | Head, flow from power, PV power, Mode A (telemetry) and Mode B (sunlight) integration, bucket-test calibration, flow range, pump output in farmer units |
 | `advice.ts` | Turns balance state into *irrigate / keep off / skip for rain*, hours, days to next irrigation, critical-stage rule, the water to give (`netMm`, `grossMm`), and the conservative `rainVerdict` (rain is a bet: 1.5× margin, safe buffer, no skip at a critical stage or on sample weather) |
+| `lookup.ts`, `soils.ts` | The water chart: water per crop, stage, soil, season, method and area from FAO-56 typical values (no weather, no sensors); soil types and their water-holding; used by the `/water-chart` page and by the daily advice (soil type) |
 | `confidence.ts` | "How sure is this advice" (high / medium / low) and the reasons, from weather source, calibration, reported hours |
 | `savings.ts` | Wasted kWh, spare-solar value, nitrogen/urea estimate |
 | `simulate.ts` | Day-by-day farm simulation that ties the above together |
