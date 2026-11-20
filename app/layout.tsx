@@ -5,6 +5,7 @@ import "./globals.css";
 import { getLang } from "@/lib/i18n/server";
 import { dictFor, dirFor } from "@/lib/i18n/dict";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { ListenMode } from "@/components/ListenMode";
 
 export const metadata: Metadata = {
   title: "PaaniPulse",
@@ -27,6 +28,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang={lang}>
       <body className="min-h-screen antialiased">
         {children}
+        <ListenMode
+          lang={lang}
+          labels={{ start: d.listenStart, stop: d.listenStop, hint: d.listenHint, voice: d.listenVoice, unavailable: d.voiceUnavailable }}
+        />
         <InstallPrompt
           dir={dirFor(lang)}
           labels={{ title: d.installTitle, body: d.installBody, install: d.installButton, later: d.installLater, iosBody: d.installIosBody, installed: d.installed }}

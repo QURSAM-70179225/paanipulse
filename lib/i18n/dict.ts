@@ -134,6 +134,11 @@ const en = {
   thinking: "typing…",
   backToFarm: "Back to farm",
   voiceUnavailable: "Voice not available on this device — read the message instead.",
+  // listen mode (read any line aloud)
+  listenStart: "Listen",
+  listenStop: "Stop listening",
+  listenHint: "Tap any line to hear it. Tap a button twice to press it.",
+  listenVoice: "Voice language",
   // authority
   authTitle: "Groundwater extraction dashboard",
   authSubtitle: "Solar tube wells across central Punjab · anonymised, district level",
@@ -749,6 +754,10 @@ const ur: Record<DictKey, string> = {
   thinking: "لکھ رہا ہے…",
   backToFarm: "کھیت پر واپس",
   voiceUnavailable: "اس فون پر آواز دستیاب نہیں — پیغام پڑھ لیں۔",
+  listenStart: "سنیں",
+  listenStop: "سننا بند کریں",
+  listenHint: "کسی بھی لائن کو چھوئیں اور سنیں۔ بٹن دبانے کے لیے اسے دو بار چھوئیں۔",
+  listenVoice: "آواز کی زبان",
   authTitle: "زیرِ زمین پانی کے اخراج کا ڈیش بورڈ",
   authSubtitle: "وسطی پنجاب کے سولر ٹیوب ویل · بغیر نام، ضلع کی سطح پر",
   simulatedBanner: "فرضی ڈیمو ڈیٹا — 150 فرضی ٹیوب ویل اور 1 ڈیمو کھیت۔ اصل پیمائش نہیں۔",
@@ -1246,5 +1255,21 @@ export const dirFor = (lang: Lang) => (lang === "ur" ? "rtl" : "ltr");
 
 /** Whole dictionary for one language (for client components). */
 export const dictFor = (lang: Lang) => DICTS[lang];
+const norm = (s: string) => s.replace(/\s+/g, " ").trim();
+let byText: Map<string, DictKey> | null = null;
+
+/** Looks up a fixed UI string (either language) and returns it in `to`, or null when the text isn't a fixed string. */
+export function translateFixed(text: string, to: Lang): string | null {
+  if (!byText) {
+    byText = new Map();
+    for (const l of LANGS) for (const [k, v] of Object.entries(DICTS[l])) if (!v.includes("{")) byText.set(norm(v), k as DictKey);
+  }
+  const key = byText.get(norm(text));
+  return key ? DICTS[to][key] : null;
+}
+
+/** True when `text` is one of the app's fixed UI strings (safe to voice without sign-in: bounded and cached). */
+export const isFixedString = (text: string) => translateFixed(text, "en") !== null;
+
 export const fill = (s: string, vars: Record<string, string | number>) =>
   Object.entries(vars).reduce((acc, [k, v]) => acc.replaceAll(`{${k}}`, String(v)), s);
