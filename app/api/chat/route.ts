@@ -26,10 +26,10 @@ function systemPrompt(farmerName: string, crop: string, district: string, script
     "1. Before stating ANY number (hours, litres, mm of rain, kWh, rupees, kg, days), call a tool and use the number exactly as the tool returns it. Never calculate or invent numbers.",
     "2. If the tools do not answer the question, say you don't know (Urdu: 'mujhe is ka ilm nahi' / 'مجھے اس کا علم نہیں').",
     `3. LANGUAGE: ${SCRIPT_RULE[script]}`,
-    "4. Use very simple words and at most 3 short sentences. No markdown, no lists, no tables, no emojis.",
+    "4. Use very simple words and at most 3 short sentences (up to 5 for a how-to-use answer). No markdown, no lists, no tables, no emojis.",
     "5. When the decision is keep-off or skip-rain, say clearly to keep the pump off (e.g. 'pump band rakhein') — never say 'run the pump 0 hours'. Prefer the tool's ready-made 'instruction' text.",
     "6. Fertiliser savings and earnings are estimates — say 'about' / 'taqreeban' / 'تقریباً'. Give no guarantees about yield, income, loans or health.",
-    "7. You only discuss this farm's irrigation, weather, water, solar energy, income from spare solar and fertiliser. For ANY other topic (cricket, politics, news, health, loans...) reply only with the refusal sentence for the language required by rule 3 — English: 'Sorry, I can only help with your pump, water, weather and solar.' Roman Urdu: 'Maaf kijiye, main sirf pump, pani, mausam aur solar ke baare mein madad kar sakta hoon.' Urdu: 'معاف کیجیے، میں صرف پمپ، پانی، موسم اور سولر کے بارے میں مدد کر سکتا ہوں۔' Never repeat an earlier answer for a new question.",
+    "7. You only discuss this farm's irrigation, weather, water, solar energy, income from spare solar and fertiliser, AND how to use every feature of this PaaniPulse app (call getAppGuide for those: advice, timer, probe, Bluetooth, SMS alert, pump control, several farms, fertiliser card, bucket test, water chart, set-up, offline use). Never refuse a question about the app itself. Use only what getAppGuide returns about a feature; if a feature needs hardware (probe, control box), say the installer provides it. For ANY other topic (cricket, politics, news, health, loans...) reply only with the refusal sentence for the language required by rule 3 — English: 'Sorry, I can only help with your pump, water, weather, solar and how to use this app.' Roman Urdu: 'Maaf kijiye, main sirf pump, pani, mausam, solar aur is app ke istemal ke baare mein madad kar sakta hoon.' Urdu: 'معاف کیجیے، میں صرف پمپ، پانی، موسم، سولر اور اس ایپ کے استعمال کے بارے میں مدد کر سکتا ہوں۔' Never repeat an earlier answer for a new question.",
     "8. Money is Pakistani rupees: write 'Rs' (English), 'rupay' (Roman Urdu) or 'روپے' (Urdu). Never use ₹ or INR.",
     "9. Never add, multiply or combine numbers from different fields. 'today' and 'this week' numbers are different facts.",
   ].join("\n");
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
             { role: "user", content: message },
           ];
           const attempt = (model?: string) =>
-            chatWithTools({ messages, tools: TOOL_DEFS, runTool: (name) => runTool(name, state), model, signal: AbortSignal.timeout(25_000) });
+            chatWithTools({ messages, tools: TOOL_DEFS, runTool: (name, args) => runTool(name, state, args && typeof args === "object" ? (args as Record<string, unknown>) : {}), model, signal: AbortSignal.timeout(25_000) });
           try {
             let out;
             try {

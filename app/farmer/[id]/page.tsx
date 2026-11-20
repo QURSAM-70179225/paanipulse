@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft, BatteryCharging, CalendarClock, CloudRain, Droplets, Flame, Gauge, History, Leaf, MessageCircle,
+  ArrowLeft, BatteryCharging, BookOpen, CalendarClock, CloudRain, Droplets, Flame, Gauge, History, Leaf, MessageCircle,
   Ruler, Waves,
   PowerOff, Radio, Sprout, Sun, Thermometer, Wheat, Zap, Coins, Info, CircleAlert, ShieldAlert, ShieldCheck,
 } from "lucide-react";
@@ -39,6 +39,7 @@ import { type Condition } from "@/lib/weatherCode";
 import { WeatherLive } from "@/components/farmer/WeatherLive";
 import { OfflineSnapshot } from "@/components/farmer/OfflineSnapshot";
 import { PumpTimer } from "@/components/farmer/PumpTimer";
+import { GuideCard } from "@/components/guide/GuideCard";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,11 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
       />
       <Header s={s} T={T} lang={lang} user={user} farms={ownFarms.map((f) => ({ id: f.id, label: farmLabel(f, lang) }))} />
       <div className="flex flex-col gap-4 px-4 pt-4">
+        <GuideCard
+          lang={ur ? "ur" : "en"}
+          farmId={s.farm.id}
+          labels={{ title: T("guideCardTitle"), body: T("guideCardBody"), play: T("guidePlay"), stop: T("guideStop"), unavailable: T("voiceUnavailable"), read: T("guideCardRead"), hide: T("guideDismiss") }}
+        />
         {!s.yesterdayReported && !s.pump.hasTelemetry && (
           <ReportHours
             farmId={s.farm.id}
@@ -222,7 +228,12 @@ function Header({ s, T, lang, user, farms }: { s: FarmState; T: TFn; lang: Lang;
         <Link href={user.role === "INSTALLER" ? "/installer" : "/"} className="inline-flex min-h-9 items-center gap-1 text-sm text-emerald-100 hover:text-white">
           <ArrowLeft className={cn("h-4 w-4", ur && "rotate-180")} aria-hidden /> {T("appName")}
         </Link>
-        <LanguageToggle lang={lang} />
+        <div className="flex items-center gap-2">
+          <Link href={`/guide?farm=${encodeURIComponent(s.farm.id)}`} className="inline-flex min-h-9 items-center gap-1 rounded-full bg-white/15 px-3 text-sm font-medium text-white hover:bg-white/25">
+            <BookOpen className="h-4 w-4" aria-hidden /> {T("guideNav")}
+          </Link>
+          <LanguageToggle lang={lang} />
+        </div>
       </div>
       <AccountBar user={user} signOutLabel={T("signOut")} className="mt-2 justify-between text-emerald-50" />
       {farms.length > 0 && <FarmSwitcher farms={farms} currentId={s.farm.id} labels={{ farm: T("farmSwitchLabel"), add: T("addFarm"), all: T("farmAll") }} />}
