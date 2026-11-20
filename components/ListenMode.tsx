@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Volume2, X } from "lucide-react";
 import { translateFixed, type Lang } from "@/lib/i18n/dict";
 import { speak, stopSpeaking } from "@/lib/speech";
@@ -60,9 +61,22 @@ function targetOf(start: HTMLElement): HTMLElement | null {
   return null;
 }
 
-export function ListenMode({ lang, labels, className }: { lang: Lang; labels: Labels; className?: string }) {
+/** Each page picks its own language, so read it from the page: any right-to-left block outside our own UI means Urdu. */
+const pageLang = (): Lang => (document.querySelector("[dir=rtl]:not([data-listen-ui]), .ur-ui") ? "ur" : "en");
+
+export function ListenMode({ labels: both, className }: { labels: Record<Lang, Labels>; className?: string }) {
+  const pathname = usePathname();
+  const [lang, setLang] = useState<Lang>("ur");
+  const labels = both[lang];
   const [on, setOn] = useState(false);
-  const [voice, setVoice] = useState<Lang>(lang);
+  const [voice, setVoice] = useState<Lang>("ur");
+  const chosenVoice = useRef(false);
+
+  useEffect(() => {
+    const l = pageLang();
+    setLang(l);
+    if (!chosenVoice.current) setVoice(l);
+  }, [pathname]);
   const [note, setNote] = useState<string | null>(null);
   const speaking = useRef<HTMLElement | null>(null);
   const last = useRef<{ el: Element; at: number } | null>(null);
@@ -71,7 +85,10 @@ export function ListenMode({ lang, labels, className }: { lang: Lang; labels: La
   useEffect(() => {
     setOn(read(STORE.on) === "1");
     const v = read(STORE.voice);
-    if (v === "ur" || v === "en") setVoice(v);
+    if (v === "ur" || v === "en") {
+      chosenVoice.current = true;
+      setVoice(v);
+    }
   }, []);
 
   const unmark = () => {
@@ -151,15 +168,20 @@ export function ListenMode({ lang, labels, className }: { lang: Lang; labels: La
 
   const toggle = () => {
     const next = !on;
+    const l = pageLang(); // the language toggle refreshes in place, so check again
+    setLang(l);
+    const v = chosenVoice.current ? voice : l;
+    setVoice(v);
     setOn(next);
     write(STORE.on, next ? "1" : "0");
     stopSpeaking();
     unmark();
     last.current = null;
-    if (next) void speak(translateFixed(labels.hint, voice) ?? labels.hint);
+    if (next) void speak(both[v].hint);
   };
 
   const pickVoice = (v: Lang) => {
+    chosenVoice.current = true;
     setVoice(v);
     write(STORE.voice, v);
   };
@@ -200,7 +222,15 @@ export function ListenMode({ lang, labels, className }: { lang: Lang; labels: La
         )}
       >
         {on ? <X className="h-6 w-6" aria-hidden /> : <Volume2 className="h-6 w-6" aria-hidden />}
-        <span className={cn(lang === "ur" && "urdu leading-none")}>{on ? labels.stop : labels.start}</span>
+        {on ? (
+          <span className={cn(lang === "ur" && "urdu leading-none")}>{labels.stop}</span>
+        ) : (
+          <span dir="ltr" className="flex items-center gap-2">
+            <span className="urdu leading-none">{both.ur.start}</span>
+            <span aria-hidden>·</span>
+            <span>{both.en.start}</span>
+          </span>
+        )}
       </button>
     </div>
   );
