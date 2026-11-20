@@ -1,5 +1,7 @@
 "use client";
 
+import { areaLimits, areaNumber, fromAcres, LAND_UNITS, toAcres, type LandUnit } from "@/lib/engine/landUnits";
+import { UNIT_KEY } from "@/lib/i18n/area";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Check, Crosshair, Droplets, Gauge, MapPin, ShieldCheck, Sprout, User } from "lucide-react";
@@ -26,7 +28,7 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
   const [v, setV] = useState({
     farmerName: "", phone: "", pin: "",
     district: d0.name as string, lat: d0.lat as number, lng: d0.lng as number,
-    cropType: "wheat", sowingDate: new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10), areaAcres: 10, irrigationMethod: "flood",
+    cropType: "wheat", sowingDate: new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10), areaValue: 10, areaUnit: "acre" as LandUnit, irrigationMethod: "flood",
     ratedKw: TYPICAL_PUMP.ratedKw, pvKwp: TYPICAL_PUMP.pvKwp, staticDepthFt: d0.typicalDepthFt as number,
     dataConsent: true,
   });
@@ -34,6 +36,9 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
   const [busy, setBusy] = useState(false);
   const up = (patch: Partial<typeof v>) => setV((s) => ({ ...s, ...patch }));
   const step = steps[i];
+  /** The land as typed (in the farmer's unit) converted to the acres we store. */
+  const acres = Math.round(toAcres(v.areaValue, v.areaUnit) * 100) / 100;
+  const lim = areaLimits(v.areaUnit);
   const input = "num h-12 w-full rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600";
   const label = "flex flex-col gap-1 text-sm font-medium text-slate-700";
 
@@ -53,7 +58,7 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          district: v.district, lat: v.lat, lng: v.lng, cropType: v.cropType, sowingDate: v.sowingDate, areaAcres: v.areaAcres,
+          district: v.district, lat: v.lat, lng: v.lng, cropType: v.cropType, sowingDate: v.sowingDate, areaAcres: acres, areaUnit: v.areaUnit,
           irrigationMethod: v.irrigationMethod, ratedKw: v.ratedKw, pvKwp: v.pvKwp, staticDepthFt: v.staticDepthFt, language: lang, dataConsent: v.dataConsent,
           ...(mode === "installer" ? { farmer: { name: v.farmerName, phone: v.phone, pin: v.pin } } : {}),
         }),
@@ -73,7 +78,7 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
 
   const canNext =
     step === "farmer" ? v.farmerName.trim().length >= 2 && /\d{10,}/.test(v.phone.replace(/\D/g, "")) && /^\d{4,6}$/.test(v.pin) :
-    step === "crop" ? v.areaAcres > 0 && !!v.sowingDate :
+    step === "crop" ? acres >= 0.5 && acres <= 500 && !!v.sowingDate :
     step === "pump" ? v.ratedKw > 0 && v.pvKwp > 0 && v.staticDepthFt > 0 : true;
 
   const titles: Record<string, { k: DictKey; icon: React.ElementType }> = {
@@ -137,7 +142,18 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
             ))}
           </div>
           <label className={label}>{T("sowingDate")}<input className={input} type="date" value={v.sowingDate} onChange={(e) => up({ sowingDate: e.target.value })} /></label>
-          <label className={label}>{T("area")}<input className={input} type="number" inputMode="decimal" min={0.5} step={0.5} value={v.areaAcres} onChange={(e) => up({ areaAcres: Number(e.target.value) })} /></label>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium text-slate-700">{T("area")}</p>
+            <div className="grid grid-cols-[1fr_auto] gap-2">
+              <input aria-label={T("area")} className={input} type="number" inputMode="decimal" min={lim.min} max={lim.max} step={lim.step} value={v.areaValue}
+                onChange={(e) => up({ areaValue: Number(e.target.value) })} />
+              <select aria-label={T("areaUnitLabel")} className={cn(input, "w-auto")} value={v.areaUnit}
+                onChange={(e) => { const u = e.target.value as LandUnit; up({ areaUnit: u, areaValue: Number(fromAcres(toAcres(v.areaValue, v.areaUnit), u).toFixed(u === "marla" ? 0 : 1)) }); }}>
+                {LAND_UNITS.map((u) => <option key={u} value={u}>{T(UNIT_KEY[u])}</option>)}
+              </select>
+            </div>
+            <p className="text-xs text-slate-500">≈ {areaNumber(acres, "acre")} {T("unitAcre")} · {areaNumber(acres, "kanal")} {T("unitKanal")}. {T("areaUnitNote")}</p>
+          </div>
           <p className={label}>{T("irrigation")}</p>
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={T("irrigation")}>
             {METHODS.map((m) => (

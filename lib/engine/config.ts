@@ -59,6 +59,8 @@ export const DEFAULTS = {
   /** PV performance ratio and pump start threshold (fraction of rated kW). */
   performanceRatio: 0.75,
   startThreshold: 0.2,
+  /** Hold a urea dose if this much rain (mm, today + tomorrow) is forecast: rain can wash it off. General rule, confirm with an agronomist. */
+  fertRainHoldMm: 10,
   /** Advice limits. */
   maxPumpHoursPerDay: 12,
   hoursStep: 0.5,

@@ -1,3 +1,5 @@
+import { isLandUnit } from "@/lib/engine/landUnits";
+import { areaText } from "@/lib/i18n/area";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Plus, Sprout } from "lucide-react";
@@ -13,7 +15,7 @@ export default async function FarmerHome() {
   const user = await getSession();
   if (!user) redirect("/login?next=/farmer");
   if (user.role === "INSTALLER") redirect("/installer");
-  const farms = await prisma.farm.findMany({ where: { ownerId: user.id }, select: { id: true, district: true, cropType: true, areaAcres: true }, orderBy: { createdAt: "asc" } });
+  const farms = await prisma.farm.findMany({ where: { ownerId: user.id }, select: { id: true, district: true, cropType: true, areaAcres: true, areaUnit: true }, orderBy: { createdAt: "asc" } });
   if (farms.length === 0) redirect("/farmer/onboard");
   if (farms.length === 1) redirect(`/farmer/${farms[0].id}`);
   const lang = await getLang("ur");
@@ -25,7 +27,7 @@ export default async function FarmerHome() {
         {farms.map((f) => (
           <li key={f.id}>
             <Link href={`/farmer/${f.id}`} className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-              <Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {f.district} · {f.cropType} · {f.areaAcres} {d.acres}
+              <Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {f.district} · {f.cropType} · {areaText(f.areaAcres, isLandUnit(f.areaUnit) ? f.areaUnit : "acre", (k) => d[k])}
             </Link>
           </li>
         ))}

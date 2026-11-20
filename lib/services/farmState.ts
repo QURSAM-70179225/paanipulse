@@ -3,7 +3,9 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import { pktDateKey, pktDayStart } from "@/lib/dates";
 import { CRITICAL_STAGES, DEFAULTS, flowRangeM3h, pumpOutput, summarise, surplusIdeas, type CropType } from "@/lib/engine";
+import { fertHint, fertSchedule, fertTotals, isLandUnit } from "@/lib/engine";
 import { advisoryText } from "./advisoryText";
+import { parseFertPlan } from "./fertPlan";
 import { runFarm } from "./farmSim";
 import { getWeather, nextHours } from "./weather";
 
@@ -49,7 +51,19 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
   // On a "pump off" day, the whole day's solar yield is spare.
   const todaySpareKwh = Math.max(0, sim.today.pvKwh - (advice.kind === "irrigate" ? advice.hoursToday * sim.today.peakPumpKw * 0.8 : 0));
 
+  const fertPlan = parseFertPlan(farm.fertPlan);
+  const fert = fertPlan
+    ? {
+        plan: fertPlan,
+        totals: fertTotals(fertPlan, farm.areaAcres),
+        schedule: fertSchedule(fertPlan, farm.areaAcres),
+        // Raw forecast rain for today + tomorrow decides whether a urea dose is held.
+        hint: fertHint(fertPlan, farm.areaAcres, advice.kind, (forecast[0]?.precipMm ?? 0) + (forecast[1]?.precipMm ?? 0)),
+      }
+    : null;
+
   return {
+    fert,
     farm: {
       id: farm.id,
       farmerName: farm.farmerName,
@@ -57,6 +71,7 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
       tehsil: farm.tehsil,
       crop: farm.cropType as CropType,
       areaAcres: farm.areaAcres,
+      areaUnit: isLandUnit(farm.areaUnit) ? farm.areaUnit : ("acre" as const),
       irrigationMethod: farm.irrigationMethod,
       isSynthetic: farm.isSynthetic,
       lat: farm.lat,

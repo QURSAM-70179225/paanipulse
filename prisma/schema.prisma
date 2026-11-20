@@ -83,6 +83,10 @@ model Farm {
   cropType         String // wheat | rice | maize | cotton | sugarcane
   sowingDate       DateTime
   areaAcres        Float
+  /// How the farmer thinks of his land: "acre" | "kanal" | "marla" | "murabba" | "ghumaon". areaAcres stays the stored value.
+  areaUnit         String         @default("acre")
+  /// Fertiliser rate the farmer or installer entered from a soil test or agriculture officer (not a recommendation by the app).
+  fertPlan         Json?
   irrigationMethod String // flood | furrow | sprinkler | drip
   isSynthetic      Boolean        @default(false)
   dataConsent      Boolean        @default(true)

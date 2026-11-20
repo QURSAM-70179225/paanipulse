@@ -225,6 +225,7 @@ Speaker notes with timings are in both PPTX files. The outline is in [docs/PITCH
 - **Pump timer and alarm**; **live meter** with an over-run warning (when a drive is connected).
 - **Offline mode**; opt-in **daily advice by SMS / WhatsApp**; installable on the home screen.
 - **Bucket test** and **meter field check**; **4-step farm set-up** with a map and typical-pump defaults.
+- **Land in your own unit** (acre, kanal, marla, murabba, ghumaon) and **Fertiliser for your land**: you enter the rate from your soil test or officer, the app totals it for your land and times the doses with your irrigation. See [docs/LAND_UNITS_AND_FERTILISER.md](docs/LAND_UNITS_AND_FERTILISER.md).
 - **Soil probe card** (optional, software only, tested with a simulator; no probe hardware connected): see [docs/SOIL_SENSOR.md](docs/SOIL_SENSOR.md).
 </details>
 

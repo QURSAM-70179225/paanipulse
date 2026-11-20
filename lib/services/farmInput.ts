@@ -1,5 +1,6 @@
 /** Shared validation for creating a farm (farmer onboarding and installer registration). */
 import { z } from "zod";
+import { LAND_UNITS } from "@/lib/engine/landUnits";
 
 export const DISTRICTS = [
   { name: "Sheikhupura", lat: 31.71, lng: 73.98, typicalDepthFt: 90 },
@@ -24,6 +25,8 @@ export const FarmCreate = z.object({
   cropType: z.enum(["wheat", "rice", "maize", "cotton", "sugarcane"]),
   sowingDate: z.coerce.date().refine((d) => d.getTime() < Date.now() + 86_400_000 && d.getTime() > Date.now() - 400 * 86_400_000, "sowing date must be within the last ~13 months"),
   areaAcres: z.number().min(0.5).max(500),
+  /** How the farmer thinks of his land; areaAcres is the stored value, already converted. */
+  areaUnit: z.enum(LAND_UNITS).default("acre"),
   irrigationMethod: z.enum(["flood", "furrow", "sprinkler", "drip"]),
   ratedKw: z.number().min(0.5).max(100),
   pvKwp: z.number().min(0.5).max(150),
