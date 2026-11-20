@@ -254,6 +254,7 @@ const en = {
   chartBack: "Back",
   // Bluetooth soil probe
   probeTitle: "Soil probe (Bluetooth)",
+  probeLink: "Optional: connect a soil probe (Bluetooth)",
   probeIntro: "Connect your PaaniProbe to this phone. Its readings are sent to PaaniPulse.",
   probeConnect: "Connect probe",
   probeConnecting: "Connecting…",
@@ -794,6 +795,7 @@ const ur: Record<DictKey, string> = {
   chartBack: "واپس",
   // Bluetooth soil probe
   probeTitle: "مٹی کا پروب (بلوٹوتھ)",
+  probeLink: "اختیاری: مٹی کا پروب جوڑیں (بلوٹوتھ)",
   probeIntro: "اپنا پانی پروب اس فون سے جوڑیں۔ اس کی ریڈنگ پانی پلس کو بھیجی جاتی ہیں۔",
   probeConnect: "پروب جوڑیں",
   probeConnecting: "جڑ رہا ہے…",

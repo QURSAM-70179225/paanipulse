@@ -183,6 +183,9 @@ export default async function FarmPage({ params, searchParams }: { params: Promi
           </p>
           <p>{T("consent")}</p>
           <Link href={`/report/${s.farm.id}`} className="font-semibold text-sky-800 underline">{T("openReportLink")}</Link>
+          {!(hasSoilProbe || showProbe) && (
+            <Link href={`/farmer/${s.farm.id}?probe=1`} className="inline-flex min-h-10 items-center font-semibold text-sky-800 underline">{T("probeLink")}</Link>
+          )}
         </footer>
       </div>
     </main>
