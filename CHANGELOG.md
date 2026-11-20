@@ -3,7 +3,7 @@
 All notable changes. Dates are 2026.
 
 ## [Unreleased]
-- Docs: simple 6-slide pitch deck (cover with name and logo, problem, idea, what is built, demo, close) in `docs/slides/`.
+- Docs: simple 7-slide pitch deck (cover with name and logo, problem, idea, existing solutions, what is built, features, close; no demo slide) in `docs/slides/`.
 - Docs: 3-minute pitch deck (PPTX and PDF, 7 slides) and 5-minute mentor deck (10 slides plus 6 hidden appendix slides), both with speaker notes, in `docs/slides/`.
 - Docs: demo video (2:30, voice-over, spoken question and answer, role sign-in scenes) and live-site screenshots; mentor session prep; pitch deck outline and video storyboard.
 - Sign-in page: large role cards (Farmer / Installer / Irrigation Dept); `?as=installer|authority`; home page links for installers and the department.
