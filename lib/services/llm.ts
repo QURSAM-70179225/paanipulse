@@ -112,6 +112,23 @@ export async function chatWithTools(opts: {
   return { text: finalText, toolOutputs };
 }
 
+/**
+ * Drops a sentence that repeats the one right before it. The model sometimes writes its answer twice, glued
+ * together ("Keep the pump off today.Keep the pump off today.").
+ */
+export function dropRepeatedSentences(text: string): string {
+  // Split after sentence-ending punctuation, but not inside a number like 3.5.
+  const parts = text.split(/(?<=[.!?۔؟])(?!\d)/);
+  const out: string[] = [];
+  for (const p of parts) {
+    const key = p.trim().toLowerCase();
+    if (!key) continue;
+    if (out.length && out[out.length - 1].trim().toLowerCase() === key) continue;
+    out.push(p);
+  }
+  return out.join("").trim();
+}
+
 /** All numbers in a text (commas stripped). */
 export function numbersIn(text: string): number[] {
   return (text.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).map((n) => Number(n.replace(/,/g, ""))).filter((n) => Number.isFinite(n));

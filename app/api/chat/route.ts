@@ -5,7 +5,7 @@ import { badRequest, guardFarm, notFound, serverError } from "@/lib/api/http";
 import { getFarmState } from "@/lib/services/farmState";
 import { CROP_NAMES } from "@/lib/services/advisoryText";
 import { detectScript, fallbackAnswer, runTool, TOOL_DEFS, type Script } from "@/lib/services/chatTools";
-import { chatWithTools, groqFallbackModel, llmConfigured, numbersGrounded, RateLimitError, type ChatMsg } from "@/lib/services/llm";
+import { chatWithTools, groqFallbackModel, llmConfigured, numbersGrounded, dropRepeatedSentences, RateLimitError, type ChatMsg } from "@/lib/services/llm";
 
 export const dynamic = "force-dynamic";
 // Groq tool rounds can take several seconds; allow up to 60 s on Vercel.
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
             // Guardrail: buffer the answer and only send it if every number came from a tool.
             const check = numbersGrounded(out.text, [...out.toolOutputs, message]);
             if (out.text.trim() && check.ok) {
-              push(out.text.trim());
+              push(dropRepeatedSentences(out.text));
             } else if (!check.ok) {
               console.warn("Ungrounded numbers in LLM answer, using rule-based answer:", check.ungrounded);
             }
