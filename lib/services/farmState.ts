@@ -74,6 +74,8 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
       tehsil: farm.tehsil,
       crop: farm.cropType as CropType,
       areaAcres: farm.areaAcres,
+      variety: farm.variety,
+      maturity: farm.maturity,
       areaUnit: isLandUnit(farm.areaUnit) ? farm.areaUnit : ("acre" as const),
       irrigationMethod: farm.irrigationMethod,
       isSynthetic: farm.isSynthetic,

@@ -224,7 +224,7 @@ function Header({ s, T, lang, user }: { s: FarmState; T: TFn; lang: Lang; user: 
       <h1 className="mt-2 text-2xl font-bold">{s.farm.farmerName}</h1>
       <p className="text-emerald-50">{s.farm.tehsil ? `${s.farm.tehsil}, ` : ""}{s.farm.district}</p>
       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-emerald-50">
-        <span className="inline-flex items-center gap-1"><Wheat className="h-4 w-4" aria-hidden /> {ur ? crop.ur : crop.en}</span>
+        <span className="inline-flex items-center gap-1"><Wheat className="h-4 w-4" aria-hidden /> {ur ? crop.ur : crop.en}{s.farm.variety ? <bdi dir="ltr"> · {s.farm.variety}</bdi> : null}</span>
         <span className="inline-flex items-center gap-1"><Sprout className="h-4 w-4" aria-hidden /> {T("day")} <span className="num">{s.today.daysSinceSowing}</span></span>
         <span className="num">{areaText(s.farm.areaAcres, s.farm.areaUnit, T)}</span>
         <span className="inline-flex items-center gap-1"><Zap className="h-4 w-4" aria-hidden /> <bdi dir="ltr" className="num">{s.pump.ratedKw} kW · {s.pump.pvKwp} kWp</bdi></span>

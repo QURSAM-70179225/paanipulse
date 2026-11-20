@@ -10,6 +10,7 @@ import { leachedNKg, ureaEquivalent, wastedKwh } from "./savings";
 import { dayOfYear, hourlyGhiFromDaily } from "./solar";
 import { acresToM2, m3OverAreaToMm, mmOverAreaToM3, mjToKwh } from "./units";
 import { awcForSoil } from "./soils";
+import { maturityScale } from "./varieties";
 import { balanceStep, rawMm, rootDepthM, tawMm } from "./waterBalance";
 
 export interface WeatherDay {
@@ -33,6 +34,8 @@ export interface FarmInput {
   irrigationMethod: IrrigationMethod;
   /** Soil type: sets how much water the root zone holds. Absent = loam (the original fixed value). */
   soilType?: string;
+  /** "normal" | "early" | "late": a shorter- or longer-duration variety. Absent = normal (the typical crop). */
+  maturity?: string;
   lat: number;
   pump: PumpSpec;
 }
@@ -112,6 +115,7 @@ export function simulateFarm(
   opts: { weatherReliable?: boolean } = {},
 ): SimulationResult {
   const crop = CROPS[farm.crop];
+  const sc = maturityScale(farm.maturity);
   const areaM2 = acresToM2(farm.areaAcres);
   const eff = IRRIGATION_EFFICIENCY[farm.irrigationMethod];
   const headM = totalHeadM(farm.pump.staticDepthFt, farm.pump.drawdownM);
@@ -121,10 +125,10 @@ export function simulateFarm(
 
   const perDay = weather.map((w) => {
     const dss = dayDiff(farm.sowingDate, w.date);
-    const kc = kcForDay(farm.crop, dss);
+    const kc = kcForDay(farm.crop, dss, sc);
     const etcMm = etcOf(kc, w.et0Mm);
     const effRainMm = effectiveRain(w.precipMm);
-    const taw = tawMm(rootDepthM(farm.crop, dss), awcForSoil(farm.soilType));
+    const taw = tawMm(rootDepthM(farm.crop, dss, undefined, sc), awcForSoil(farm.soilType));
     const raw = rawMm(taw, dss < 0 ? 0.5 : crop.p);
     const ghi = w.hourlyGhi ?? hourlyGhiFromDaily(mjToKwh(w.radiationMj), farm.lat, dayOfYear(dateUtc(w.date)));
     const solar = modeBDay(farm.pump, ghi);
@@ -202,7 +206,7 @@ export function simulateFarm(
     days.push({
       date: d.w.date,
       daysSinceSowing: d.dss,
-      stage: stageForDay(farm.crop, d.dss),
+      stage: stageForDay(farm.crop, d.dss, sc),
       kc: d.kc,
       et0: d.w.et0Mm,
       etc: d.etcMm,
@@ -239,7 +243,7 @@ export function simulateFarm(
       tawMm: t.taw,
       pvKwh: t.solar.pvKwh,
       pumpableHours: t.solar.pumpableHours,
-      stage: stageForDay(farm.crop, t.dss),
+      stage: stageForDay(farm.crop, t.dss, sc),
       daysSinceSowing: t.dss,
       et0: t.w.et0Mm,
       etc: t.etcMm,

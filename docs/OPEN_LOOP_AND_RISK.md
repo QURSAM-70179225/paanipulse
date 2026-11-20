@@ -88,7 +88,9 @@ efficiency of the irrigation method (flood 55%, furrow 65%, sprinkler 75%, drip 
 Today the app knows **crop type only**, and uses typical FAO-56 values. Real varieties differ (for example, short- and
 long-duration rice, early and late wheat). We have **no local variety data**, so we will not invent per-variety numbers.
 
-**Planned approach (not built):**
+**Built on the `feature/crop-varieties` branch** (see [VARIETIES.md](VARIETIES.md)): the farm form records the variety name and a ripening time (normal, early, late). Only the ripening time changes the maths (a rough 10% shift of the growth stages); the name is recorded. **Still planned:** per-variety durations from an official source.
+
+**Original plan:**
 1. Add a **variety or maturity group** to the farm profile (early, medium, late, or "I don't know").
 2. Scale the growth-stage lengths by maturity group, within limits set with **extension officers** or the research
    institute. "I don't know" keeps today's typical values.

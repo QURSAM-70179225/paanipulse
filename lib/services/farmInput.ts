@@ -1,5 +1,6 @@
 /** Shared validation for creating a farm (farmer onboarding and installer registration). */
 import { z } from "zod";
+import { cleanVariety, MATURITY } from "@/lib/engine/varieties";
 import { SOIL_TYPES } from "@/lib/engine/soils";
 import { LAND_UNITS } from "@/lib/engine/landUnits";
 
@@ -30,6 +31,9 @@ export const FarmCreate = z.object({
   areaUnit: z.enum(LAND_UNITS).default("acre"),
   irrigationMethod: z.enum(["flood", "furrow", "sprinkler", "drip"]),
   soilType: z.enum(SOIL_TYPES).default("loam"),
+  /** The seed variety the farmer knows. Empty or unusable text is stored as "not given". */
+  variety: z.string().max(60).nullish().transform((v) => cleanVariety(v)),
+  maturity: z.enum(MATURITY).default("normal"),
   ratedKw: z.number().min(0.5).max(100),
   pvKwp: z.number().min(0.5).max(150),
   staticDepthFt: z.number().min(5).max(800),

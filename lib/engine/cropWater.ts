@@ -6,11 +6,12 @@ import { mmOverAreaToM3 } from "./units";
  * Crop coefficient for a given day after sowing (FAO-56 Fig. 25):
  * flat Kc_ini, linear rise to Kc_mid over development, flat Kc_mid, linear fall to Kc_end over late season.
  * Before sowing (day < 0) the field is fallow.
+ * `stageScale` stretches or shrinks all four stage lengths (a shorter- or longer-duration variety); 1 = the typical crop.
  */
-export function kcForDay(crop: CropType, daysSinceSowing: number): number {
+export function kcForDay(crop: CropType, daysSinceSowing: number, stageScale = 1): number {
   if (daysSinceSowing < 0) return FALLOW.kc;
   const c = CROPS[crop];
-  const [ini, dev, mid, late] = c.stages;
+  const [ini, dev, mid, late] = c.stages.map((x) => x * stageScale) as [number, number, number, number];
   const d = daysSinceSowing;
   if (d <= ini) return c.kcIni;
   if (d <= ini + dev) return c.kcIni + ((d - ini) / dev) * (c.kcMid - c.kcIni);
@@ -20,9 +21,9 @@ export function kcForDay(crop: CropType, daysSinceSowing: number): number {
 }
 
 /** Growth stage label for UI. */
-export function stageForDay(crop: CropType, daysSinceSowing: number): "fallow" | "initial" | "development" | "mid" | "late" | "harvested" {
+export function stageForDay(crop: CropType, daysSinceSowing: number, stageScale = 1): "fallow" | "initial" | "development" | "mid" | "late" | "harvested" {
   if (daysSinceSowing < 0) return "fallow";
-  const [ini, dev, mid, late] = CROPS[crop].stages;
+  const [ini, dev, mid, late] = CROPS[crop].stages.map((x) => x * stageScale) as [number, number, number, number];
   if (daysSinceSowing <= ini) return "initial";
   if (daysSinceSowing <= ini + dev) return "development";
   if (daysSinceSowing <= ini + dev + mid) return "mid";

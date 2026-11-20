@@ -1,5 +1,6 @@
 "use client";
 
+import { MATURITY, VARIETIES, VARIETY_OTHER, type Maturity } from "@/lib/engine/varieties";
 import { areaLimits, areaNumber, fromAcres, LAND_UNITS, toAcres, type LandUnit } from "@/lib/engine/landUnits";
 import { UNIT_KEY } from "@/lib/i18n/area";
 import dynamic from "next/dynamic";
@@ -18,6 +19,7 @@ const CROPS = [
   { id: "cotton", en: "Cotton", ur: "کپاس" },
   { id: "sugarcane", en: "Sugarcane", ur: "گنا" },
 ] as const;
+const MATURITY_KEY = { normal: "maturityNormal", early: "maturityEarly", late: "maturityLate" } as const;
 const METHODS = ["flood", "furrow", "sprinkler", "drip"] as const;
 const SOIL_OPTIONS = [["sand", "soilSand"], ["sandy-loam", "soilSandyLoam"], ["loam", "soilLoam"], ["clay", "soilClay"]] as const;
 
@@ -29,7 +31,7 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
   const [v, setV] = useState({
     farmerName: "", phone: "", pin: "",
     district: d0.name as string, lat: d0.lat as number, lng: d0.lng as number,
-    cropType: "wheat", sowingDate: new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10), areaValue: 10, areaUnit: "acre" as LandUnit, soilType: "loam", irrigationMethod: "flood",
+    cropType: "wheat", sowingDate: new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10), areaValue: 10, areaUnit: "acre" as LandUnit, soilType: "loam", variety: "", varietyOther: "", maturity: "normal", irrigationMethod: "flood",
     ratedKw: TYPICAL_PUMP.ratedKw, pvKwp: TYPICAL_PUMP.pvKwp, staticDepthFt: d0.typicalDepthFt as number,
     dataConsent: true,
   });
@@ -60,7 +62,7 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           district: v.district, lat: v.lat, lng: v.lng, cropType: v.cropType, sowingDate: v.sowingDate, areaAcres: acres, areaUnit: v.areaUnit,
-          soilType: v.soilType, irrigationMethod: v.irrigationMethod, ratedKw: v.ratedKw, pvKwp: v.pvKwp, staticDepthFt: v.staticDepthFt, language: lang, dataConsent: v.dataConsent,
+          soilType: v.soilType, variety: v.variety === VARIETY_OTHER ? v.varietyOther : v.variety, maturity: v.maturity, irrigationMethod: v.irrigationMethod, ratedKw: v.ratedKw, pvKwp: v.pvKwp, staticDepthFt: v.staticDepthFt, language: lang, dataConsent: v.dataConsent,
           ...(mode === "installer" ? { farmer: { name: v.farmerName, phone: v.phone, pin: v.pin } } : {}),
         }),
       });
@@ -136,13 +138,29 @@ export function OnboardWizard({ mode, lang, dict }: { mode: "farmer" | "installe
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={T("stepCrop")}>
             {CROPS.map((c) => (
-              <button key={c.id} type="button" role="radio" aria-checked={v.cropType === c.id} onClick={() => up({ cropType: c.id })}
+              <button key={c.id} type="button" role="radio" aria-checked={v.cropType === c.id} onClick={() => up({ cropType: c.id, variety: "", varietyOther: "" })}
                 className={cn("flex min-h-14 flex-col items-center justify-center rounded-xl border-2 text-sm font-semibold", v.cropType === c.id ? "border-emerald-600 bg-emerald-50 text-emerald-900" : "border-slate-200 bg-white text-slate-800")}>
                 <Sprout className="h-5 w-5" aria-hidden /> {c[lang]}
               </button>
             ))}
           </div>
           <label className={label}>{T("sowingDate")}<input className={input} type="date" value={v.sowingDate} onChange={(e) => up({ sowingDate: e.target.value })} /></label>
+          <label className={label}>{T("varietyLabel")}
+            <select className={input} value={v.variety} onChange={(e) => up({ variety: e.target.value })}>
+              <option value="">{T("varietyUnknown")}</option>
+              {(VARIETIES[v.cropType as keyof typeof VARIETIES] ?? []).map((name) => <option key={name} value={name}>{name}</option>)}
+              <option value={VARIETY_OTHER}>{T("varietyOther")}</option>
+            </select>
+          </label>
+          {v.variety === VARIETY_OTHER && (
+            <input aria-label={T("varietyOther")} className={input} type="text" maxLength={40} placeholder={T("varietyOtherPlaceholder")} value={v.varietyOther} onChange={(e) => up({ varietyOther: e.target.value })} />
+          )}
+          <label className={label}>{T("maturityLabel")}
+            <select className={input} value={v.maturity} onChange={(e) => up({ maturity: e.target.value })}>
+              {MATURITY.map((m: Maturity) => <option key={m} value={m}>{T(MATURITY_KEY[m])}</option>)}
+            </select>
+          </label>
+          <p className="text-xs text-slate-500">{T("varietyNote")}</p>
           <div className="flex flex-col gap-1">
             <p className="text-sm font-medium text-slate-700">{T("area")}</p>
             <div className="grid grid-cols-[1fr_auto] gap-2">

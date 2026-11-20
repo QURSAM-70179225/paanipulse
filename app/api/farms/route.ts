@@ -45,6 +45,8 @@ export async function POST(req: Request) {
         areaUnit: b.areaUnit,
         irrigationMethod: b.irrigationMethod,
         soilType: b.soilType,
+        variety: b.variety,
+        maturity: b.maturity,
         dataConsent: b.dataConsent,
         isSynthetic: false,
         ownerId,

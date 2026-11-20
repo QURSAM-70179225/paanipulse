@@ -85,6 +85,10 @@ model Farm {
   areaAcres        Float
   /// "sand" | "sandy-loam" | "loam" | "clay": sets how much water the soil holds. Default loam = the earlier fixed value.
   soilType         String         @default("loam")
+  /// The seed variety the farmer knows (free text, e.g. "Galaxy-2013"). Recorded for the installer and the pilot; it does not change the maths.
+  variety          String?
+  /// "normal" | "early" | "late": a shorter- or longer-duration variety. Stretches the growth stages by 10% (a rough assumption).
+  maturity         String         @default("normal")
   /// How the farmer thinks of his land: "acre" | "kanal" | "marla" | "murabba" | "ghumaon". areaAcres stays the stored value.
   areaUnit         String         @default("acre")
   /// Fertiliser rate the farmer or installer entered from a soil test or agriculture officer (not a recommendation by the app).

@@ -10,6 +10,7 @@ export function toFarmInput(farm: Farm, pump: Pump): FarmInput {
     areaAcres: farm.areaAcres,
     irrigationMethod: farm.irrigationMethod as IrrigationMethod,
     soilType: farm.soilType,
+    maturity: farm.maturity,
     lat: farm.lat,
     pump: {
       ratedKw: pump.ratedKw,

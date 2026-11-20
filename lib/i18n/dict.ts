@@ -203,6 +203,16 @@ const en = {
   soilChartAria: "Soil moisture, last 24 hours",
   soilZoneDry: "Dry",
   soilZoneWet: "Wet",
+  // crop variety and ripening time
+  varietyLabel: "Variety (seed name)",
+  varietyUnknown: "I don't know",
+  varietyOther: "Other (type the name)",
+  varietyOtherPlaceholder: "Name from the seed bag",
+  maturityLabel: "How long does it take to ripen?",
+  maturityNormal: "Normal / I don't know",
+  maturityEarly: "Early (shorter)",
+  maturityLate: "Late (longer)",
+  varietyNote: "Optional. The variety name is recorded. Only the ripening time changes the water calculation, by a rough 10%.",
   // pump control (prototype)
   pumpCtlTitle: "Pump control (prototype)",
   pumpCtlOn: "Pump is ON",
@@ -775,6 +785,16 @@ const ur: Record<DictKey, string> = {
   soilChartAria: "مٹی کی نمی، پچھلے 24 گھنٹے",
   soilZoneDry: "خشک",
   soilZoneWet: "گیلی",
+  // crop variety and ripening time
+  varietyLabel: "قسم (بیج کا نام)",
+  varietyUnknown: "مجھے معلوم نہیں",
+  varietyOther: "کوئی اور (نام لکھیں)",
+  varietyOtherPlaceholder: "بیج کی تھیلی پر لکھا نام",
+  maturityLabel: "فصل پکنے میں کتنا وقت لیتی ہے؟",
+  maturityNormal: "عام / معلوم نہیں",
+  maturityEarly: "جلدی پکنے والی (کم مدت)",
+  maturityLate: "دیر سے پکنے والی (زیادہ مدت)",
+  varietyNote: "اختیاری۔ قسم کا نام محفوظ ہوتا ہے۔ پانی کے حساب میں صرف پکنے کا وقت تقریباً 10 فیصد کا فرق ڈالتا ہے۔",
   // pump control (prototype)
   pumpCtlTitle: "پمپ کنٹرول (تجرباتی)",
   pumpCtlOn: "پمپ چل رہا ہے",

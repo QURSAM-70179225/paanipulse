@@ -77,7 +77,7 @@ export default async function InstallerPage() {
                       {r.synthetic && <Badge variant="outline" className="mt-0.5">sim</Badge>}
                     </th>
                     <td className="px-2 py-2">{r.tehsil ? `${r.tehsil}, ` : ""}{r.district}</td>
-                    <td className="px-2 py-2">{CROP[r.crop]?.[lang] ?? r.crop} · <span className="num">{areaText(r.areaAcres, isLandUnit(r.areaUnit) ? r.areaUnit : "acre", (k) => d[k])}</span></td>
+                    <td className="px-2 py-2">{CROP[r.crop]?.[lang] ?? r.crop}{r.variety ? ` (${r.variety})` : ""} · <span className="num">{areaText(r.areaAcres, isLandUnit(r.areaUnit) ? r.areaUnit : "acre", (k) => d[k])}</span></td>
                     <td className="px-2 py-2">
                       {!r.hasData ? <span className="text-slate-500">{d.statusNoData}</span> : (
                         <span className={cn("font-semibold", r.lostPct > 30 ? "text-red-700" : r.lostPct > 15 ? "text-amber-700" : "text-emerald-700")}>{fill(d.statusLost, { pct: Math.round(r.lostPct) })}</span>

@@ -3,10 +3,10 @@ import { CROPS, DEFAULTS, FALLOW, type CropType } from "./config";
 import { clamp } from "./units";
 
 /** Effective rooting depth (m): grows linearly from rootMin at sowing to max at end of development. */
-export function rootDepthM(crop: CropType, daysSinceSowing: number, rootMin = DEFAULTS.rootMinM): number {
+export function rootDepthM(crop: CropType, daysSinceSowing: number, rootMin = DEFAULTS.rootMinM, stageScale = 1): number {
   if (daysSinceSowing < 0) return FALLOW.rootM;
   const c = CROPS[crop];
-  const growDays = c.stages[0] + c.stages[1];
+  const growDays = (c.stages[0] + c.stages[1]) * stageScale;
   return rootMin + (c.rootMaxM - rootMin) * clamp(daysSinceSowing / growDays, 0, 1);
 }
 

@@ -16,3 +16,4 @@ export * from "./landUnits";
 export * from "./fertiliser";
 export * from "./fieldFull";
 export * from "./pumpControl";
+export * from "./varieties";
