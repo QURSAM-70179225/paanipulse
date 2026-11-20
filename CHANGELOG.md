@@ -3,6 +3,7 @@
 All notable changes. Dates are 2026.
 
 ## [Unreleased]
+- Land units: farmers and installers can enter land in acre, kanal, marla, murabba or ghumaon (stored in acres, shown in the farmer's unit). Fertiliser for your land: the farmer enters the rate from a soil test or officer; the app totals it for his area, splits the urea and times doses with irrigation, holding a dose if heavy rain is forecast. Migration `land_unit_fert_plan`. See `docs/LAND_UNITS_AND_FERTILISER.md`.
 - Optional soil probe (software side, no hardware): `POST /api/soil`, `GET /api/farms/{id}/soil`, a "Soil now" card with a cross-check against the water-balance model, `npm run simulate:soil`, and a `SoilReading` table (migration `20261120072719_soil_readings`). See `docs/SOIL_SENSOR.md`.
 - Docs: business plan (`BUSINESS_PLAN.md`): value-based pricing, revenue wheels, cost model, unit economics, ROI, phases, KPIs, assumptions register, Australia comparison.
 - Docs: simple 7-slide pitch deck (cover with name and logo, problem, idea, existing solutions, what is built, features, close; no demo slide) in `docs/slides/`.
