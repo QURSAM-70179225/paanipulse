@@ -1,31 +1,32 @@
 # Demo video: storyboard and narration
 
-Target length about **2:45**. Each scene has what is on screen and the voice-over. The same text works for a generated
-voice or for you reading it. Numbers are read off the live screen at recording time: **check them before you record**.
+The published video, `docs/demo/paanipulse-demo.mp4`, is **3:07** long. It was recorded on the live site (paanipulse.onrender.com) with Playwright on 21 November 2026.
 
-| # | On screen | Narration (English) | ~sec |
+- **Voice-over:** the English narration below, spoken by the Azure neural voice `en-IN-NeerjaNeural` (the app's own TTS route), sped up 13%.
+- **Real app voices:** in scenes 3 and 4, the dashboard's listen button plays the advice card in Urdu (`ur-PK-UzmaNeural`) and Punjabi (`pa-IN-VaaniNeural`). This is real app audio, trimmed to about 6 seconds each.
+- **Captions:** every scene shows its title and one line on screen, for viewers watching muted.
+
+| # | On screen | Caption | Narration |
 |---|---|---|---|
-| 1 | Home page (Urdu) | "Pakistan has about six hundred and fifty thousand solar tube wells. Solar made pumping free, so farmers pump all day, and nobody measures it. This is PaaniPulse." | 13 |
-| 2 | Tap **Farmer (Karamat)**; dashboard (Urdu) | "Meet Karamat, a wheat farmer. Every morning he gets advice in Urdu. Yesterday he ran the pump six hours, but his crop needed none. Today: keep the pump off." | 14 |
-| 3 | Tap **English** | "One tap switches the whole app to English." | 4 |
-| 4 | This week's waste, then the chart | "Last week he pumped about eighty-five percent more water than his crop needed: water lost below the roots, fertiliser washed away, and solar energy wasted." | 13 |
-| 5 | Spare sunshine, pump output | "The spare solar energy could earn money, for example by charging batteries. And the app shows how many litres a minute the pump gives, and how much land an hour waters." | 13 |
-| 6 | Weather now, next 24 hours | "Live weather for the farm, and the next twenty-four hours." | 5 |
-| 7 | Pump timer, red alarm screen | "Press start when the pump is switched on. When time is up, the phone rings loudly. It works with no internet." | 9 |
-| 8 | Chat in English: tap the microphone | "Farmers can simply speak. The assistant answers using numbers from our tested engine, and reads the answer aloud." | 9 |
-| 8b | The spoken question and the assistant's spoken answer | *(question)* "Will it rain tomorrow?" · *(assistant)* the answer shown on screen, read aloud | 8 |
-| 9 | Login page: role cards → **Installer** → portal | "Installers and the Irrigation Department sign in with email. Each role sees its own screens. Installers see every farm they installed, who is over-pumping, and can register new farmers." | 14 |
-| 10 | Irrigation Dept map, filter, table | "The Irrigation Department sees an anonymised heatmap of extraction and wasted solar energy, and can export the data. This regional data is simulated." | 12 |
-| 11 | Lender report | "Lenders get a printable report for every well." | 5 |
-| 12 | Closing card / site address | "Solar made pumping free. PaaniPulse makes it smart." | 5 |
+| 1 | Home page (Urdu) | **650,000 solar tube wells. Zero meters.** Solar made pumping free, so nothing tells a farmer when to stop. | "Pakistan has about six hundred and fifty thousand solar tube wells. Pumping is free once the panels are paid for, so farmers pump for hours, and nobody measures the water. This is PaaniPulse: a virtual water meter and a daily voice advisor, with no extra hardware." |
+| 2 | Tap Farmer (Karamat); voice choice | **Meet Karamat** 12.5 acres of wheat near Sheikhupura. His farm page opens in Urdu. | "Meet Karamat, a wheat farmer near Sheikhupura. His farm page opens in Urdu, and at the top he picks his voice: Urdu, Punjabi, or English." |
+| 3 | Today's advice; listen button plays Urdu | **A listen button on every card** For farmers who cannot read: each card explains itself and says what to do. | "Many farmers cannot read, so every card has a listen button that explains it and says what to do. Here is today's advice in Urdu." |
+| 4 | Pick Punjabi; same card plays in Punjabi | **The same advice in Punjabi** Spoken Punjabi for farmers who don't follow Urdu. Text stays in Urdu or English. | "And the same card, spoken in Punjabi." |
+| 5 | Yesterday's hours question | **One question each morning** How long did the pump run yesterday? One tap answers it. | "Each morning the app asks one question: how long did the pump run yesterday? The voice reads it aloud, and one tap answers it." |
+| 6 | Advice and confidence; switch to English | **Today's advice, with its reason** Crop water need (FAO-56) + soil-moisture balance + live weather. | "The advice comes from the crop's water need, a soil moisture balance and live weather, and it says how sure it is. One tap switches the app to English." |
+| 7 | Pump timer and alarm | **Pump timer and alarm** Rings loudly when time is up. Works with no internet. | "When he switches the pump on, he starts the timer. When the time is up, the phone rings loudly, even with no internet." |
+| 8 | Pump output; bucket test | **A virtual water meter** Litres from pump size and sunlight. A 5-minute bucket test calibrates it. | "The virtual meter turns pump size and sunlight into litres per minute, per hour, and hours per acre. A five minute bucket test calibrates it." |
+| 9 | This week's waste; last 7 days chart | **The cost of over-pumping** Water lost below the roots, urea washed away, solar energy wasted. | "The weekly card shows the cost of over-pumping: water lost below the roots, urea washed away, and solar energy wasted." |
+| 10 | Spare sunshine; fertiliser card | **Spare sunshine and fertiliser** Spare solar can earn money. Fertiliser amounts come from the farmer's own soil test. | "When the pump stays off, spare solar power could earn money, for example by charging batteries. Fertiliser amounts come from the farmer's own soil test." |
+| 11 | Weather; soil probe card | **Weather and optional add-ons** Next 24 hours and 7 days. Soil probe and remote pump switch: optional, fitted by the installer. | "Live weather covers the next day and the week ahead. A soil probe and a remote pump switch are optional add-ons, fitted by the installer." |
+| 12 | Assistant chat: "Should I run the pump today?" | **Ask by voice or text** Answers use only numbers from the tested engine. Invented numbers are blocked. | "Farmers can ask by voice or by text. The assistant answers in their language, using only numbers from our tested engine." |
+| 13 | Installer portal | **Installers: our paying customer** Every farm they installed, who over-pumps, register farmers, reset PINs. | "Solar installers are our paying customers. Their portal shows every farm they installed, who is over-pumping, and lets them register new farmers." |
+| 14 | Well report | **A report for every well** Pump use, water stewardship and income potential. Printable for lenders. | "Every well gets a printable report for lenders: pump use, water stewardship, and income potential." |
+| 15 | Irrigation Department map and table | **A map for the Irrigation Department** Anonymised, district level, with CSV export. Regional data here is simulated. | "The Irrigation Department sees an anonymised district map of extraction and wasted solar energy, with a data export. Regional data here is simulated." |
+| 16 | Closing card | **Solar made pumping free. PaaniPulse makes it smart.** Free for farmers. Paid by the installer who sold the pump. paanipulse.onrender.com | "Free for the farmer, paid by the installer who sold the pump. Solar made pumping free. PaaniPulse makes it smart." |
 
 ## Notes
 
-- **The published video (`docs/demo/paanipulse-demo.mp4`, 2:30) has an English voice-over** made with the free offline Kokoro voice and mixed in editing; the farmer's spoken question is played through a fake microphone into the real app, and the assistant's real reply is read aloud with a second voice. Nothing was saved to the live data (chat cleared afterwards).
-- **Voice-over is added in editing.** In the app itself, spoken answers use Azure's Urdu neural voice when it is configured,
-  otherwise a recorded file or the phone's own voice. Say "voice-over added" in the video description.
-- **Don't record writes to the live data:** no simulator, no saved bucket-test calibration, and don't press
-  "I switched the pump off" (it records pump hours). Clear the chat afterwards.
-- **Microphone scene:** the browser is given a prepared audio file instead of a live microphone so the question is
-  repeatable; the app records it, sends it to speech-to-text, and answers.
-- Keep captions on screen even with voice-over: many viewers watch muted.
+- **Nothing important was written to the live data.** Before the chat scene, the demo farm's chat was cleared, and the video's question and answer stay in it. No hours, calibration or pump actions were saved.
+- **The regional map data is simulated.** The video says so.
+- **Numbers on screen** come from the live engine on the recording day.
