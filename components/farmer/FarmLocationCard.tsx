@@ -15,7 +15,7 @@ export interface FarmLocationLabels {
  * Shown while the farm's spot is only the district centre. When the farmer is standing in his field, one tap saves the phone's
  * GPS position as the farm's location, so weather and rain are for his own field. Reminded weekly by SMS until it is done.
  */
-export function FarmLocationCard({ farmId, district, listen, labels }: { farmId: string; district: string; listen?: React.ReactNode; labels: FarmLocationLabels }) {
+export function FarmLocationCard({ farmId, district, listen, art, labels }: { farmId: string; district: string; listen?: React.ReactNode; art?: React.ReactNode; labels: FarmLocationLabels }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -61,6 +61,7 @@ export function FarmLocationCard({ farmId, district, listen, labels }: { farmId:
           <CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5 text-amber-700" aria-hidden /> {labels.title}</CardTitle>
           <div className="shrink-0">{listen}</div>
         </div>
+        {art && <div className="mt-2">{art}</div>}
         <p className="text-sm text-slate-800">{labels.body.replace("{district}", district)}</p>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
@@ -68,7 +69,7 @@ export function FarmLocationCard({ farmId, district, listen, labels }: { farmId:
           <Crosshair className="h-5 w-5" aria-hidden /> {busy ? labels.finding : labels.button}
         </button>
         {msg && <p role={msg.ok ? "status" : "alert"} className={msg.ok ? "rounded-xl bg-emerald-100 p-2 text-sm text-emerald-900" : "rounded-xl bg-red-50 p-2 text-sm text-red-800"}>{msg.text}</p>}
-        <More label={labels.more}><p>{labels.why}</p></More>
+        <More label={labels.more}><p>{labels.why.replace("{district}", district)}</p></More>
       </CardContent>
     </Card>
   );

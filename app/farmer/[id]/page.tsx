@@ -34,6 +34,7 @@ import { farmDevices } from "@/lib/services/devices";
 import { supportContact } from "@/lib/config/support";
 import { FarmLocationCard } from "@/components/farmer/FarmLocationCard";
 import { CompareBars, ConfidenceMeter, SoilTank, SunRow, ValueBar } from "@/components/farmer/Visuals";
+import { BucketArt, FertiliserArt, LiveMeterArt, LocationArt, ProbeArt, PumpBoxArt, PumpControlArt, TimerArt } from "@/components/farmer/Illustrations";
 import { ReportHours } from "@/components/farmer/ReportHours";
 import { FieldCheck } from "@/components/farmer/FieldCheck";
 import { fieldCheckSummary } from "@/lib/services/fieldCheck";
@@ -142,6 +143,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             farmId={s.farm.id}
             district={s.farm.district}
             listen={listen("location")}
+            art={<LocationArt label={T("artLocation")} />}
             labels={{
               title: T("locTitle"), body: T("locBody"), why: T("locWhy"), button: T("locButton"), finding: T("locFinding"), saved: T("locSaved"), more,
               errDenied: T("locErrDenied"), errOutside: T("locErrOutside"), errInaccurate: T("locErrInaccurate"), errFar: T("locErrFar"), errGeneric: T("errGeneric"),
@@ -154,6 +156,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             advisedHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
             hasProbe={hasProbe}
             listen={listen("pumpctl")}
+            art={<PumpControlArt label={T("artPumpControl")} />}
             labels={{
               title: T("pumpCtlTitle"), on: T("pumpCtlOn"), off: T("pumpCtlOff"), left: T("pumpCtlLeft"), offline: T("pumpCtlOffline"), never: T("pumpCtlNever"),
               hours: T("pumpCtlHours"), start: T("pumpCtlStart"), stop: T("pumpCtlStop"), confirm: T("pumpCtlConfirm"), auto: T("pumpCtlAuto"), autoNote: T("pumpCtlAutoNote"),
@@ -173,11 +176,13 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           initial={devices}
           shared={deviceShared}
           listen={listen("pumpbox")}
+          art={<PumpBoxArt label={T("artPumpBox")} />}
           labels={{ title: T("pumpBoxTitle"), intro: T("pumpBoxIntro"), none: T("pumpBoxNone"), link: T("pumpBoxLink"), note: T("pumpBoxNote"), errWrongKind: T("pumpBoxWrongKind"), more }}
         />
         {!pumpCtlOn && <PumpTimer
           farmId={s.farm.id}
           listen={listen("timer")}
+          art={<TimerArt label={T("artTimer")} />}
           recommendedHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
           adviceIsOff={s.today.advice.kind !== "irrigate"}
           labels={{
@@ -193,6 +198,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           initialHasTelemetry={s.pump.hasTelemetry}
           limitHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
           listen={listen("live")}
+          art={<LiveMeterArt label={T("artLive")} />}
           labels={{
             notConnected: T("liveNotConnected"), more,
             title: T("liveTitle"), waiting: T("liveWaiting"), today: T("liveToday"), now: T("liveNow"), energy: T("liveEnergy"),
@@ -208,6 +214,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           initial={devices}
           shared={deviceShared}
           listen={listen("probe")}
+          art={<ProbeArt label={T("artProbe")} />}
           labels={{ title: T("probeCardTitle"), intro: T("probeCardIntro"), none: T("probeCardNone"), link: T("probeCardLink"), note: T("probeCardNote"), errWrongKind: T("probeCardWrongKind"), more }}
         />
         {hasSoilProbe && (
@@ -245,6 +252,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           areaLabel={areaText(s.farm.areaAcres, s.farm.areaUnit, T)}
           fert={s.fert}
           listen={listen("fertiliser")}
+          art={<FertiliserArt label={T("artFert")} />}
           labels={{
             more,
             title: T("fertTitle"), intro: T("fertIntro"), enter: T("fertEnter"), change: T("fertChange"), cancel: T("fertCancel"), save: T("fertSave"),
@@ -261,6 +269,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           efficiency={s.pump.efficiency}
           calibrated={s.pump.calibrated}
           listen={listen("bucket")}
+          art={<BucketArt label={T("artBucket")} />}
           labels={{
             more,
             title: T("bucketTitle"), intro: T("bucketIntro"), volume: T("bucketVolume"), seconds: T("bucketSeconds"), hour: T("bucketHour"),

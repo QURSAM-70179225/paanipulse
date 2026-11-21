@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { WhyPaaniPulse } from "@/components/about/WhyPaaniPulse";
 import { CROPS, DEFAULTS, IRRIGATION_EFFICIENCY } from "@/lib/engine";
 import { dirFor, type Lang } from "@/lib/i18n/dict";
 import { getLang } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "How we calculate · PaaniPulse" };
+export const metadata = { title: "About and how we calculate · PaaniPulse" };
 
 type Bi = { en: string; ur: string };
 interface Section {
@@ -133,11 +134,13 @@ export default async function AboutPage() {
             <LanguageToggle lang={lang} />
           </div>
           <h1 className="flex items-center gap-2 text-3xl font-bold">
-            <BookOpen className="h-7 w-7 shrink-0" aria-hidden /> {ur ? "ہم حساب کیسے کرتے ہیں" : "How we calculate"}
+            <BookOpen className="h-7 w-7 shrink-0" aria-hidden /> {ur ? "پانی پلس اور ہمارا حساب" : "About PaaniPulse and how we calculate"}
           </h1>
         </div>
       </header>
       <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6">
+        <WhyPaaniPulse lang={lang} />
+        <h2 className="mt-4 text-2xl font-bold text-slate-900">{ur ? "ہم حساب کیسے کرتے ہیں" : "How we calculate"}</h2>
         <nav aria-label={ur ? "فہرست" : "Contents"} className="flex flex-wrap gap-2 text-sm">
           {SECTIONS.map((s) => (
             <a key={s.id} href={`#${s.id}`} className="rounded-full border border-slate-300 bg-white px-3 py-1 text-slate-800 hover:bg-slate-100">

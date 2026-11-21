@@ -29,7 +29,7 @@ export interface FertView {
 const fill = (s: string, v: Record<string, string | number>) => Object.entries(v).reduce((a, [k, x]) => a.replaceAll(`{${k}}`, String(x)), s);
 const MAX: Record<Product, number> = { urea: 6, dap: 4, sop: 3 };
 
-export function FertiliserPlan({ farmId, areaLabel, fert, listen, labels }: { farmId: string; areaLabel: string; fert: FertView | null; listen?: React.ReactNode; labels: FertLabels }) {
+export function FertiliserPlan({ farmId, areaLabel, fert, listen, art, labels }: { farmId: string; areaLabel: string; fert: FertView | null; listen?: React.ReactNode; art?: React.ReactNode; labels: FertLabels }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -90,6 +90,7 @@ export function FertiliserPlan({ farmId, areaLabel, fert, listen, labels }: { fa
           <CardTitle className="flex items-center gap-2"><Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}</CardTitle>
           <div className="shrink-0">{listen}</div>
         </div>
+        {art && <div className="mt-2">{art}</div>}
         {showForm && <More label={labels.more}><p>{labels.intro}</p></More>}
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

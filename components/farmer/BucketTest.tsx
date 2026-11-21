@@ -27,7 +27,7 @@ export interface BucketLabels {
 
 const fill = (s: string, v: Record<string, string | number>) => Object.entries(v).reduce((a, [k, x]) => a.replaceAll(`{${k}}`, String(x)), s);
 
-export function BucketTest({ farmId, efficiency, calibrated, listen, labels }: { farmId: string; efficiency: number; calibrated: boolean; listen?: React.ReactNode; labels: BucketLabels }) {
+export function BucketTest({ farmId, efficiency, calibrated, listen, art, labels }: { farmId: string; efficiency: number; calibrated: boolean; listen?: React.ReactNode; art?: React.ReactNode; labels: BucketLabels }) {
   const router = useRouter();
   const [volume, setVolume] = useState(200);
   const [seconds, setSeconds] = useState(21); // ≈ default efficiency at noon, so the demo narrows the range without shifting the headline numbers
@@ -70,6 +70,7 @@ export function BucketTest({ farmId, efficiency, calibrated, listen, labels }: {
           <CardTitle className="flex items-center gap-2"><FlaskConical className="h-5 w-5 text-violet-700" aria-hidden /> {labels.title}</CardTitle>
           <div className="shrink-0">{listen}</div>
         </div>
+        {art && <div className="mt-2">{art}</div>}
         <More label={labels.more}><p>{labels.intro}</p></More>
         <p className="flex flex-wrap items-center gap-2 text-sm text-slate-800">
           {fill(labels.efficiencyNow, { pct: Math.round(efficiency * 100) })}

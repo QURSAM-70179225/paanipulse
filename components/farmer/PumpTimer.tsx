@@ -31,7 +31,7 @@ function load(farmId: string): TimerState | null {
 }
 
 /** Farmer-started pump timer. Rings a loud alarm when the advised hours are over. All client-side, so it works offline. */
-export function PumpTimer({ farmId, recommendedHours, adviceIsOff, listen, labels }: { farmId: string; recommendedHours: number; adviceIsOff: boolean; listen?: React.ReactNode; labels: PumpTimerLabels }) {
+export function PumpTimer({ farmId, recommendedHours, adviceIsOff, listen, art, labels }: { farmId: string; recommendedHours: number; adviceIsOff: boolean; listen?: React.ReactNode; art?: React.ReactNode; labels: PumpTimerLabels }) {
   const [timer, setTimer] = useState<TimerState | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [hours, setHours] = useState(recommendedHours > 0 ? recommendedHours : 2);
@@ -130,6 +130,7 @@ export function PumpTimer({ farmId, recommendedHours, adviceIsOff, listen, label
             <CardTitle className="flex items-center gap-2"><Timer className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}</CardTitle>
             <div className="shrink-0">{listen}</div>
           </div>
+          {art && <div className="mt-2">{art}</div>}
           <More label={labels.more}>
             <p>{labels.help}</p>
             <p>{labels.boxHint}</p>

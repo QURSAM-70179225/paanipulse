@@ -29,7 +29,7 @@ const clock = (iso: string) => new Date(iso).toLocaleTimeString("en-GB", { hour:
  * Remote start and stop of the pump through a SIM control box. Shown once a control box is linked to this farm with its code.
  * Every run has a hard stop time; the control box enforces it on its own clock, so a weak or lost network cannot keep it running.
  */
-export function PumpControl({ farmId, advisedHours, hasProbe, listen, labels }: { farmId: string; advisedHours: number; hasProbe: boolean; listen?: React.ReactNode; labels: PumpCtlLabels }) {
+export function PumpControl({ farmId, advisedHours, hasProbe, listen, art, labels }: { farmId: string; advisedHours: number; hasProbe: boolean; listen?: React.ReactNode; art?: React.ReactNode; labels: PumpCtlLabels }) {
   const router = useRouter();
   const [v, setV] = useState<View | null>(null);
   const [hours, setHours] = useState(String(advisedHours > 0 ? Math.min(12, Math.max(0.5, advisedHours)) : 2));
@@ -87,6 +87,7 @@ export function PumpControl({ farmId, advisedHours, hasProbe, listen, labels }: 
           </CardTitle>
           <div className="shrink-0">{listen}</div>
         </div>
+        {art && <div className="mt-2">{art}</div>}
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div aria-live="polite">
