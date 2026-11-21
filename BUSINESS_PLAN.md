@@ -191,6 +191,20 @@ more convincing than three untested ones. Add the next wheel only after the prev
 
 **Today: no wheel is turning.** No installer, lender or department has agreed to pay.
 
+### 6b. Two more wheels that need no farmer subscription
+
+Farmers rarely pay a monthly fee, so two further wheels earn without one. Both are untested; the numbers are illustrations.
+
+| Wheel | How it works | Payer | Illustration (assumption) | When |
+|---|---|---|---|---|
+| **4. Hardware margin** | The farmer taps Call or WhatsApp on the Soil probe or Pump control box card in the app. Our team orders the device from a vendor at a negotiated price, a local electrician fits it, and we sell it at the vendor price plus a margin | The farmer, once (or through installer or lender financing) | 15–25% on Rs 27,000–65,000 per farm (probe Rs 10,000–25,000 plus pump box Rs 17,000–40,000, rough parts-and-fitting estimates) = about Rs 4,000–16,000 per farm | With the pilot |
+| **5. Telecom package share** | A mobile operator sells a "PaaniPulse package": data for the device SIMs plus the advice SMS and voice; the operator shares part of the monthly package revenue | The farmer pays the operator, as he already does each month | 10–20% of a Rs 300–500 monthly package = about Rs 360–1,200 per farm a year | After the pilot shows volume |
+
+- **Why they fit:** a one-time hardware purchase the farmer can see, and a phone bill he already pays. Neither asks him to subscribe.
+- **Risks:** hardware needs working capital, stock and a warranty process; operators want thousands of users before sharing revenue.
+- **First steps:** prices from two vendors for 10 probes and 5 pump boxes; one conversation with an operator's agriculture or value-added-services team about the share and the volume they need.
+- **In the app today:** the device cards show Call and WhatsApp buttons (numbers set on the server as `SUPPORT_PHONE` / `SUPPORT_WHATSAPP`), so a farmer with no hardware can ask the team directly.
+
 ---
 
 ## 7. Cost model

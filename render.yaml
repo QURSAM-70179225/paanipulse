@@ -25,6 +25,10 @@ services:
         sync: false
       - key: AZURE_SPEECH_REGION   # the Speech resource's region, e.g. eastus (student subscriptions can't use every region)
         sync: false
+      - key: SUPPORT_PHONE          # team number farmers call for device help, e.g. 0300-1234567
+        sync: false
+      - key: SUPPORT_WHATSAPP       # optional: WhatsApp number if different from SUPPORT_PHONE
+        sync: false
       - key: AUTHORITY_INVITE_CODE
         sync: false
       - key: DEMO_MODE

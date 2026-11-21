@@ -68,7 +68,7 @@ export function BucketTest({ farmId, efficiency, calibrated, listen, labels }: {
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="flex items-center gap-2"><FlaskConical className="h-5 w-5 text-violet-700" aria-hidden /> {labels.title}</CardTitle>
-          {listen}
+          <div className="shrink-0">{listen}</div>
         </div>
         <More label={labels.more}><p>{labels.intro}</p></More>
         <p className="flex flex-wrap items-center gap-2 text-sm text-slate-800">

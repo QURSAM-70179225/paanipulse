@@ -104,7 +104,7 @@ export function LiveMeter({ farmId, initialHasTelemetry, limitHours, listen, lab
             <Radio className={cn("h-5 w-5", live.hasTelemetry ? "text-sky-700" : "text-slate-400")} aria-hidden /> {labels.title}
             {live.hasTelemetry && <span className={cn("h-2.5 w-2.5 rounded-full", on ? "animate-pulse bg-emerald-500" : "bg-slate-400")} aria-hidden />}
           </CardTitle>
-          {listen}
+          <div className="shrink-0">{listen}</div>
         </div>
         {!live.hasTelemetry && (
           <>

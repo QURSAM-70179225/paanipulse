@@ -107,7 +107,7 @@ export function SoilNow({ farmId, listen, labels }: { farmId: string; listen?: R
             <Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}
             {l.source === "simulator" && <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">{labels.simulated}</span>}
           </CardTitle>
-          {listen}
+          <div className="shrink-0">{listen}</div>
         </div>
       </CardHeader>
       <CardContent>

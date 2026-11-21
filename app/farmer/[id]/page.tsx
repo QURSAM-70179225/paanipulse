@@ -31,6 +31,9 @@ import { FarmSwitcher } from "@/components/farmer/FarmSwitcher";
 import { farmLabel } from "@/lib/services/farmLabel";
 import { pumpControlAvailable } from "@/lib/services/pumpControl";
 import { farmDevices } from "@/lib/services/devices";
+import { supportContact } from "@/lib/config/support";
+import { FarmLocationCard } from "@/components/farmer/FarmLocationCard";
+import { CompareBars, ConfidenceMeter, SoilTank, SunRow, ValueBar } from "@/components/farmer/Visuals";
 import { ReportHours } from "@/components/farmer/ReportHours";
 import { FieldCheck } from "@/components/farmer/FieldCheck";
 import { fieldCheckSummary } from "@/lib/services/fieldCheck";
@@ -88,7 +91,9 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
     safetyTitle: T("devSafetyTitle"), safetyBody: T("devSafetyBody"), safetyCheck: T("devSafetyCheck"), safetyLink: T("devSafetyLink"),
     linkedProbe: T("devLinkedProbe"), linkedPump: T("devLinkedPump"), errBadCode: T("devErrBadCode"), errNotFound: T("devErrNotFound"),
     errElsewhere: T("devErrElsewhere"), errPumpExists: T("devErrPumpExists"), errGeneric: T("errGeneric"),
+    helpTitle: T("devHelpTitle"), helpBody: T("devHelpBody"), call: T("devCall"), whatsapp: T("devWhatsApp"), waProbe: T("devWaProbe"), waPump: T("devWaPump"),
   };
+  const contact = supportContact();
   const ur = lang === "ur";
   const locale = ur ? "ur-PK" : "en-GB";
   const L = (m3: number) => `${n0(m3 * 1000)} ${T("litres")}`;
@@ -132,6 +137,17 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
         )}
         {s.yesterday && s.yesterday.actualHours > 0 && <YesterdayCard s={s} T={T} L={L} listen={listen} />}
         <HeroCard s={s} T={T} ur={ur} listen={listen} more={more} />
+        {s.farm.locationSource === "district" && (
+          <FarmLocationCard
+            farmId={s.farm.id}
+            district={s.farm.district}
+            listen={listen("location")}
+            labels={{
+              title: T("locTitle"), body: T("locBody"), why: T("locWhy"), button: T("locButton"), finding: T("locFinding"), saved: T("locSaved"), more,
+              errDenied: T("locErrDenied"), errOutside: T("locErrOutside"), errInaccurate: T("locErrInaccurate"), errFar: T("locErrFar"), errGeneric: T("errGeneric"),
+            }}
+          />
+        )}
         {pumpCtlOn && (
           <PumpControl
             farmId={s.farm.id}
@@ -152,6 +168,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
         )}
         <DeviceCard
           kind="pump"
+          contact={contact}
           farmId={s.farm.id}
           initial={devices}
           shared={deviceShared}
@@ -186,6 +203,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
         />
         <DeviceCard
           kind="probe"
+          contact={contact}
           farmId={s.farm.id}
           initial={devices}
           shared={deviceShared}
@@ -375,6 +393,7 @@ function HeroCard({ s, T, ur, listen, more }: { s: FarmState; T: TFn; ur: boolea
       )}
       <p className="text-xs text-white/80">{T("soilMoisture", { used: Math.round(s.today.depletionStartMm), raw: Math.round(s.today.rawMm) })}</p>
       </More>
+      <SoilTank leftPct={s.today.rawMm > 0 ? (1 - s.today.depletionStartMm / s.today.rawMm) * 100 : 100} label={T("visSoilWater")} full={T("visFull")} empty={T("visEmpty")} />
       <ConfidenceLine s={s} T={T} more={more} />
     </section>
   );
@@ -392,7 +411,7 @@ function ConfidenceLine({ s, T, more }: { s: FarmState; T: TFn; more: string }) 
   return (
     <div className={cn("mt-3 rounded-xl px-3 py-2 text-xs", c.level === "low" ? "bg-red-600/80" : "bg-white/15")}>
       <p className="flex items-center gap-1.5 font-semibold">
-        <Icon className="h-4 w-4 shrink-0" aria-hidden /> {T("confTitle")} {T(c.level === "high" ? "confHigh" : c.level === "medium" ? "confMedium" : "confLow")}
+        <Icon className="h-4 w-4 shrink-0" aria-hidden /> {T("confTitle")} <ConfidenceMeter level={c.level} /> {T(c.level === "high" ? "confHigh" : c.level === "medium" ? "confMedium" : "confLow")}
       </p>
       {c.reasons.length > 0 && (
         <More label={more} tone="dark" className="mt-1">
@@ -436,7 +455,7 @@ function TodayStats({ s, T, L, listen }: { s: FarmState; T: TFn; L: (m3: number)
           value={range}
           sub={<Badge variant={s.pump.calibrated ? "default" : "warning"} className="mt-1">{s.pump.calibrated ? T("calibrated") : T("defaultEstimate")}</Badge>}
         />
-        <Stat icon={Sun} label={T("sunHours")} value={`${s.today.pumpableHours} ${T("hours")}`} sub={T("solarToday", { kwh: n0(s.today.pvKwh) })} tone="text-amber-700" />
+        <Stat icon={Sun} label={T("sunHours")} value={`${s.today.pumpableHours} ${T("hours")}`} sub={<><SunRow hours={s.today.pumpableHours} />{T("solarToday", { kwh: n0(s.today.pvKwh) })}</>} tone="text-amber-700" />
       </CardContent>
     </Card>
   );
@@ -449,9 +468,17 @@ function WeekCard({ s, T, L, listen }: { s: FarmState; T: TFn; L: (m3: number) =
     <Card>
       <CardHeader>
         <CardHead title={<><Flame className="h-5 w-5 text-red-700" aria-hidden /> {T("weekWaste")}</>} listen={listen("week")} />
-        <p className="text-base text-slate-800">{w.overNeedPct > 5 ? T("pumpedMore", { pct: Math.round(w.overNeedPct) }) : T("pumpedOk")}</p>
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-3">
+        <div className="col-span-2">
+          <CompareBars
+            a={{ label: T("visPumped"), value: w.pumpedM3 }}
+            b={{ label: T("visNeeded"), value: w.needM3 }}
+            unit="m³"
+            extraLabel={w.overNeedPct > 5 ? T("visExtra", { pct: Math.round(w.overNeedPct) }) : undefined}
+          />
+          {w.overNeedPct <= 5 && <p className="mt-1 text-sm font-semibold text-emerald-800">{T("pumpedOk")}</p>}
+        </div>
         <Stat icon={Droplets} label={T("lostBelowRoots")} value={L(w.excessM3)} sub={T("ofPumped", { pct: Math.round(w.excessPct) })} tone="text-red-700" />
         <Stat icon={Leaf} label={T("ureaWashed")} value={`${w.ureaKg.toFixed(1)} ${T("kg")}`} sub={`≈ ${T("rs")} ${n0(w.ureaRs)} · ${T("estimate")}`} tone="text-amber-800" />
         <Stat icon={Zap} label={T("solarOnWaste")} value={`${n0(w.wastedKwh)} ${T("kwh")}`} sub={T("solarOnWasteSub")} />
@@ -467,21 +494,25 @@ function SpareSunCard({ s, T, ur, listen, more }: { s: FarmState; T: TFn; ur: bo
     <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-white">
       <CardHeader>
         <CardHead title={<><Sun className="h-5 w-5 text-amber-600" aria-hidden /> {T("spareSun")}</>} listen={listen("spare")} />
-        <p className="text-sm text-slate-700">{s.today.advice.kind === "irrigate" ? T("spareAfterIrrigate", { kwh }) : T("spareKeepOff", { kwh })}</p>
+        <p className="num inline-flex w-fit items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-base font-bold text-amber-900"><Zap className="h-4 w-4" aria-hidden /> {T("visSpare", { kwh })}</p>
       </CardHeader>
       <CardContent>
         <ul className="flex flex-col gap-2">
           {s.today.todaySpareIdeas.map((idea) => (
-            <li key={idea.id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-sm">
+            <li key={idea.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl bg-white p-3 shadow-sm">
               <span className="flex items-center gap-2 text-sm">
                 <BatteryCharging className="h-5 w-5 shrink-0 text-emerald-700" aria-hidden />
                 {ur ? idea.labelUr : idea.labelEn}
               </span>
               <span className="num whitespace-nowrap text-base font-bold text-emerald-800">{T("rs")} {n0(idea.rs)}</span>
+              <span className="basis-full"><ValueBar value={idea.rs} max={Math.max(...s.today.todaySpareIdeas.map((i) => i.rs))} /></span>
             </li>
           ))}
         </ul>
-        <More label={more} className="mt-2"><p>{T("spareNote")}</p></More>
+        <More label={more} className="mt-2">
+          <p>{s.today.advice.kind === "irrigate" ? T("spareAfterIrrigate", { kwh }) : T("spareKeepOff", { kwh })}</p>
+          <p>{T("spareNote")}</p>
+        </More>
       </CardContent>
     </Card>
   );
