@@ -128,7 +128,7 @@ export function PumpTimer({ farmId, recommendedHours, adviceIsOff, listen, label
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="flex items-center gap-2"><Timer className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}</CardTitle>
-            {listen}
+            <div className="shrink-0">{listen}</div>
           </div>
           <More label={labels.more}>
             <p>{labels.help}</p>

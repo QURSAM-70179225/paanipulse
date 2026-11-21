@@ -10,7 +10,8 @@ import { pktDateKey, pktDayStart } from "@/lib/dates";
 import { modeAIntegrate } from "@/lib/engine";
 import { getFarmState } from "./farmState";
 import { synthesize, ttsConfigured } from "./tts";
-import { dailySms } from "./smsText";
+import { dailySms, locationSms } from "./smsText";
+import { locationReminderDue } from "./farmLocation";
 import { sendSms, smsConfigured } from "./sms";
 
 const toDate = (key: string) => new Date(`${key}T00:00:00+05:00`);
@@ -92,6 +93,11 @@ export async function runDailyForFarm(farmId: string, now = new Date()) {
     if (owner?.owner?.smsAdvice && owner.owner.phone) {
       const a = state.today.advice;
       sms = await sendSms(owner.owner.phone, dailySms({ kind: a.kind, hoursToday: a.hoursToday, daysUntilNext: a.daysUntilNext, rainTomorrowMm: a.rainTomorrowMm }));
+    }
+    // Once a week, while only the district centre is known: ask him to save the spot next time he is in the field.
+    const loc = await prisma.farm.findUnique({ where: { id: farmId }, select: { locationSource: true, lastLocationReminderAt: true } });
+    if (owner?.owner?.smsAdvice && owner.owner.phone && loc && locationReminderDue(loc, now)) {
+      if (await sendSms(owner.owner.phone, locationSms())) await prisma.farm.update({ where: { id: farmId }, data: { lastLocationReminderAt: now } });
     }
   }
 

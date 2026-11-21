@@ -85,7 +85,7 @@ export function PumpControl({ farmId, advisedHours, hasProbe, listen, labels }: 
           <CardTitle className="flex items-center gap-2">
             {v.on ? <Power className="h-5 w-5 text-emerald-700" aria-hidden /> : <PowerOff className="h-5 w-5 text-slate-500" aria-hidden />} {labels.title}
           </CardTitle>
-          {listen}
+          <div className="shrink-0">{listen}</div>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

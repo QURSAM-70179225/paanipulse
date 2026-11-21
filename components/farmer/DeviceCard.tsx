@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Link2, Power, Radio, SignalHigh, SignalLow, SignalMedium, Trash2 } from "lucide-react";
+import { Link2, MessageCircle, Phone, Power, Radio, SignalHigh, SignalLow, SignalMedium, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { More } from "@/components/ui/more";
 import { signalWord } from "@/lib/devices/code";
@@ -16,6 +16,7 @@ export interface DeviceSharedLabels {
   waiting: string; lastSeen: string; justNow: string; signalGood: string; signalFair: string; signalWeak: string; remove: string; removeConfirm: string; removePumpConfirm: string;
   safetyTitle: string; safetyBody: string; safetyCheck: string; safetyLink: string; linkedProbe: string; linkedPump: string;
   errBadCode: string; errNotFound: string; errElsewhere: string; errPumpExists: string; errGeneric: string;
+  helpTitle: string; helpBody: string; call: string; whatsapp: string; waProbe: string; waPump: string;
 }
 /** Texts for one card (probe or pump box). */
 export interface DeviceCardLabels { title: string; intro: string; none: string; link: string; note: string; errWrongKind: string; more: string }
@@ -28,7 +29,10 @@ const fill = (s: string, v: Record<string, string | number>) => Object.entries(v
  * The probe card links only probes (a farm may have several). The pump card links one box, after the safety checklist, and then the
  * farmer can switch the motor on and off from anywhere with the Pump control card.
  */
-export function DeviceCard({ kind, farmId, initial, labels, shared, listen }: { kind: "probe" | "pump"; farmId: string; initial: DeviceRow[]; labels: DeviceCardLabels; shared: DeviceSharedLabels; listen?: React.ReactNode }) {
+/** The team's numbers, so a farmer with no device yet can call or WhatsApp for help setting one up. */
+export interface SupportContact { tel: string | null; whatsapp: string | null; display: string | null }
+
+export function DeviceCard({ kind, farmId, initial, labels, shared, listen, contact }: { kind: "probe" | "pump"; farmId: string; initial: DeviceRow[]; labels: DeviceCardLabels; shared: DeviceSharedLabels; listen?: React.ReactNode; contact?: SupportContact }) {
   const router = useRouter();
   const [all, setAll] = useState(initial);
   const devices = all.filter((d) => d.kind === kind);
@@ -110,12 +114,37 @@ export function DeviceCard({ kind, farmId, initial, labels, shared, listen }: { 
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="flex items-center gap-2"><TitleIcon className={cn("h-5 w-5", kind === "pump" ? "text-emerald-700" : "text-sky-700")} aria-hidden /> {labels.title}</CardTitle>
-          {listen}
+          <div className="shrink-0">{listen}</div>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {devices.length === 0 ? (
-          <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-700">{labels.none}</p>
+          <div className="flex flex-col gap-2 rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
+            <p>{labels.none}</p>
+            {contact && (contact.tel || contact.whatsapp) && (
+              <div className="flex flex-col gap-2 rounded-xl border border-emerald-200 bg-white p-3">
+                <p className="font-semibold text-slate-900">{shared.helpTitle}</p>
+                <p className="text-slate-600">{shared.helpBody}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {contact.tel && (
+                    <a href={`tel:${contact.tel}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-sky-700 px-3 font-semibold text-white">
+                      <Phone className="h-4 w-4" aria-hidden /> {shared.call}
+                    </a>
+                  )}
+                  {contact.whatsapp && (
+                    <a
+                      href={`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent((kind === "pump" ? shared.waPump : shared.waProbe).replace("{farm}", farmId))}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#128C7E] px-3 font-semibold text-white"
+                    >
+                      <MessageCircle className="h-4 w-4" aria-hidden /> {shared.whatsapp}
+                    </a>
+                  )}
+                </div>
+                {contact.display && <p className="num text-xs text-slate-500" dir="ltr">{contact.display}</p>}
+              </div>
+            )}
+          </div>
         ) : (
           <ul className="flex flex-col gap-2">
             {devices.map((d) => {

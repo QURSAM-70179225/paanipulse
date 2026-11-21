@@ -88,7 +88,7 @@ export function FertiliserPlan({ farmId, areaLabel, fert, listen, labels }: { fa
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="flex items-center gap-2"><Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}</CardTitle>
-          {listen}
+          <div className="shrink-0">{listen}</div>
         </div>
         {showForm && <More label={labels.more}><p>{labels.intro}</p></More>}
       </CardHeader>

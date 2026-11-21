@@ -80,6 +80,12 @@ model Farm {
   language         String        @default("ur") // "ur" | "en"
   lat              Float
   lng              Float
+  /// "district" (only the district centre is known) | "signup" (picked on the map or by GPS at sign-up) | "farm-gps" (saved standing in the field).
+  locationSource   String        @default("district")
+  /// When the farmer saved the spot from his field.
+  locationSetAt    DateTime?
+  /// Last weekly SMS asking him to save the spot (sent only while locationSource is "district").
+  lastLocationReminderAt DateTime?
   district         String
   tehsil           String?
   cropType         String // wheat | rice | maize | cotton | sugarcane

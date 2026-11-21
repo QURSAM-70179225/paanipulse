@@ -38,3 +38,6 @@ export function overrunSms(f: { ranHours: number; recommendedHours: number }): s
 export function fullSms(): string {
   return "PaaniPulse: Mitti mein pani kafi ho gaya hai. Agar pump chal raha hai to ja kar band kar dein. Khait bhi dekh lein.".slice(0, 160);
 }
+
+/** Weekly, while the farm's spot is only the district centre. */
+export const locationSms = () => "PaaniPulse: Jab khet par hon to app kholein aur 'Main khet par hoon' dabayen. Is se mausam aur barish ka hisaab aap ke khet ka hoga.".slice(0, 160);

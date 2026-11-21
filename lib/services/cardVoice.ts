@@ -13,7 +13,7 @@ export const VOICE_LANGS: VoiceLang[] = ["ur", "en", "pa"];
 export type VoiceScript = { ur: string; urRoman: string; en: string; pa: string; paRoman: string };
 export type CardId =
   | "report" | "advice" | "yesterday" | "today" | "output" | "week" | "spare" | "weather"
-  | "pumpctl" | "pumpbox" | "timer" | "live" | "probe" | "soil" | "chart" | "fertiliser" | "bucket" | "fieldcheck";
+  | "pumpctl" | "pumpbox" | "timer" | "live" | "probe" | "soil" | "chart" | "fertiliser" | "bucket" | "fieldcheck" | "location";
 
 type Say = "ur" | "urRoman" | "en" | "pa" | "paRoman";
 
@@ -509,6 +509,14 @@ const FIELDCHECK: VoiceScript = {
   "paRoman": "Eh jaanch dassdi ae ke app da paani meter kinna theek ae. Pump di pipe ton drum bharo, samaan note karo, te ho sake taan solar inverter di screen utte kilowatt vekh ke likho. Is naal meter nahin badalda, sirf jaanch hundi ae."
 };
 
+const LOCATION: VoiceScript = {
+  ur: "ابھی ہمیں آپ کے کھیت کی صحیح جگہ معلوم نہیں۔ جب آپ اپنے کھیت میں کھڑے ہوں تو یہ پیلا بٹن ایک بار دبائیں۔ پھر بارش اور موسم کا حساب آپ کے اپنے کھیت کا ہو گا۔",
+  urRoman: "Abhi humein aap ke khet ki sahi jagah maloom nahin. Jab aap apne khet mein kharay hon to yeh peela button aik baar dabaayen. Phir baarish aur mausam ka hisaab aap ke apne khet ka ho ga.",
+  en: "We do not know the exact place of your field yet. When you are standing in your field, press this yellow button once. Then rain and weather will be worked out for your own field.",
+  pa: "ਹਾਲੇ ਸਾਨੂੰ ਤੁਹਾਡੇ ਖੇਤ ਦੀ ਠੀਕ ਥਾਂ ਨਹੀਂ ਪਤਾ। ਜਦੋਂ ਤੁਸੀਂ ਆਪਣੇ ਖੇਤ ਵਿੱਚ ਖੜ੍ਹੇ ਹੋਵੋ ਤਾਂ ਇਹ ਪੀਲਾ ਬਟਨ ਇੱਕ ਵਾਰ ਦਬਾਓ। ਫੇਰ ਮੀਂਹ ਤੇ ਮੌਸਮ ਦਾ ਹਿਸਾਬ ਤੁਹਾਡੇ ਆਪਣੇ ਖੇਤ ਦਾ ਹੋਵੇਗਾ।",
+  paRoman: "Haale saanu tuhaade khet di theek thaan nahin pata. Jadon tusi apne khet vich kharre hovo taan eh peela button ikk vaar dabao. Pher meenh te mausam da hisaab tuhaade apne khet da howe ga.",
+};
+
 /** One guided voice note per dashboard card (null where the card isn't shown). */
 export function cardScripts(s: FarmState): Record<CardId, VoiceScript | null> {
   return {
@@ -530,6 +538,7 @@ export function cardScripts(s: FarmState): Record<CardId, VoiceScript | null> {
     fertiliser: FERTILISER,
     bucket: BUCKET,
     fieldcheck: FIELDCHECK,
+    location: s.farm?.locationSource === "district" ? LOCATION : null,
   };
 }
 

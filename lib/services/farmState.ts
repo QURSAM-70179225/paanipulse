@@ -84,6 +84,7 @@ export async function getFarmState(farmId: string, now: Date = new Date()) {
       isSynthetic: farm.isSynthetic,
       lat: farm.lat,
       lng: farm.lng,
+      locationSource: farm.locationSource,
     },
     /** How far to trust today's advice, and why not (shown on the farmer dashboard). */
     confidence: adviceConfidence({

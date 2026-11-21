@@ -4,6 +4,7 @@ import { badRequest, forbidden, serverError, unauthorized } from "@/lib/api/http
 import { getSession, hashSecret } from "@/lib/auth/session";
 import { normalisePhone } from "@/lib/auth/token";
 import { FarmCreate } from "@/lib/services/farmInput";
+import { sourceAtSignup } from "@/lib/services/farmLocation";
 import { MAX_FARMS_PER_ACCOUNT } from "@/lib/services/farmLabel";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,7 @@ export async function POST(req: Request) {
         language: b.language,
         lat: b.lat,
         lng: b.lng,
+        locationSource: sourceAtSignup(b.district, b.lat, b.lng),
         district: b.district,
         tehsil: b.tehsil || null,
         cropType: b.cropType,
