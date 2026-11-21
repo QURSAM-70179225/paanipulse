@@ -35,7 +35,7 @@ when nothing is connected, so people can see that the features exist and what th
 
 - **Pump control** says why it is dull: *not available on this site yet* (the server has remote control switched off) or *not connected, your
   installer switches it on after the control box is fitted*. Start and Stop are disabled.
-- **SIM devices** says no device is linked yet, and the farmer can link a probe or pump box there with the code on the box.
+- **Soil probe** and **Pump control box** are two separate cards. Each says nothing is linked yet, and the farmer links that device there with the code on its box.
 
 They turn to their normal look as soon as a probe sends readings or the installer enables remote control. The earlier small footer
 link and the `?probe=1` address are no longer needed.

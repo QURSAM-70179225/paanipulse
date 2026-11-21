@@ -54,7 +54,7 @@ farmer can always use. The app cannot give these.
 
 ## How it works
 
-- **Linking** (once): the farmer or installer types the code printed on the box in **SIM devices** and confirms the safety checklist.
+- **Linking** (once): the farmer or installer types the code printed on the box in the **Pump control box** card (separate from the soil probe card) and confirms the safety checklist.
   See [SIM_DEVICES.md](SIM_DEVICES.md).
 - **Farmer's screen** (the "Pump control" card, shown once a box is linked): shows ON or OFF and the time left; **Start pump** for N hours
   (default: the advised hours); a big red **Stop pump now**; and the tick box for automatic stop.

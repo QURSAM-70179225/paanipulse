@@ -37,19 +37,21 @@ export const touchDevice = (id: string, n?: string, q?: number, now = new Date()
 
 export type PairResult =
   | { ok: true; kind: DeviceKind; code: string }
-  | { ok: false; error: "bad-code" | "not-found" | "linked-elsewhere" | "needs-safety" | "pump-exists" | "no-pump" };
+  | { ok: false; error: "bad-code" | "not-found" | "linked-elsewhere" | "needs-safety" | "pump-exists" | "no-pump" | "wrong-kind" };
 
 /**
  * Links a device to a farm with the code printed on it. A probe links at once; several probes may share a farm.
  * A pump control box also switches remote control on, but only after the person confirms the safety checklist, and a farm has
  * one box (one motor).
  */
-export async function pairDevice(i: { farmId: string; code: string; userId: string; actor: "farmer" | "installer"; safetyConfirmed: boolean }): Promise<PairResult> {
+export async function pairDevice(i: { farmId: string; code: string; userId: string; actor: "farmer" | "installer"; safetyConfirmed: boolean; expectKind?: DeviceKind }): Promise<PairResult> {
   const code = normalizeCode(i.code);
   if (!code) return { ok: false, error: "bad-code" };
   const device = await prisma.device.findUnique({ where: { code } });
   if (!device) return { ok: false, error: "not-found" };
   const kind = device.kind as DeviceKind;
+  // The probe card only links probes and the pump card only links pump boxes, so a code typed in the wrong place is caught.
+  if (i.expectKind && i.expectKind !== kind) return { ok: false, error: "wrong-kind" };
   if (device.farmId === i.farmId) return { ok: true, kind, code };
   if (device.farmId) return { ok: false, error: "linked-elsewhere" };
   if (kind === "pump") {
@@ -59,6 +61,8 @@ export async function pairDevice(i: { farmId: string; code: string; userId: stri
     const pump = await loadPump(i.farmId);
     if (!pump) return { ok: false, error: "no-pump" };
     await prisma.device.update({ where: { id: device.id }, data: { farmId: i.farmId, pairedAt: new Date(), pairedBy: i.userId } });
+    // Forget what an earlier box reported, so the screen waits for this box's own first check-in.
+    await prisma.pump.update({ where: { id: pump.id }, data: { deviceOn: null, deviceSeenAt: null } });
     await setControlEnabled(pump, true, i.actor);
     return { ok: true, kind, code };
   }
@@ -73,7 +77,10 @@ export async function unpairDevice(i: { farmId: string; deviceId: string; actor:
   await prisma.device.update({ where: { id: device.id }, data: { farmId: null, pairedAt: null, pairedBy: null } });
   if (device.kind === "pump") {
     const pump = await loadPump(i.farmId);
-    if (pump) await setControlEnabled(pump, false, i.actor);
+    if (pump) {
+      await setControlEnabled(pump, false, i.actor);
+      await prisma.pump.update({ where: { id: pump.id }, data: { deviceOn: null, deviceSeenAt: null } });
+    }
   }
   return true;
 }
