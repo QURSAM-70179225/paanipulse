@@ -13,7 +13,7 @@ export const VOICE_LANGS: VoiceLang[] = ["ur", "en", "pa"];
 export type VoiceScript = { ur: string; urRoman: string; en: string; pa: string; paRoman: string };
 export type CardId =
   | "report" | "advice" | "yesterday" | "today" | "output" | "week" | "spare" | "weather"
-  | "pumpctl" | "pumpbox" | "timer" | "live" | "probe" | "soil" | "chart" | "fertiliser" | "bucket" | "fieldcheck" | "location";
+  | "pumpctl" | "pumpbox" | "timer" | "live" | "probe" | "soil" | "chart" | "fertiliser" | "bucket" | "fieldcheck" | "location" | "awareness";
 
 type Say = "ur" | "urRoman" | "en" | "pa" | "paRoman";
 
@@ -517,6 +517,14 @@ const LOCATION: VoiceScript = {
   paRoman: "Haale saanu tuhaade khet di theek thaan nahin pata. Jadon tusi apne khet vich kharre hovo taan eh peela button ikk vaar dabao. Pher meenh te mausam da hisaab tuhaade apne khet da howe ga.",
 };
 
+const AWARENESS: VoiceScript = {
+  ur: "زمین کے نیچے پانی محدود ہے۔ ہم جتنا زیادہ پمپ چلاتے ہیں، پانی کی سطح اتنی نیچے جاتی ہے۔ پھر کنواں گہرا کرنا پڑتا ہے اور پمپ کو زیادہ بجلی چاہیے۔ فصل کو جتنا پانی چاہیے اتنا ہی دیں۔ نیچے دیکھیں کہ اس ہفتے آپ کا کتنا پانی ضائع ہوا۔",
+  urRoman: "Zameen ke neeche paani mehdood hai. Hum jitna zyada pump chalaate hain, paani ki sathh utni neeche jaati hai. Phir kuan gehra karna parta hai aur pump ko zyada bijli chahiye. Fasal ko jitna paani chahiye utna hi den. Neeche dekhein ke is hafte aap ka kitna paani zaaya hua.",
+  en: "Water under the ground is limited. The more we run the pump, the lower the water level goes. Then the well has to be dug deeper and the pump needs more power. Give the crop only the water it needs. Look below to see how much of your water was wasted this week.",
+  pa: "ਜ਼ਮੀਨ ਹੇਠਾਂ ਪਾਣੀ ਸੀਮਤ ਹੈ। ਅਸੀਂ ਜਿੰਨਾ ਵੱਧ ਪੰਪ ਚਲਾਉਂਦੇ ਹਾਂ, ਪਾਣੀ ਦੀ ਸਤ੍ਹਾ ਓਨੀ ਹੇਠਾਂ ਜਾਂਦੀ ਹੈ। ਫੇਰ ਖੂਹ ਡੂੰਘਾ ਕਰਨਾ ਪੈਂਦਾ ਹੈ ਤੇ ਪੰਪ ਨੂੰ ਵੱਧ ਬਿਜਲੀ ਚਾਹੀਦੀ ਹੈ। ਫ਼ਸਲ ਨੂੰ ਜਿੰਨਾ ਪਾਣੀ ਚਾਹੀਦਾ ਹੈ ਓਨਾ ਹੀ ਦਿਓ। ਹੇਠਾਂ ਵੇਖੋ ਕਿ ਇਸ ਹਫ਼ਤੇ ਤੁਹਾਡਾ ਕਿੰਨਾ ਪਾਣੀ ਬਰਬਾਦ ਹੋਇਆ।",
+  paRoman: "Zameen hethaan paani seemit ae. Asin jinna vadh pump chalaunde haan, paani di sathh onni hethaan jaandi ae. Pher khooh dunga karna painda ae te pump nu vadh bijli chaahidi ae. Fasal nu jinna paani chaahida ae onna hi deo. Hethaan vekho ke is hafte tuhaada kinna paani barbaad hoya.",
+};
+
 /** One guided voice note per dashboard card (null where the card isn't shown). */
 export function cardScripts(s: FarmState): Record<CardId, VoiceScript | null> {
   return {
@@ -538,6 +546,7 @@ export function cardScripts(s: FarmState): Record<CardId, VoiceScript | null> {
     fertiliser: FERTILISER,
     bucket: BUCKET,
     fieldcheck: FIELDCHECK,
+    awareness: AWARENESS,
     location: s.farm?.locationSource === "district" ? LOCATION : null,
   };
 }
