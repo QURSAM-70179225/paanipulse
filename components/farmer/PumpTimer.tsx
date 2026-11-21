@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BellRing, Timer, TimerOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { More } from "@/components/ui/more";
 import { chime, startAlarm, stopAlarm, unlockAudio } from "@/lib/alarm";
 import { queueReport, timerKey } from "@/lib/offline";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,7 @@ interface TimerState { startedAt: number; endsAt: number; hours: number }
 export interface PumpTimerLabels {
   title: string; help: string; hours: string; start: string; left: string; stop: string; offNow: string; done: string;
   soon: string; keepOpen: string; noNeed: string; saved: string; unit: string;
+  more: string; boxHint: string;
 }
 
 const fmt = (ms: number) => {
@@ -29,7 +31,7 @@ function load(farmId: string): TimerState | null {
 }
 
 /** Farmer-started pump timer. Rings a loud alarm when the advised hours are over. All client-side, so it works offline. */
-export function PumpTimer({ farmId, recommendedHours, adviceIsOff, labels }: { farmId: string; recommendedHours: number; adviceIsOff: boolean; labels: PumpTimerLabels }) {
+export function PumpTimer({ farmId, recommendedHours, adviceIsOff, listen, labels }: { farmId: string; recommendedHours: number; adviceIsOff: boolean; listen?: React.ReactNode; labels: PumpTimerLabels }) {
   const [timer, setTimer] = useState<TimerState | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [hours, setHours] = useState(recommendedHours > 0 ? recommendedHours : 2);
@@ -124,8 +126,14 @@ export function PumpTimer({ farmId, recommendedHours, adviceIsOff, labels }: { f
     <>
       <Card className={cn(timer && !ringing && "border-emerald-400")}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Timer className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}</CardTitle>
-          <p className="text-sm text-slate-700">{labels.help}</p>
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="flex items-center gap-2"><Timer className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}</CardTitle>
+            {listen}
+          </div>
+          <More label={labels.more}>
+            <p>{labels.help}</p>
+            <p>{labels.boxHint}</p>
+          </More>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {timer ? (

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Power, PowerOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { More } from "@/components/ui/more";
 import { signalWord } from "@/lib/devices/code";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,7 @@ export interface PumpCtlLabels {
   title: string; on: string; off: string; left: string; offline: string; never: string; hours: string; start: string; stop: string; confirm: string;
   auto: string; autoNote: string; safety: string; errOffline: string; errBusy: string; errHours: string; errDisabled: string; errGeneric: string; log: string;
   offlineRunning: string; network: string; signalGood: string; signalFair: string; signalWeak: string;
+  autoTitle: string; autoTime: string; autoNeedsProbe: string; more: string;
   actions: Record<string, string>; actors: Record<string, string>;
 }
 
@@ -27,7 +29,7 @@ const clock = (iso: string) => new Date(iso).toLocaleTimeString("en-GB", { hour:
  * Remote start and stop of the pump through a SIM control box. Shown once a control box is linked to this farm with its code.
  * Every run has a hard stop time; the control box enforces it on its own clock, so a weak or lost network cannot keep it running.
  */
-export function PumpControl({ farmId, advisedHours, labels }: { farmId: string; advisedHours: number; labels: PumpCtlLabels }) {
+export function PumpControl({ farmId, advisedHours, hasProbe, listen, labels }: { farmId: string; advisedHours: number; hasProbe: boolean; listen?: React.ReactNode; labels: PumpCtlLabels }) {
   const router = useRouter();
   const [v, setV] = useState<View | null>(null);
   const [hours, setHours] = useState(String(advisedHours > 0 ? Math.min(12, Math.max(0.5, advisedHours)) : 2));
@@ -79,9 +81,12 @@ export function PumpControl({ farmId, advisedHours, labels }: { farmId: string; 
   return (
     <Card className={cn(v.on ? "border-emerald-400" : "border-slate-300")}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {v.on ? <Power className="h-5 w-5 text-emerald-700" aria-hidden /> : <PowerOff className="h-5 w-5 text-slate-500" aria-hidden />} {labels.title}
-        </CardTitle>
+<div className="flex items-start justify-between gap-2">
+          <CardTitle className="flex items-center gap-2">
+            {v.on ? <Power className="h-5 w-5 text-emerald-700" aria-hidden /> : <PowerOff className="h-5 w-5 text-slate-500" aria-hidden />} {labels.title}
+          </CardTitle>
+          {listen}
+        </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div aria-live="polite">
@@ -109,13 +114,24 @@ export function PumpControl({ farmId, advisedHours, labels }: { farmId: string; 
           </>
         )}
 
-        <label className="flex items-start gap-2 text-sm text-slate-800">
-          <input type="checkbox" className="mt-1 h-5 w-5" checked={v.autoStopWhenFull} disabled={busy} onChange={(e) => post({ action: "auto-stop", enabled: e.target.checked })} />
-          <span>{labels.auto}<span className="block text-xs text-slate-500">{labels.autoNote}</span></span>
-        </label>
+        {/* The motor stops by itself: always at the end of the set time, and (with a soil probe) when the soil is wet enough. */}
+        <div className="flex flex-col gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-slate-800">
+          <p className="font-semibold text-emerald-900">{labels.autoTitle}</p>
+          <label className="flex items-start gap-2">
+            <input type="checkbox" className="mt-0.5 h-5 w-5" checked readOnly disabled />
+            <span>{labels.autoTime}</span>
+          </label>
+          <label className="flex items-start gap-2">
+            <input type="checkbox" className="mt-0.5 h-5 w-5" checked={hasProbe && v.autoStopWhenFull} disabled={busy || !hasProbe} onChange={(e) => post({ action: "auto-stop", enabled: e.target.checked })} />
+            <span>{labels.auto}{!hasProbe && <span className="block text-xs text-slate-500">{labels.autoNeedsProbe}</span>}</span>
+          </label>
+        </div>
 
         {error && <p role="alert" className="rounded-xl bg-red-50 p-2 text-sm text-red-800">{error}</p>}
-        <p className="text-xs text-slate-600">{labels.safety}</p>
+        <More label={labels.more}>
+          <p>{labels.autoNote}</p>
+          <p>{labels.safety}</p>
+        </More>
 
         {v.log.length > 0 && (
           <details className="text-xs text-slate-700">

@@ -104,7 +104,7 @@ export function WeatherLive({ farmId, initial, today, labels }: {
           </ul>
         </section>
       )}
-      <p className="mt-1 text-xs text-slate-500">{labels.auto}</p>
+
     </div>
   );
 }

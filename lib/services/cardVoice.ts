@@ -11,7 +11,9 @@ import type { FarmState } from "./farmState";
 export type VoiceLang = "ur" | "en" | "pa";
 export const VOICE_LANGS: VoiceLang[] = ["ur", "en", "pa"];
 export type VoiceScript = { ur: string; urRoman: string; en: string; pa: string; paRoman: string };
-export type CardId = "report" | "advice" | "yesterday" | "today" | "output" | "week" | "spare" | "weather";
+export type CardId =
+  | "report" | "advice" | "yesterday" | "today" | "output" | "week" | "spare" | "weather"
+  | "pumpctl" | "pumpbox" | "timer" | "live" | "probe" | "soil" | "chart" | "fertiliser" | "bucket" | "fieldcheck";
 
 type Say = "ur" | "urRoman" | "en" | "pa" | "paRoman";
 
@@ -426,6 +428,87 @@ const REPORT: VoiceScript = {
   paRoman: "Kall tusi pump kinne ghante chalaaya? Hethaan ghanteyaan waala number dabao: sifar, do, chaar, chhe ya aath. Je pump bilkul nahin chalya taan sifar dabao. Is naal tuhaada paani meter te salaah theek rehndi ae.",
 };
 
+/* Device and tool cards: the same words for every farm, saying what the card is for and what to do. */
+const PUMPCTL: VoiceScript = {
+  "ur": "اس کارڈ سے آپ کہیں بھی بیٹھ کر موٹر چلا اور بند کر سکتے ہیں۔ گھنٹے چنیں اور پمپ شروع کریں دبائیں۔ وقت پورا ہوتے ہی موٹر خود بند ہو جائے گی۔ اگر مٹی کا پروب لگا ہے تو کھیت میں نمی پوری ہونے پر بھی موٹر خود بند ہو جائے گی۔ فوراً بند کرنا ہو تو لال بٹن دبائیں۔",
+  "urRoman": "Is card se aap kahin bhi baith kar motor chala aur band kar sakte hain. Ghantay chunein aur pump shuru karein dabaayen. Waqt poora hotay hi motor khud band ho jaaye gi. Agar mitti ka probe laga hai to khet mein nami poori honay par bhi motor khud band ho jaaye gi. Foran band karna ho to laal button dabaayen.",
+  "en": "From this card you can switch the motor on and off from anywhere. Choose the hours and press Start pump. The motor stops by itself when the time is up. If a soil probe is fitted, it also stops by itself when the field has enough water. To stop it at once, press the red button.",
+  "pa": "ਇਸ ਕਾਰਡ ਨਾਲ ਤੁਸੀਂ ਕਿਤੇ ਵੀ ਬੈਠ ਕੇ ਮੋਟਰ ਚਲਾ ਤੇ ਬੰਦ ਕਰ ਸਕਦੇ ਹੋ। ਘੰਟੇ ਚੁਣੋ ਤੇ ਪੰਪ ਸ਼ੁਰੂ ਕਰੋ ਦਬਾਓ। ਸਮਾਂ ਪੂਰਾ ਹੁੰਦੇ ਹੀ ਮੋਟਰ ਆਪੇ ਬੰਦ ਹੋ ਜਾਵੇਗੀ। ਜੇ ਮਿੱਟੀ ਦਾ ਪ੍ਰੋਬ ਲੱਗਿਆ ਹੈ ਤਾਂ ਖੇਤ ਵਿੱਚ ਨਮੀ ਪੂਰੀ ਹੋਣ ਤੇ ਵੀ ਮੋਟਰ ਆਪੇ ਬੰਦ ਹੋ ਜਾਵੇਗੀ। ਹੁਣੇ ਬੰਦ ਕਰਨੀ ਹੋਵੇ ਤਾਂ ਲਾਲ ਬਟਨ ਦਬਾਓ।",
+  "paRoman": "Is card naal tusi kite vi baith ke motor chala te band kar sakde ho. Ghante chuno te pump shuru karo dabao. Samaan poora hunde hi motor aape band ho jaawe gi. Je mitti da probe laggya ae taan khet vich nami poori hon te vi motor aape band ho jaawe gi. Hune band karni howe taan laal button dabao."
+};
+
+const PUMPBOX: VoiceScript = {
+  "ur": "پمپ کنٹرول بکس الیکٹریشن موٹر پر لگاتا ہے۔ اس میں اپنی SIM ہوتی ہے۔ بکس پر لکھا کوڈ یہاں ایک بار لکھیں اور جوڑیں دبائیں۔ اس کے بعد آپ فون سے کہیں سے بھی موٹر چلا اور بند کر سکتے ہیں۔",
+  "urRoman": "Pump control box electrician motor par lagaata hai. Is mein apni SIM hoti hai. Box par likha code yahan aik baar likhein aur jorein dabaayen. Is ke baad aap phone se kahin se bhi motor chala aur band kar sakte hain.",
+  "en": "An electrician fits the pump control box at the motor. It has its own SIM. Type the code printed on the box here, once, and press Link. After that you can switch the motor on and off from your phone, from anywhere.",
+  "pa": "ਪੰਪ ਕੰਟਰੋਲ ਬਕਸਾ ਬਿਜਲੀ ਵਾਲਾ ਮੋਟਰ ਉੱਤੇ ਲਾਉਂਦਾ ਹੈ। ਇਸ ਵਿੱਚ ਆਪਣੀ SIM ਹੁੰਦੀ ਹੈ। ਬਕਸੇ ਉੱਤੇ ਲਿਖਿਆ ਕੋਡ ਇੱਥੇ ਇੱਕ ਵਾਰ ਲਿਖੋ ਤੇ ਜੋੜੋ ਦਬਾਓ। ਫੇਰ ਤੁਸੀਂ ਫ਼ੋਨ ਨਾਲ ਕਿਤੋਂ ਵੀ ਮੋਟਰ ਚਲਾ ਤੇ ਬੰਦ ਕਰ ਸਕਦੇ ਹੋ।",
+  "paRoman": "Pump control baksa bijli waala motor utte launda ae. Is vich apni SIM hundi ae. Bakse utte likhya code ithe ikk vaar likho te jorro dabao. Pher tusi phone naal kiton vi motor chala te band kar sakde ho."
+};
+
+const TIMER: VoiceScript = {
+  "ur": "جب آپ خود پمپ چلائیں تو یہاں گھنٹے چن کر ٹائمر شروع کریں۔ وقت پورا ہونے پر فون زور سے بجے گا تاکہ آپ پمپ بند کر دیں۔ یہ انٹرنیٹ کے بغیر بھی چلتا ہے۔ موٹر خود بند کروانی ہو تو پمپ کنٹرول بکس لگوائیں۔",
+  "urRoman": "Jab aap khud pump chalaayen to yahan ghantay chun kar timer shuru karein. Waqt poora honay par phone zor se bajay ga taa ke aap pump band kar den. Yeh internet ke baghair bhi chalta hai. Motor khud band karwaani ho to pump control box lagwaayen.",
+  "en": "When you switch the pump on yourself, choose the hours here and start the timer. When the time is up, the phone rings loudly so you can switch the pump off. It works without internet. To have the motor stop by itself, get a pump control box fitted.",
+  "pa": "ਜਦੋਂ ਤੁਸੀਂ ਆਪ ਪੰਪ ਚਲਾਓ ਤਾਂ ਇੱਥੇ ਘੰਟੇ ਚੁਣ ਕੇ ਟਾਈਮਰ ਸ਼ੁਰੂ ਕਰੋ। ਸਮਾਂ ਪੂਰਾ ਹੋਣ ਤੇ ਫ਼ੋਨ ਜ਼ੋਰ ਨਾਲ ਵੱਜੇਗਾ ਤਾਂ ਜੋ ਤੁਸੀਂ ਪੰਪ ਬੰਦ ਕਰ ਦਿਓ। ਇਹ ਇੰਟਰਨੈੱਟ ਤੋਂ ਬਿਨਾਂ ਵੀ ਚੱਲਦਾ ਹੈ। ਮੋਟਰ ਆਪੇ ਬੰਦ ਕਰਵਾਉਣੀ ਹੋਵੇ ਤਾਂ ਪੰਪ ਕੰਟਰੋਲ ਬਕਸਾ ਲਵਾਓ।",
+  "paRoman": "Jadon tusi aap pump chalao taan ithe ghante chun ke timer shuru karo. Samaan poora hon te phone zor naal vajje ga taan jo tusi pump band kar deo. Eh internet ton binaan vi chalda ae. Motor aape band karwauni howe taan pump control baksa lawao."
+};
+
+const LIVE: VoiceScript = {
+  "ur": "یہ میٹر سولر ڈرائیو سے جڑ کر بتاتا ہے کہ ابھی پمپ کتنا پانی نکال رہا ہے اور آج کتنا نکالا۔ اگر پمپ مشورے سے زیادہ دیر چلے تو یہ خبردار کرتا ہے۔ اسے آپ کا انسٹالر جوڑتا ہے۔",
+  "urRoman": "Yeh meter solar drive se jur kar batata hai ke abhi pump kitna paani nikaal raha hai aur aaj kitna nikaala. Agar pump mashwaray se zyada der chalay to yeh khabardaar karta hai. Isay aap ka installer jorta hai.",
+  "en": "This meter connects to the solar drive and shows how much water the pump is giving now and today. If the pump runs longer than advised, it warns you. Your installer connects it.",
+  "pa": "ਇਹ ਮੀਟਰ ਸੋਲਰ ਡਰਾਈਵ ਨਾਲ ਜੁੜ ਕੇ ਦੱਸਦਾ ਹੈ ਕਿ ਹੁਣ ਪੰਪ ਕਿੰਨਾ ਪਾਣੀ ਕੱਢ ਰਿਹਾ ਹੈ ਤੇ ਅੱਜ ਕਿੰਨਾ ਕੱਢਿਆ। ਜੇ ਪੰਪ ਸਲਾਹ ਤੋਂ ਵੱਧ ਚੱਲੇ ਤਾਂ ਇਹ ਖ਼ਬਰਦਾਰ ਕਰਦਾ ਹੈ। ਇਸ ਨੂੰ ਤੁਹਾਡਾ ਇੰਸਟਾਲਰ ਜੋੜਦਾ ਹੈ।",
+  "paRoman": "Eh meter solar drive naal jurr ke dassda ae ke hun pump kinna paani kaddh reha ae te ajj kinna kaddhya. Je pump salaah ton vadh challe taan eh khabardaar karda ae. Is nu tuhaada installer jorrda ae."
+};
+
+const PROBE: VoiceScript = {
+  "ur": "مٹی کا پروب کھیت میں لگتا ہے اور اپنی SIM سے نمی خود بھیجتا ہے۔ پروب پر لکھا کوڈ یہاں ایک بار لکھیں اور جوڑیں دبائیں۔ پھر جب کھیت میں کافی پانی پہنچ جائے گا تو آپ کو پتا چل جائے گا، اور پمپ بکس لگا ہو تو موٹر خود بند ہو جائے گی۔",
+  "urRoman": "Mitti ka probe khet mein lagta hai aur apni SIM se nami khud bhejta hai. Probe par likha code yahan aik baar likhein aur jorein dabaayen. Phir jab khet mein kaafi paani pohanch jaaye ga to aap ko pata chal jaaye ga, aur pump box laga ho to motor khud band ho jaaye gi.",
+  "en": "The soil probe goes in the field and sends the moisture by itself through its own SIM. Type the code printed on the probe here, once, and press Link. Then you will know when the field has enough water, and with a pump box the motor stops by itself.",
+  "pa": "ਮਿੱਟੀ ਦਾ ਪ੍ਰੋਬ ਖੇਤ ਵਿੱਚ ਲੱਗਦਾ ਹੈ ਤੇ ਆਪਣੀ SIM ਨਾਲ ਨਮੀ ਆਪੇ ਭੇਜਦਾ ਹੈ। ਪ੍ਰੋਬ ਉੱਤੇ ਲਿਖਿਆ ਕੋਡ ਇੱਥੇ ਇੱਕ ਵਾਰ ਲਿਖੋ ਤੇ ਜੋੜੋ ਦਬਾਓ। ਫੇਰ ਜਦੋਂ ਖੇਤ ਵਿੱਚ ਕਾਫ਼ੀ ਪਾਣੀ ਪਹੁੰਚ ਜਾਵੇਗਾ ਤਾਂ ਤੁਹਾਨੂੰ ਪਤਾ ਲੱਗ ਜਾਵੇਗਾ, ਤੇ ਪੰਪ ਬਕਸਾ ਲੱਗਿਆ ਹੋਵੇ ਤਾਂ ਮੋਟਰ ਆਪੇ ਬੰਦ ਹੋ ਜਾਵੇਗੀ।",
+  "paRoman": "Mitti da probe khet vich lagda ae te apni SIM naal nami aape bhejda ae. Probe utte likhya code ithe ikk vaar likho te jorro dabao. Pher jadon khet vich kaafi paani pohanch jaawe ga taan tuhanu pata lagg jaawe ga, te pump baksa laggya howe taan motor aape band ho jaawe gi."
+};
+
+const SOIL: VoiceScript = {
+  "ur": "یہ کارڈ پروب سے مٹی کی نمی دکھاتا ہے۔ نمی کم ہو تو زمین خشک ہے۔ نمی پوری ہو جائے تو کھیت میں کافی پانی ہے، پمپ بند کر دیں۔ پروب ایک جگہ کا حال بتاتا ہے، اس لیے کھیت بھی دیکھ لیں۔",
+  "urRoman": "Yeh card probe se mitti ki nami dikhata hai. Nami kam ho to zameen khushk hai. Nami poori ho jaaye to khet mein kaafi paani hai, pump band kar den. Probe aik jagah ka haal batata hai, is liye khet bhi dekh len.",
+  "en": "This card shows the soil moisture from your probe. Low moisture means the soil is dry. When it is full, the field has enough water, so switch the pump off. The probe shows one spot, so look at your field too.",
+  "pa": "ਇਹ ਕਾਰਡ ਪ੍ਰੋਬ ਤੋਂ ਮਿੱਟੀ ਦੀ ਨਮੀ ਵਿਖਾਉਂਦਾ ਹੈ। ਨਮੀ ਘੱਟ ਹੋਵੇ ਤਾਂ ਜ਼ਮੀਨ ਸੁੱਕੀ ਹੈ। ਨਮੀ ਪੂਰੀ ਹੋ ਜਾਵੇ ਤਾਂ ਖੇਤ ਵਿੱਚ ਕਾਫ਼ੀ ਪਾਣੀ ਹੈ, ਪੰਪ ਬੰਦ ਕਰ ਦਿਓ। ਪ੍ਰੋਬ ਇੱਕ ਥਾਂ ਦਾ ਹਾਲ ਦੱਸਦਾ ਹੈ, ਇਸ ਲਈ ਖੇਤ ਵੀ ਵੇਖ ਲਓ।",
+  "paRoman": "Eh card probe ton mitti di nami vikhaunda ae. Nami ghatt howe taan zameen sukki ae. Nami poori ho jaawe taan khet vich kaafi paani ae, pump band kar deo. Probe ikk thaan da haal dassda ae, is layi khet vi vekh lao."
+};
+
+const CHART: VoiceScript = {
+  "ur": "یہ چارٹ پچھلے سات دن دکھاتا ہے۔ نیلا بار وہ پانی ہے جو آپ نے نکالا، سبز بار وہ پانی ہے جو فصل کو چاہیے تھا، اور لال لکیر ضائع پانی ہے۔ نیلا بار سبز سے اونچا ہو تو پانی زیادہ دیا گیا۔",
+  "urRoman": "Yeh chart pichlay saat din dikhata hai. Neela baar woh paani hai jo aap ne nikaala, sabz baar woh paani hai jo fasal ko chahiye tha, aur laal lakeer zaaya paani hai. Neela baar sabz se ooncha ho to paani zyada diya gaya.",
+  "en": "This chart shows the last seven days. The blue bar is the water you pumped, the green bar is what the crop needed, and the red line is water wasted. When blue is taller than green, too much water was given.",
+  "pa": "ਇਹ ਚਾਰਟ ਪਿਛਲੇ ਸੱਤ ਦਿਨ ਵਿਖਾਉਂਦਾ ਹੈ। ਨੀਲਾ ਬਾਰ ਉਹ ਪਾਣੀ ਹੈ ਜੋ ਤੁਸੀਂ ਕੱਢਿਆ, ਹਰਾ ਬਾਰ ਉਹ ਪਾਣੀ ਹੈ ਜੋ ਫ਼ਸਲ ਨੂੰ ਚਾਹੀਦਾ ਸੀ, ਤੇ ਲਾਲ ਲਕੀਰ ਬਰਬਾਦ ਪਾਣੀ ਹੈ। ਨੀਲਾ ਬਾਰ ਹਰੇ ਤੋਂ ਉੱਚਾ ਹੋਵੇ ਤਾਂ ਪਾਣੀ ਵੱਧ ਦਿੱਤਾ ਗਿਆ।",
+  "paRoman": "Eh chart pichhle satt din vikhaunda ae. Neela baar oh paani ae jo tusi kaddhya, hara baar oh paani ae jo fasal nu chaahida si, te laal lakeer barbaad paani ae. Neela baar hare ton uchcha howe taan paani vadh dittaa gaya."
+};
+
+const FERTILISER: VoiceScript = {
+  "ur": "یہاں اپنے مٹی کے ٹیسٹ یا زرعی افسر کی بتائی ہوئی کھاد فی ایکڑ لکھیں۔ ایپ پوری زمین کا حساب کر کے بتاتی ہے کہ یوریا کب اور کتنی ڈالنی ہے، اور تیز بارش ہو تو انتظار کا کہتی ہے۔ کھاد کی مقدار ایپ خود طے نہیں کرتی۔",
+  "urRoman": "Yahan apne mitti ke test ya zarai afsar ki batayi hui khaad fi acre likhein. App poori zameen ka hisaab kar ke batati hai ke urea kab aur kitni daalni hai, aur tez baarish ho to intezaar ka kehti hai. Khaad ki miqdaar app khud tay nahin karti.",
+  "en": "Enter the fertiliser per acre from your soil test or agriculture officer. The app works out the total for your land and says when and how much urea to apply, and to wait if heavy rain is coming. The app does not decide the amount itself.",
+  "pa": "ਇੱਥੇ ਆਪਣੇ ਮਿੱਟੀ ਦੇ ਟੈਸਟ ਜਾਂ ਖੇਤੀ ਅਫ਼ਸਰ ਦੀ ਦੱਸੀ ਖਾਦ ਪ੍ਰਤੀ ਏਕੜ ਲਿਖੋ। ਐਪ ਸਾਰੀ ਜ਼ਮੀਨ ਦਾ ਹਿਸਾਬ ਕਰਕੇ ਦੱਸਦੀ ਹੈ ਕਿ ਯੂਰੀਆ ਕਦੋਂ ਤੇ ਕਿੰਨਾ ਪਾਉਣਾ ਹੈ, ਤੇ ਤੇਜ਼ ਮੀਂਹ ਆਵੇ ਤਾਂ ਉਡੀਕ ਕਰਨ ਨੂੰ ਕਹਿੰਦੀ ਹੈ। ਖਾਦ ਦੀ ਮਿਕਦਾਰ ਐਪ ਆਪ ਤੈਅ ਨਹੀਂ ਕਰਦੀ।",
+  "paRoman": "Ithe apne mitti de test ya kheti afsar di dassi khaad prati acre likho. App saari zameen da hisaab karke dassdi ae ke urea kadon te kinna pauna ae, te tez meenh aawe taan udeek karan nu kehndi ae. Khaad di miqdaar app aap tay nahin kardi."
+};
+
+const BUCKET: VoiceScript = {
+  "ur": "بالٹی ٹیسٹ سے پانی کا حساب آپ کے اپنے پمپ کے مطابق ہو جاتا ہے۔ دوپہر کی دھوپ میں پمپ چلائیں۔ پمپ کے پائپ سے ایک ڈرم یا بالٹی بھریں اور سیکنڈ گنیں۔ برتن کے لیٹر اور سیکنڈ یہاں لکھیں اور بھیج دیں۔",
+  "urRoman": "Baalti test se paani ka hisaab aap ke apne pump ke mutaabiq ho jaata hai. Dopehar ki dhoop mein pump chalaayen. Pump ke pipe se aik drum ya baalti bharein aur second ginein. Bartan ke litre aur second yahan likhein aur bhej den.",
+  "en": "The bucket test tunes the water meter to your own pump. Run the pump in the midday sun. Fill a drum or bucket from the pump pipe and count the seconds. Enter the litres and the seconds here and send.",
+  "pa": "ਬਾਲਟੀ ਟੈਸਟ ਨਾਲ ਪਾਣੀ ਦਾ ਹਿਸਾਬ ਤੁਹਾਡੇ ਆਪਣੇ ਪੰਪ ਮੁਤਾਬਕ ਹੋ ਜਾਂਦਾ ਹੈ। ਦੁਪਹਿਰ ਦੀ ਧੁੱਪ ਵਿੱਚ ਪੰਪ ਚਲਾਓ। ਪੰਪ ਦੀ ਪਾਈਪ ਤੋਂ ਇੱਕ ਡਰੰਮ ਜਾਂ ਬਾਲਟੀ ਭਰੋ ਤੇ ਸਕਿੰਟ ਗਿਣੋ। ਭਾਂਡੇ ਦੇ ਲੀਟਰ ਤੇ ਸਕਿੰਟ ਇੱਥੇ ਲਿਖੋ ਤੇ ਭੇਜ ਦਿਓ।",
+  "paRoman": "Baalti test naal paani da hisaab tuhaade apne pump mutaabik ho jaanda ae. Dupehar di dhupp vich pump chalao. Pump di pipe ton ikk drum ya baalti bharo te second gino. Bhaande de litre te second ithe likho te bhej deo."
+};
+
+const FIELDCHECK: VoiceScript = {
+  "ur": "یہ جانچ بتاتی ہے کہ ایپ کا پانی میٹر کتنا درست ہے۔ پمپ کے پائپ سے ڈرم بھریں، وقت نوٹ کریں، اور ہو سکے تو سولر انورٹر کی اسکرین پر کلو واٹ دیکھ کر لکھیں۔ اس سے میٹر نہیں بدلتا، صرف جانچ ہوتی ہے۔",
+  "urRoman": "Yeh jaanch batati hai ke app ka paani meter kitna durust hai. Pump ke pipe se drum bharein, waqt note karein, aur ho sakay to solar inverter ki screen par kilowatt dekh kar likhein. Is se meter nahin badalta, sirf jaanch hoti hai.",
+  "en": "This check shows how accurate the app's water meter is. Fill a drum from the pump pipe, note the time, and if you can, read the kilowatts on the solar inverter's screen. It does not change the meter; it only checks it.",
+  "pa": "ਇਹ ਜਾਂਚ ਦੱਸਦੀ ਹੈ ਕਿ ਐਪ ਦਾ ਪਾਣੀ ਮੀਟਰ ਕਿੰਨਾ ਠੀਕ ਹੈ। ਪੰਪ ਦੀ ਪਾਈਪ ਤੋਂ ਡਰੰਮ ਭਰੋ, ਸਮਾਂ ਨੋਟ ਕਰੋ, ਤੇ ਹੋ ਸਕੇ ਤਾਂ ਸੋਲਰ ਇਨਵਰਟਰ ਦੀ ਸਕਰੀਨ ਉੱਤੇ ਕਿਲੋਵਾਟ ਵੇਖ ਕੇ ਲਿਖੋ। ਇਸ ਨਾਲ ਮੀਟਰ ਨਹੀਂ ਬਦਲਦਾ, ਸਿਰਫ਼ ਜਾਂਚ ਹੁੰਦੀ ਹੈ।",
+  "paRoman": "Eh jaanch dassdi ae ke app da paani meter kinna theek ae. Pump di pipe ton drum bharo, samaan note karo, te ho sake taan solar inverter di screen utte kilowatt vekh ke likho. Is naal meter nahin badalda, sirf jaanch hundi ae."
+};
+
 /** One guided voice note per dashboard card (null where the card isn't shown). */
 export function cardScripts(s: FarmState): Record<CardId, VoiceScript | null> {
   return {
@@ -437,6 +520,16 @@ export function cardScripts(s: FarmState): Record<CardId, VoiceScript | null> {
     week: week(s),
     spare: spare(s),
     weather: weather(s),
+    pumpctl: PUMPCTL,
+    pumpbox: PUMPBOX,
+    timer: TIMER,
+    live: LIVE,
+    probe: PROBE,
+    soil: SOIL,
+    chart: CHART,
+    fertiliser: FERTILISER,
+    bucket: BUCKET,
+    fieldcheck: FIELDCHECK,
   };
 }
 

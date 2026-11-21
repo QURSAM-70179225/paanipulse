@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { FlaskConical, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { More } from "@/components/ui/more";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -21,11 +22,12 @@ export interface BucketLabels {
   inverter: string;
   calibrated: string;
   defaultEstimate: string;
+  more: string;
 }
 
 const fill = (s: string, v: Record<string, string | number>) => Object.entries(v).reduce((a, [k, x]) => a.replaceAll(`{${k}}`, String(x)), s);
 
-export function BucketTest({ farmId, efficiency, calibrated, labels }: { farmId: string; efficiency: number; calibrated: boolean; labels: BucketLabels }) {
+export function BucketTest({ farmId, efficiency, calibrated, listen, labels }: { farmId: string; efficiency: number; calibrated: boolean; listen?: React.ReactNode; labels: BucketLabels }) {
   const router = useRouter();
   const [volume, setVolume] = useState(200);
   const [seconds, setSeconds] = useState(21); // ≈ default efficiency at noon, so the demo narrows the range without shifting the headline numbers
@@ -64,8 +66,11 @@ export function BucketTest({ farmId, efficiency, calibrated, labels }: { farmId:
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><FlaskConical className="h-5 w-5 text-violet-700" aria-hidden /> {labels.title}</CardTitle>
-        <p className="text-sm text-slate-700">{labels.intro}</p>
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="flex items-center gap-2"><FlaskConical className="h-5 w-5 text-violet-700" aria-hidden /> {labels.title}</CardTitle>
+          {listen}
+        </div>
+        <More label={labels.more}><p>{labels.intro}</p></More>
         <p className="flex flex-wrap items-center gap-2 text-sm text-slate-800">
           {fill(labels.efficiencyNow, { pct: Math.round(efficiency * 100) })}
           <Badge variant={calibrated ? "default" : "warning"}>{calibrated ? labels.calibrated : labels.defaultEstimate}</Badge>

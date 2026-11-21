@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Link2, Power, Radio, SignalHigh, SignalLow, SignalMedium, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { More } from "@/components/ui/more";
 import { signalWord } from "@/lib/devices/code";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,7 @@ export interface DeviceSharedLabels {
   errBadCode: string; errNotFound: string; errElsewhere: string; errPumpExists: string; errGeneric: string;
 }
 /** Texts for one card (probe or pump box). */
-export interface DeviceCardLabels { title: string; intro: string; none: string; link: string; note: string; errWrongKind: string }
+export interface DeviceCardLabels { title: string; intro: string; none: string; link: string; note: string; errWrongKind: string; more: string }
 
 const fill = (s: string, v: Record<string, string | number>) => Object.entries(v).reduce((a, [k, x]) => a.replaceAll(`{${k}}`, String(x)), s);
 
@@ -27,7 +28,7 @@ const fill = (s: string, v: Record<string, string | number>) => Object.entries(v
  * The probe card links only probes (a farm may have several). The pump card links one box, after the safety checklist, and then the
  * farmer can switch the motor on and off from anywhere with the Pump control card.
  */
-export function DeviceCard({ kind, farmId, initial, labels, shared }: { kind: "probe" | "pump"; farmId: string; initial: DeviceRow[]; labels: DeviceCardLabels; shared: DeviceSharedLabels }) {
+export function DeviceCard({ kind, farmId, initial, labels, shared, listen }: { kind: "probe" | "pump"; farmId: string; initial: DeviceRow[]; labels: DeviceCardLabels; shared: DeviceSharedLabels; listen?: React.ReactNode }) {
   const router = useRouter();
   const [all, setAll] = useState(initial);
   const devices = all.filter((d) => d.kind === kind);
@@ -107,8 +108,10 @@ export function DeviceCard({ kind, farmId, initial, labels, shared }: { kind: "p
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><TitleIcon className={cn("h-5 w-5", kind === "pump" ? "text-emerald-700" : "text-sky-700")} aria-hidden /> {labels.title}</CardTitle>
-        <p className="text-sm text-slate-600">{labels.intro}</p>
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="flex items-center gap-2"><TitleIcon className={cn("h-5 w-5", kind === "pump" ? "text-emerald-700" : "text-sky-700")} aria-hidden /> {labels.title}</CardTitle>
+          {listen}
+        </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {devices.length === 0 ? (
@@ -173,7 +176,10 @@ export function DeviceCard({ kind, farmId, initial, labels, shared }: { kind: "p
 
         {error && <p role="alert" className="rounded-xl bg-red-50 p-2 text-sm text-red-800">{error}</p>}
         {done && <p role="status" className="rounded-xl bg-emerald-50 p-2 text-sm text-emerald-900">{done}</p>}
-        <p className="text-xs text-slate-500">{labels.note}</p>
+        <More label={labels.more}>
+          <p>{labels.intro}</p>
+          <p>{labels.note}</p>
+        </More>
       </CardContent>
     </Card>
   );

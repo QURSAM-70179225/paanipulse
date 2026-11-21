@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Activity, AlarmClock, Bell, BellOff, Clock, Droplets, Radio, Zap } from "lucide-react";
 import { startAlarm, stopAlarm, unlockAudio } from "@/lib/alarm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { More } from "@/components/ui/more";
 import { cn } from "@/lib/utils";
 
 export interface LiveLabels {
@@ -25,6 +26,7 @@ export interface LiveLabels {
   overrunHours: string;
   soundOn: string;
   soundOff: string;
+  notConnected: string; more: string;
 }
 
 interface Live {
@@ -41,7 +43,7 @@ interface Live {
 const n0 = (x: number) => Math.round(x).toLocaleString("en-US");
 
 /** Polls the live meter every 5 s; refreshes the page once when telemetry first appears (badge → "Telemetry"). */
-export function LiveMeter({ farmId, initialHasTelemetry, limitHours, labels }: { farmId: string; initialHasTelemetry: boolean; limitHours: number; labels: LiveLabels }) {
+export function LiveMeter({ farmId, initialHasTelemetry, limitHours, listen, labels }: { farmId: string; initialHasTelemetry: boolean; limitHours: number; listen?: React.ReactNode; labels: LiveLabels }) {
   const router = useRouter();
   const [live, setLive] = useState<Live>({ hasTelemetry: initialHasTelemetry });
   const [display, setDisplay] = useState(0);
@@ -97,11 +99,19 @@ export function LiveMeter({ farmId, initialHasTelemetry, limitHours, labels }: {
   return (
     <Card className={cn(live.hasTelemetry ? "border-sky-300" : "border-dashed bg-slate-50")}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Radio className={cn("h-5 w-5", live.hasTelemetry ? "text-sky-700" : "text-slate-400")} aria-hidden /> {labels.title}
-          {live.hasTelemetry && <span className={cn("ms-auto h-2.5 w-2.5 rounded-full", on ? "animate-pulse bg-emerald-500" : "bg-slate-400")} aria-hidden />}
-        </CardTitle>
-        {!live.hasTelemetry && <p className="text-sm text-slate-600">{labels.waiting}</p>}
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="flex items-center gap-2">
+            <Radio className={cn("h-5 w-5", live.hasTelemetry ? "text-sky-700" : "text-slate-400")} aria-hidden /> {labels.title}
+            {live.hasTelemetry && <span className={cn("h-2.5 w-2.5 rounded-full", on ? "animate-pulse bg-emerald-500" : "bg-slate-400")} aria-hidden />}
+          </CardTitle>
+          {listen}
+        </div>
+        {!live.hasTelemetry && (
+          <>
+            <p className="text-sm font-medium text-slate-700">{labels.notConnected}</p>
+            <More label={labels.more}><p>{labels.waiting}</p></More>
+          </>
+        )}
         {live.hasTelemetry && (
           <button type="button" aria-pressed={soundOn} onClick={() => { if (!soundOn) unlockAudio(); setSoundOn(!soundOn); }}
             className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800">
