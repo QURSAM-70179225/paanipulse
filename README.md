@@ -231,9 +231,9 @@ Speaker notes with timings are in both PPTX files. The outline is in [docs/PITCH
 - **Several farms in one account**: add a farm, switch between farms, a My farms overview, and a separate pump and probe for each. The soil probe and pump cards always show, dull when nothing is connected. See [docs/MULTI_FARM.md](docs/MULTI_FARM.md).
 - **Voice guide and a smarter assistant**: a one-minute voice note at the start explains the whole app (card on the farm page, `/guide` page), and the assistant answers how to use any feature, not just pump and weather. See [docs/GUIDE_AND_ASSISTANT.md](docs/GUIDE_AND_ASSISTANT.md).
 - **Crop variety and ripening time** in the farm form (seed names for each crop, or type your own). The name is recorded; the ripening time shifts the growth stages by a rough 10%. See [docs/VARIETIES.md](docs/VARIETIES.md).
-- **Remote pump control** (prototype, off by default, never connected to a real pump): start and stop from the phone with a hard stop time, plus an automatic stop when the soil is full. See [docs/PUMP_CONTROL.md](docs/PUMP_CONTROL.md).
+- **Remote pump control** with a SIM control box (linked once with the code on the box; not yet tried on a real pump): start and stop from the phone over 2G, 3G or 4G, with a hard stop time the box enforces itself, plus an automatic stop when the soil is full. See [docs/PUMP_CONTROL.md](docs/PUMP_CONTROL.md).
 - **"Enough water" alert** (prototype): a soil probe with a SIM can tell a farmer who is at home, by SMS, when water has reached the probe so he can switch the pump off. See [docs/FIELD_FULL_ALERT.md](docs/FIELD_FULL_ALERT.md). The app never switches the pump itself.
-- **DIY Bluetooth soil probe** (prototype: ESP32 sketch plus a "Connect probe" card for Chrome on Android): see [docs/SOIL_PROBE_DIY.md](docs/SOIL_PROBE_DIY.md). Firmware not yet run on real hardware.
+- **SIM soil probe and pump box**: each device has its own SIM and is linked once by typing the code printed on it; it then reports by itself over 2G, 3G or 4G and keeps readings while offline. Firmware not yet run on hardware. See [docs/SIM_DEVICES.md](docs/SIM_DEVICES.md).
 - **Soil probe card** (optional, software only, tested with a simulator; no probe hardware connected): see [docs/SOIL_SENSOR.md](docs/SOIL_SENSOR.md).
 </details>
 

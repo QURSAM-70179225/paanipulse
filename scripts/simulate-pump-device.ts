@@ -2,7 +2,9 @@
  * Simulates the pump control box (no hardware). It checks in with the server, follows the order, and, like the real box must,
  * switches off by itself when the run time has passed, even if it loses contact.
  *
- *   PUMP_CONTROL_ENABLED=true must be set on the server; TELEMETRY_INGEST_KEY on both sides.
+ *   A SIM box (as in the field): make one with "npm run device:new -- --kind pump", link its code to a farm in the app, then
+ *   npm run simulate:pump -- --secret <secret> --interval 3
+ *   Older way, with the shared key (TELEMETRY_INGEST_KEY on both sides):
  *   npm run simulate:pump -- --url http://localhost:3000 --farm karamat --interval 3
  *   npm run simulate:pump -- --drop 3      # lose contact after 3 check-ins: the local timer must still stop the pump
  */
@@ -15,6 +17,7 @@ const FARM_ID = arg("farm", "karamat");
 const INTERVAL_S = Number(arg("interval", "3"));
 const DROP_AFTER = Number(arg("drop", "0")); // 0 = never lose contact
 const KEY = process.env.TELEMETRY_INGEST_KEY ?? "";
+const SECRET = arg("secret", "");
 
 let relayOn = false;
 let stopAtMs = 0; // local hard stop, on this device's own clock
@@ -35,9 +38,14 @@ async function main() {
     if (!lostContact) {
       polls++;
       try {
-        const res = await fetch(`${URL_BASE}/api/device/pump`, { method: "POST", headers: { "Content-Type": "application/json", "x-ingest-key": KEY }, body: JSON.stringify({ farmId: FARM_ID, on: relayOn }) });
-        if (!res.ok) {
-          console.log(`${stamp()}  server answered ${res.status}: ${(await res.text()).slice(0, 120)}  -> relay stays/turns OFF`);
+        const res = SECRET
+          ? await fetch(`${URL_BASE}/api/device/pump`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${SECRET}` }, body: JSON.stringify({ on: relayOn, n: "2G", q: 11 }) })
+          : await fetch(`${URL_BASE}/api/device/pump`, { method: "POST", headers: { "Content-Type": "application/json", "x-ingest-key": KEY }, body: JSON.stringify({ farmId: FARM_ID, on: relayOn }) });
+        if (res.status >= 500) {
+          // Like a weak network: the server could not answer. Keep the current run; the local timer still stops it.
+          console.log(`${stamp()}  server answered ${res.status}; keeping the current state, the local timer will still stop the pump`);
+        } else if (!res.ok) {
+          console.log(`${stamp()}  server answered ${res.status}: ${(await res.text()).slice(0, 120)}  -> relay OFF`);
           setRelay(false, `server ${res.status}`);
         } else {
           const d = (await res.json()) as { command: "on" | "off"; runForSeconds: number };
@@ -58,3 +66,5 @@ async function main() {
   }
 }
 main().catch((e) => { console.error(e); process.exit(1); });
+
+export {};

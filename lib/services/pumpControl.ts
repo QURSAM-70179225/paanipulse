@@ -1,16 +1,17 @@
 /**
- * Remote pump control (PROTOTYPE, off unless PUMP_CONTROL_ENABLED=true). Server-only.
- * The control box (a relay or starter fitted by a qualified electrician) polls the server and does what it is told, but it also
- * enforces the hard stop time on its own clock. See docs/PUMP_CONTROL.md for the safety rules.
+ * Remote pump control. Server-only. A farm gets it when a SIM control box (fitted by a qualified electrician) is linked with its code.
+ * The box checks in over 2G/3G/4G and does what it is told, but it also enforces the hard stop time on its own clock.
+ * See docs/PUMP_CONTROL.md for the safety rules. PUMP_CONTROL_ENABLED=false is an emergency switch that turns it off site-wide.
  */
 import "server-only";
 import { prisma } from "@/lib/db";
+import { pollSecondsFor } from "@/lib/devices/code";
 import {
   deviceCommand, effectiveOn, FRESH_MINUTES, fieldFilled, planStart, remainingSeconds, RISE_WINDOW_HOURS, shouldAutoStop, soilLimits, deviceOnline,
   type PumpControlState, type StartVerdict,
 } from "@/lib/engine";
 
-export const pumpControlAvailable = () => process.env.PUMP_CONTROL_ENABLED === "true";
+export const pumpControlAvailable = () => process.env.PUMP_CONTROL_ENABLED !== "false";
 
 type PumpRow = NonNullable<Awaited<ReturnType<typeof loadPump>>>;
 export const loadPump = (farmId: string) => prisma.pump.findFirst({ where: { farmId } });
@@ -22,7 +23,10 @@ const log = (pumpId: string, actor: string, action: string, detail?: string) => 
 /** What the farmer's screen shows. */
 export async function pumpView(pump: PumpRow, now = new Date()) {
   const s = toState(pump);
-  const entries = await prisma.pumpControlLog.findMany({ where: { pumpId: pump.id }, orderBy: { at: "desc" }, take: 8 });
+  const [entries, box] = await Promise.all([
+    prisma.pumpControlLog.findMany({ where: { pumpId: pump.id }, orderBy: { at: "desc" }, take: 8 }),
+    prisma.device.findFirst({ where: { farmId: pump.farmId, kind: "pump" }, select: { network: true, signal: true } }),
+  ]);
   return {
     available: pumpControlAvailable(),
     enabled: pump.controlEnabled,
@@ -33,6 +37,8 @@ export async function pumpView(pump: PumpRow, now = new Date()) {
     online: deviceOnline(s, now),
     deviceSeenAt: pump.deviceSeenAt?.toISOString() ?? null,
     autoStopWhenFull: pump.autoStopWhenFull,
+    network: box?.network ?? null,
+    signal: box?.signal ?? null,
     log: entries.map((e) => ({ at: e.at.toISOString(), actor: e.actor, action: e.action, detail: e.detail })),
   };
 }
@@ -69,7 +75,8 @@ export async function deviceSync(pump: PumpRow, reportedOn: boolean, now = new D
   await prisma.pump.update({ where: { id: pump.id }, data: { deviceOn: reportedOn, deviceSeenAt: now, ...(timeUp ? { desiredOn: false, offAt: null } : {}) } });
   if (timeUp) await log(pump.id, "timer", "stop", "run time ended");
   const s = toState(pump);
-  return { ...deviceCommand(timeUp ? { ...s, desiredOn: false, offAt: null } : s, now), serverTime: now.toISOString() };
+  const order = deviceCommand(timeUp ? { ...s, desiredOn: false, offAt: null } : s, now);
+  return { ...order, pollSeconds: pollSecondsFor(order.command === "on"), serverTime: now.toISOString() };
 }
 
 /** After soil readings arrive: stop a running pump if the farmer asked for that and the soil is full. Stop only, never start. */

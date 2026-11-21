@@ -47,7 +47,7 @@ export const TOOL_DEFS = [
     type: "function" as const,
     function: {
       name: "getAppGuide",
-      description: "How to use PaaniPulse and what each feature does: today's advice, confidence line, pump timer and alarm, yesterday's hours, weather, last 7 days, fertiliser card, soil probe and Bluetooth, SMS alert, pump control from the phone, adding several farms, bucket test, water chart, farm set-up, assistant, no-internet use. Use for 'how do I use this app', 'what is the probe', 'how do I add another farm', 'app kaise istemal karun'. Pass a topic for one feature, or omit it for the full overview.",
+      description: "How to use PaaniPulse and what each feature does: today's advice, confidence line, pump timer and alarm, yesterday's hours, weather, last 7 days, fertiliser card, soil probe and linking SIM devices, SMS alert, pump control from the phone, adding several farms, bucket test, water chart, farm set-up, assistant, no-internet use. Use for 'how do I use this app', 'what is the probe', 'how do I add another farm', 'app kaise istemal karun'. Pass a topic for one feature, or omit it for the full overview.",
       parameters: {
         type: "object",
         properties: { topic: { type: "string", enum: [...GUIDE_TOPICS], description: "One feature; omit for the whole app." } },
@@ -74,7 +74,7 @@ function appGuide(args: Record<string, unknown>): Record<string, unknown> {
   return {
     overview: GUIDE_VOICE,
     topics: GUIDE_TOPICS.map((t) => ({ topic: t, title: GUIDE[t].title })),
-    note: "The app only advises; the farmer decides. Probe and pump control need hardware an installer provides. Say a feature is not connected yet if the farmer has none.",
+    note: "The app only advises; the farmer decides. Probe and pump control need a SIM device linked once with the code on its box. Say a feature is not connected yet if the farmer has none.",
   };
 }
 

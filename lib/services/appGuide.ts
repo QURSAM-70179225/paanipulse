@@ -94,18 +94,18 @@ export const GUIDE: Record<GuideTopic, GuideEntry> = {
   probe: {
     title: { en: "Soil probe", roman: "Mitti ka probe", ur: "مٹی کا پروب" },
     how: {
-      en: "A soil probe in the field measures the moisture. Connect it by Bluetooth on Chrome on Android, or have one with a SIM fitted so it reports by itself. If you turn on SMS, you get a message when enough water has reached the probe. One probe shows one spot, so check your field. Until a probe is connected the card stays dull.",
-      roman: "Khait mein laga mitti ka probe nami naapta hai. Isay Android ke Chrome mein Bluetooth se jodein, ya SIM wala probe lagwayen jo khud report kare. SMS on karein to jab probe tak kaafi pani pahunche to message aata hai. Ek probe ek hi jagah ka haal batata hai, is liye khait bhi dekhein. Probe jurne tak card dhundla rehta hai.",
-      ur: "کھیت میں لگا مٹی کا پروب نمی ناپتا ہے۔ اسے اینڈرائیڈ کے کروم میں بلوٹوتھ سے جوڑیں، یا SIM والا پروب لگوائیں جو خود رپورٹ کرے۔ SMS چالو کریں تو جب پروب تک کافی پانی پہنچے تو پیغام آتا ہے۔ ایک پروب ایک ہی جگہ کا حال بتاتا ہے، اس لیے کھیت بھی دیکھیں۔ پروب جڑنے تک کارڈ دھندلا رہتا ہے۔",
+      en: "A soil probe in the field measures the moisture and sends it by itself through its own SIM, on 2G, 3G or 4G. To link it, type the code printed on the probe once, in SIM devices on your farm page. After that it works wherever you are. With a weak or no network it keeps its readings and sends them later. If you turn on SMS, you get a message when enough water has reached the probe. One probe shows one spot, so check your field.",
+      roman: "Khait mein laga mitti ka probe nami naapta hai aur apni SIM se khud bhejta hai, 2G, 3G ya 4G par. Isay jodne ke liye probe par likha code ek baar khait ke page par SIM devices mein likhein. Us ke baad aap jahan bhi hon yeh chalta rehta hai. Network kamzor ho ya na ho to yeh readings sambhal kar baad mein bhej deta hai. SMS on karein to jab probe tak kaafi pani pahunche to message aata hai. Ek probe ek hi jagah ka haal batata hai, is liye khait bhi dekhein.",
+      ur: "کھیت میں لگا مٹی کا پروب نمی ناپتا ہے اور اپنی SIM سے خود بھیجتا ہے، 2G، 3G یا 4G پر۔ اسے جوڑنے کے لیے پروب پر لکھا کوڈ ایک بار کھیت کے صفحے پر SIM والے آلات میں لکھیں۔ اس کے بعد آپ جہاں بھی ہوں یہ چلتا رہتا ہے۔ نیٹ کمزور ہو یا نہ ہو تو یہ ریڈنگ سنبھال کر بعد میں بھیج دیتا ہے۔ SMS چالو کریں تو جب پروب تک کافی پانی پہنچے تو پیغام آتا ہے۔ ایک پروب ایک ہی جگہ کا حال بتاتا ہے، اس لیے کھیت بھی دیکھیں۔",
     },
-    match: /(probe|sensor|bluetooth|moisture|soil now|پروب|سینسر|بلوٹوتھ|نمی|enough water|kafi pani)/i,
+    match: /(probe|sensor|bluetooth|moisture|soil now|device code|پروب|سینسر|بلوٹوتھ|نمی|enough water|kafi pani)/i,
   },
   pumpcontrol: {
     title: { en: "Pump control from the phone", roman: "Phone se pump control", ur: "فون سے پمپ کنٹرول" },
     how: {
-      en: "If your installer has fitted a control box on the pump and switched control on, you can start the pump for set hours or stop it from the phone. It also stops by itself at the set time, even if the network fails. Keep your local switch. If the card is dull, it is not connected yet.",
-      roman: "Agar aap ke installer ne pump par control box lagaya aur control on kiya ho, to aap phone se pump muqarrar ghantay ke liye shuru ya band kar sakte hain. Waqt poora hone par yeh khud band ho jata hai, network ho ya na ho. Apna haath wala switch rakhein. Card dhundla ho to abhi jura nahi.",
-      ur: "اگر آپ کے انسٹالر نے پمپ پر کنٹرول بکس لگایا اور کنٹرول چالو کیا ہو تو آپ فون سے پمپ مقررہ گھنٹوں کے لیے شروع یا بند کر سکتے ہیں۔ وقت پورا ہونے پر یہ خود بند ہو جاتا ہے، نیٹ ہو یا نہ ہو۔ اپنا ہاتھ والا سوئچ رکھیں۔ کارڈ دھندلا ہو تو ابھی جڑا نہیں۔",
+      en: "An electrician fits a SIM control box on the pump. Type the code printed on the box once, in SIM devices on your farm page, and confirm the safety checklist. Then you can start the pump for set hours or stop it from your phone, wherever you are, on 2G, 3G or 4G. Every run stops by itself at the set time, even if the network fails. Keep your local switch.",
+      roman: "Electrician pump par SIM wala control box lagata hai. Box par likha code ek baar khait ke page par SIM devices mein likhein aur safety ki tasdeeq karein. Phir aap jahan bhi hon, phone se pump muqarrar ghantay ke liye shuru ya band kar sakte hain, 2G, 3G ya 4G par. Har baar waqt poora hone par pump khud band ho jata hai, network ho ya na ho. Apna haath wala switch rakhein.",
+      ur: "الیکٹریشن پمپ پر SIM والا کنٹرول بکس لگاتا ہے۔ بکس پر لکھا کوڈ ایک بار کھیت کے صفحے پر SIM والے آلات میں لکھیں اور حفاظت کی تصدیق کریں۔ پھر آپ جہاں بھی ہوں، فون سے پمپ مقررہ گھنٹوں کے لیے شروع یا بند کر سکتے ہیں، 2G، 3G یا 4G پر۔ ہر بار وقت پورا ہونے پر پمپ خود بند ہو جاتا ہے، نیٹ ہو یا نہ ہو۔ اپنا ہاتھ والا سوئچ رکھیں۔",
     },
     match: /((phone|mobile|app)[^.?]{0,25}(pump|motor)|(pump|motor)[^.?]{0,25}(phone|mobile)|phone se|band kar sak|shuru kar sak|بند کر سک|فون سے|motor|motar|control box|remote|start the pump|stop the pump|switch on|turn on|turn off|auto.?stop|موٹر|کنٹرول|بند کرنا|شروع کرنا|pump control)/i,
   },

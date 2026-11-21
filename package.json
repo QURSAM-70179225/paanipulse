@@ -19,7 +19,9 @@
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma migrate deploy && tsx scripts/seed-if-empty.ts && next build",
     "render-build": "prisma generate && prisma migrate deploy && tsx scripts/seed-if-empty.ts && next build",
-    "weather:prime": "tsx scripts/prime-weather.ts"
+    "weather:prime": "tsx scripts/prime-weather.ts",
+    "simulate:sim-probe": "tsx scripts/simulate-sim-probe.ts",
+    "device:new": "tsx scripts/device-new.ts"
   },
   "dependencies": {
     "@fontsource/noto-nastaliq-urdu": "^5.3.0",

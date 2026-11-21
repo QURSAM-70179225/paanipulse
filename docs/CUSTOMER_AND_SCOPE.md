@@ -81,7 +81,7 @@ risk is not that it is stuck; it is that it is unproven.
 | **Trust** | Farmers fear a water tax | Refusal | Farmer-owned data, anonymised district view |
 | **Competition** | A drive maker adds the same feature | Lost position | Move first on installer relationships and calibration data |
 | **Constraint** | Two-person team, no budget yet | Slow growth | One segment, one beachhead; funding need about Rs 1.8 million to the end of year one |
-| **Constraint** | Poor village internet; Android only for Bluetooth | Reach | Offline advice; SMS option |
+| **Constraint** | Poor village internet (devices fall back to 2G) | Reach | Offline advice; SMS option |
 
 ---
 

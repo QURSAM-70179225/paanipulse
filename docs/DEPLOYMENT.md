@@ -26,7 +26,7 @@ Never commit secrets and never paste them in chats or issues.
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` | no | SMS or WhatsApp PIN codes for farmers (`TWILIO_FROM` is a number or `whatsapp:+1…`). Without: farmers ask their installer |
 | `SUPPORT_WHATSAPP` | no | Number shown on the forgot-PIN page, e.g. `923001234567` |
 | `TELEMETRY_INGEST_KEY` | before real drives | If set, devices (pump drives and soil probes) and the simulators must send it as the `x-ingest-key` header. Leave empty for the demo |
-| `PUMP_CONTROL_ENABLED` | pilot only | Set to `true` to switch remote pump control on (prototype, off by default). Needs `TELEMETRY_INGEST_KEY`. See [PUMP_CONTROL.md](PUMP_CONTROL.md). Leave unset in production until a real control box has been tested |
+| `PUMP_CONTROL_ENABLED` | optional | Remote pump control is on for every farm that links a SIM pump box. Set to `false` only as an emergency switch to turn it off site-wide. See [PUMP_CONTROL.md](PUMP_CONTROL.md) and [SIM_DEVICES.md](SIM_DEVICES.md). |
 | `DEMO_MODE` | no (default `true`) | Keeps the one-tap demo accounts and the offline sample-weather fallback. Set `false` for a real public launch |
 
 ## 2. Render + Neon

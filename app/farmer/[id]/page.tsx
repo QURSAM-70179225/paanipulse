@@ -24,12 +24,12 @@ import { LiveMeter } from "@/components/farmer/LiveMeter";
 import { SoilNow } from "@/components/farmer/SoilNow";
 import { FertiliserPlan } from "@/components/farmer/FertiliserPlan";
 import { areaText } from "@/lib/i18n/area";
-import { ProbeConnect } from "@/components/farmer/ProbeConnect";
+import { DevicesCard } from "@/components/farmer/DevicesCard";
 import { PumpControl } from "@/components/farmer/PumpControl";
-import { PumpControlPlaceholder } from "@/components/farmer/PumpControlPlaceholder";
 import { FarmSwitcher } from "@/components/farmer/FarmSwitcher";
 import { farmLabel } from "@/lib/services/farmLabel";
 import { pumpControlAvailable } from "@/lib/services/pumpControl";
+import { farmDevices } from "@/lib/services/devices";
 import { ReportHours } from "@/components/farmer/ReportHours";
 import { FieldCheck } from "@/components/farmer/FieldCheck";
 import { fieldCheckSummary } from "@/lib/services/fieldCheck";
@@ -74,7 +74,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
   const farmLang = (await prisma.farm.findUnique({ where: { id }, select: { language: true } }))?.language;
   const lang = await getLang(isLang(farmLang) ? farmLang : "ur");
   const s = await getFarmState(id);
-  const hasSoilProbe = (await prisma.soilReading.count({ where: { farmId: id } })) > 0;
+  const [hasSoilProbe, devices] = await Promise.all([prisma.soilReading.count({ where: { farmId: id } }).then((n) => n > 0), farmDevices(id)]);
   const ownFarms = user.role === "FARMER" ? await prisma.farm.findMany({ where: { ownerId: user.id }, orderBy: { createdAt: "asc" }, select: { id: true, nickname: true, district: true, cropType: true, variety: true } }) : [];
   if (!s) notFound();
   // Keep the stored history (read by the installer portal, report and authority map) in step with what the farmer sees.
@@ -128,16 +128,11 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
               title: T("pumpCtlTitle"), on: T("pumpCtlOn"), off: T("pumpCtlOff"), left: T("pumpCtlLeft"), offline: T("pumpCtlOffline"), never: T("pumpCtlNever"),
               hours: T("pumpCtlHours"), start: T("pumpCtlStart"), stop: T("pumpCtlStop"), confirm: T("pumpCtlConfirm"), auto: T("pumpCtlAuto"), autoNote: T("pumpCtlAutoNote"),
               safety: T("pumpCtlSafety"), errOffline: T("pumpCtlErrOffline"), errBusy: T("pumpCtlErrBusy"), errHours: T("pumpCtlErrHours"), errDisabled: T("pumpCtlErrDisabled"),
-              errGeneric: T("errGeneric"), log: T("pumpCtlLog"),
+              errGeneric: T("errGeneric"), log: T("pumpCtlLog"), offlineRunning: T("pumpCtlOfflineRunning"), network: T("pumpCtlNetwork"),
+              signalGood: T("devSignalGood"), signalFair: T("devSignalFair"), signalWeak: T("devSignalWeak"),
               actions: { start: T("pumpLogStart"), stop: T("pumpLogStop"), "auto-stop-on": T("pumpLogAutoOn"), "auto-stop-off": T("pumpLogAutoOff"), enable: T("pumpLogEnable"), disable: T("pumpLogDisable") },
               actors: { farmer: T("pumpActorFarmer"), installer: T("pumpActorInstaller"), "auto-full": T("pumpActorAuto"), timer: T("pumpActorTimer") },
             }}
-          />
-        )}
-        {!(pumpControlAvailable() && s.pump.controlEnabled) && (
-          <PumpControlPlaceholder
-            reason={pumpControlAvailable() ? "not-enabled" : "unavailable"}
-            labels={{ title: T("pumpCtlTitle"), start: T("pumpCtlStart"), stop: T("pumpCtlStop"), notAvail: T("pumpCtlNotAvail"), notOn: T("pumpCtlNotOn"), needs: T("pumpCtlNeeds"), off: T("pumpCtlOff") }}
           />
         )}
         <PumpTimer
@@ -162,14 +157,18 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             overrunTitle: T("overrunTitle"), overrunNone: T("overrunNone"), overrunHours: T("overrunHours"), soundOn: T("alarmSoundOn"), soundOff: T("alarmSoundOff"),
           }}
         />
-        <ProbeConnect
-            farmId={s.farm.id}
-            hasReadings={hasSoilProbe}
-            labels={{
-              title: T("probeTitle"), intro: T("probeIntro"), connect: T("probeConnect"), connecting: T("probeConnecting"), disconnect: T("probeDisconnect"),
-              connected: T("probeConnected"), live: T("probeLive"), unsupported: T("probeUnsupported"), uploaded: T("probeUploaded"), waiting: T("probeWaiting"),
-              notFound: T("probeNotFound"), lost: T("probeLost"), prototype: T("probePrototype"), history: T("probeHistory"), notConnected: T("probeNotConnected"), needs: T("probeNeeds"),
-            }}
+        <DevicesCard
+          farmId={s.farm.id}
+          initial={devices}
+          labels={{
+            title: T("devTitle"), intro: T("devIntro"), probe: T("devProbe"), pump: T("devPump"), none: T("devNone"), codeLabel: T("devCodeLabel"),
+            codePlaceholder: T("devCodePlaceholder"), link: T("devLink"), linking: T("devLinking"), waiting: T("devWaiting"), lastSeen: T("devLastSeen"),
+            justNow: T("devJustNow"), signalGood: T("devSignalGood"), signalFair: T("devSignalFair"), signalWeak: T("devSignalWeak"), remove: T("devRemove"),
+            removeConfirm: T("devRemoveConfirm"), removePumpConfirm: T("devRemovePumpConfirm"), safetyTitle: T("devSafetyTitle"), safetyBody: T("devSafetyBody"),
+            safetyCheck: T("devSafetyCheck"), safetyLink: T("devSafetyLink"), linkedProbe: T("devLinkedProbe"), linkedPump: T("devLinkedPump"),
+            errBadCode: T("devErrBadCode"), errNotFound: T("devErrNotFound"), errElsewhere: T("devErrElsewhere"), errPumpExists: T("devErrPumpExists"),
+            errGeneric: T("errGeneric"), offlineNote: T("devOfflineNote"),
+          }}
         />
         {hasSoilProbe && (
           <SoilNow

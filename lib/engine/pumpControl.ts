@@ -1,5 +1,5 @@
 /**
- * Remote pump control rules. Pure. PROTOTYPE: needs a relay or starter fitted by a qualified electrician.
+ * Remote pump control rules. Pure. Needs a SIM control box (relay or starter) fitted by a qualified electrician.
  *
  * Safety principles (see docs/PUMP_CONTROL.md):
  *  1. Automation may only STOP the pump. Starting always needs an explicit command from the farmer, with a duration.
