@@ -276,6 +276,7 @@ const en = {
   pumpActorAuto: "Soil probe",
   pumpActorTimer: "Timer",
   // SIM devices: link once with the code on the box
+  awareTitle: "Where does the water go?",
   artPumpBox: "Picture: sun, solar panel, motor with a SIM box, signal to your phone",
   artPumpControl: "Picture: phone buttons start and stop the motor; a clock and wet soil stop it by themselves",
   artProbe: "Picture: probe in the field's soil sends a signal through a mobile tower to your phone",
@@ -945,6 +946,7 @@ const ur: Record<DictKey, string> = {
   pumpActorAuto: "پروب",
   pumpActorTimer: "ٹائمر",
   // SIM devices: link once with the code on the box
+  awareTitle: "پانی کہاں جاتا ہے؟",
   artPumpBox: "تصویر: دھوپ، سولر پینل، موٹر پر SIM والا بکس، فون تک سگنل",
   artPumpControl: "تصویر: فون کے بٹن سے موٹر چلے اور بند ہو؛ گھڑی اور گیلی مٹی خود بند کریں",
   artProbe: "تصویر: کھیت کی مٹی میں پروب، موبائل ٹاور کے ذریعے فون تک سگنل",

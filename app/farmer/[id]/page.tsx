@@ -34,6 +34,7 @@ import { farmDevices } from "@/lib/services/devices";
 import { supportContact } from "@/lib/config/support";
 import { FarmLocationCard } from "@/components/farmer/FarmLocationCard";
 import { CompareBars, ConfidenceMeter, SoilTank, SunRow, ValueBar } from "@/components/farmer/Visuals";
+import { AwarenessCard } from "@/components/farmer/AwarenessCard";
 import { BucketArt, FertiliserArt, LiveMeterArt, LocationArt, ProbeArt, PumpBoxArt, PumpControlArt, TimerArt } from "@/components/farmer/Illustrations";
 import { ReportHours } from "@/components/farmer/ReportHours";
 import { FieldCheck } from "@/components/farmer/FieldCheck";
@@ -233,6 +234,7 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           />
         )}
         <WeekCard s={s} T={T} L={L} listen={listen} />
+        <AwarenessCard lang={lang} title={T("awareTitle")} wastedM3={s.week.excessM3} ureaKg={s.week.ureaKg} dayIndex={Math.floor(Date.now() / 86_400_000)} listen={listen("awareness")} />
         <Card>
           <CardHeader>
             <CardHead title={<><Droplets className="h-5 w-5 text-sky-700" aria-hidden /> {T("last7")}</>} listen={listen("chart")} />
