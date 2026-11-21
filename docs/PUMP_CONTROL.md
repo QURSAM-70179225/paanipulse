@@ -57,7 +57,10 @@ farmer can always use. The app cannot give these.
 - **Linking** (once): the farmer or installer types the code printed on the box in the **Pump control box** card (separate from the soil probe card) and confirms the safety checklist.
   See [SIM_DEVICES.md](SIM_DEVICES.md).
 - **Farmer's screen** (the "Pump control" card, shown once a box is linked): shows ON or OFF and the time left; **Start pump** for N hours
-  (default: the advised hours); a big red **Stop pump now**; and the tick box for automatic stop.
+  (default: the advised hours); a big red **Stop pump now**; and a box **"The motor stops by itself"** with two ticks:
+  *when the time you set is over* (always on, cannot be switched off) and *when the soil is wet enough* (on by default when the
+  box is linked; it needs a linked soil probe and can be switched off). With a pump box linked, the phone-only **Pump timer** card
+  is hidden, because the Pump control card already stops the motor at the set time.
 - **Control box**: has its own SIM and checks in over 4G, 3G or 2G (`POST /api/device/pump` with its own secret), reports whether the
   relay is on and which network it uses, and gets back `{ command, runForSeconds, pollSeconds }`: every 15 seconds while running,
   30 while off. It counts `runForSeconds` down locally and never extends a run by itself.

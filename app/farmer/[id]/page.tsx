@@ -4,7 +4,7 @@ import { after } from "next/server";
 import {
   ArrowLeft, BatteryCharging, BookOpen, CalendarClock, CloudRain, Droplets, Flame, Gauge, History, Leaf, MessageCircle,
   Ruler, Waves,
-  PowerOff, Radio, Sprout, Sun, Thermometer, Wheat, Zap, Coins, Info, CircleAlert, ShieldAlert, ShieldCheck,
+  PowerOff, Radio, Sprout, Sun, Thermometer, Wheat, Zap, Coins, CircleAlert, ShieldAlert, ShieldCheck,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { canAccessFarm, getSession } from "@/lib/auth/session";
@@ -17,6 +17,7 @@ import { dirFor, isLang, t, type DictKey, type Lang } from "@/lib/i18n/dict";
 import { getLang } from "@/lib/i18n/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { More } from "@/components/ui/more";
 import { buttonVariants } from "@/components/ui/button";
 import { PumpChart } from "@/components/farmer/PumpChart";
 import { BucketTest } from "@/components/farmer/BucketTest";
@@ -95,6 +96,9 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
   const scripts = cardScripts(s);
   const voiceLabels = { listen: T("cardListen"), stop: T("stopVoice"), unavailable: T("voiceUnavailable") };
   /** The "listen" button for one card: a guided voice note on what the card means and what to do. */
+  const more = T("moreInfo");
+  const hasProbe = hasSoilProbe || devices.some((d) => d.kind === "probe");
+  const pumpCtlOn = pumpControlAvailable() && s.pump.controlEnabled;
   const listen: ListenFn = (card, tone) => {
     const script = scripts[card];
     return script ? <CardVoice script={script} pageLang={ur ? "ur" : "en"} labels={voiceLabels} tone={tone} /> : null;
@@ -127,17 +131,20 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           />
         )}
         {s.yesterday && s.yesterday.actualHours > 0 && <YesterdayCard s={s} T={T} L={L} listen={listen} />}
-        <HeroCard s={s} T={T} ur={ur} listen={listen} />
-        {pumpControlAvailable() && s.pump.controlEnabled && (
+        <HeroCard s={s} T={T} ur={ur} listen={listen} more={more} />
+        {pumpCtlOn && (
           <PumpControl
             farmId={s.farm.id}
             advisedHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
+            hasProbe={hasProbe}
+            listen={listen("pumpctl")}
             labels={{
               title: T("pumpCtlTitle"), on: T("pumpCtlOn"), off: T("pumpCtlOff"), left: T("pumpCtlLeft"), offline: T("pumpCtlOffline"), never: T("pumpCtlNever"),
               hours: T("pumpCtlHours"), start: T("pumpCtlStart"), stop: T("pumpCtlStop"), confirm: T("pumpCtlConfirm"), auto: T("pumpCtlAuto"), autoNote: T("pumpCtlAutoNote"),
               safety: T("pumpCtlSafety"), errOffline: T("pumpCtlErrOffline"), errBusy: T("pumpCtlErrBusy"), errHours: T("pumpCtlErrHours"), errDisabled: T("pumpCtlErrDisabled"),
               errGeneric: T("errGeneric"), log: T("pumpCtlLog"), offlineRunning: T("pumpCtlOfflineRunning"), network: T("pumpCtlNetwork"),
               signalGood: T("devSignalGood"), signalFair: T("devSignalFair"), signalWeak: T("devSignalWeak"),
+              autoTitle: T("pumpCtlAutoTitle"), autoTime: T("pumpCtlAutoTime"), autoNeedsProbe: T("pumpCtlAutoNeedsProbe"), more,
               actions: { start: T("pumpLogStart"), stop: T("pumpLogStop"), "auto-stop-on": T("pumpLogAutoOn"), "auto-stop-off": T("pumpLogAutoOff"), enable: T("pumpLogEnable"), disable: T("pumpLogDisable") },
               actors: { farmer: T("pumpActorFarmer"), installer: T("pumpActorInstaller"), "auto-full": T("pumpActorAuto"), timer: T("pumpActorTimer") },
             }}
@@ -148,24 +155,29 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           farmId={s.farm.id}
           initial={devices}
           shared={deviceShared}
-          labels={{ title: T("pumpBoxTitle"), intro: T("pumpBoxIntro"), none: T("pumpBoxNone"), link: T("pumpBoxLink"), note: T("pumpBoxNote"), errWrongKind: T("pumpBoxWrongKind") }}
+          listen={listen("pumpbox")}
+          labels={{ title: T("pumpBoxTitle"), intro: T("pumpBoxIntro"), none: T("pumpBoxNone"), link: T("pumpBoxLink"), note: T("pumpBoxNote"), errWrongKind: T("pumpBoxWrongKind"), more }}
         />
-        <PumpTimer
+        {!pumpCtlOn && <PumpTimer
           farmId={s.farm.id}
+          listen={listen("timer")}
           recommendedHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
           adviceIsOff={s.today.advice.kind !== "irrigate"}
           labels={{
             title: T("timerTitle"), help: T("timerHelp"), hours: T("timerHours"), start: T("timerStart"), left: T("timerLeft"), stop: T("timerStop"),
             offNow: T("timerOffNow"), done: T("timerDone"), soon: T("timerSoon"), keepOpen: T("timerKeepOpen"), noNeed: T("timerNoNeed"), saved: T("timerSaved"), unit: T("hours"),
+            more, boxHint: T("timerBoxHint"),
           }}
-        />
+        />}
         <TodayStats s={s} T={T} L={L} listen={listen} />
-        <PumpOutputCard s={s} T={T} ur={ur} listen={listen} />
+        <PumpOutputCard s={s} T={T} ur={ur} listen={listen} more={more} />
         <LiveMeter
           farmId={s.farm.id}
           initialHasTelemetry={s.pump.hasTelemetry}
           limitHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
+          listen={listen("live")}
           labels={{
+            notConnected: T("liveNotConnected"), more,
             title: T("liveTitle"), waiting: T("liveWaiting"), today: T("liveToday"), now: T("liveNow"), energy: T("liveEnergy"),
             runHours: T("liveRunHours"), updated: T("liveUpdated"), noHardware: T("liveNoHardware"), off: T("liveOff"),
             litres: T("litres"), hours: T("hours"), kwh: T("kwh"),
@@ -177,12 +189,15 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           farmId={s.farm.id}
           initial={devices}
           shared={deviceShared}
-          labels={{ title: T("probeCardTitle"), intro: T("probeCardIntro"), none: T("probeCardNone"), link: T("probeCardLink"), note: T("probeCardNote"), errWrongKind: T("probeCardWrongKind") }}
+          listen={listen("probe")}
+          labels={{ title: T("probeCardTitle"), intro: T("probeCardIntro"), none: T("probeCardNone"), link: T("probeCardLink"), note: T("probeCardNote"), errWrongKind: T("probeCardWrongKind"), more }}
         />
         {hasSoilProbe && (
           <SoilNow
             farmId={s.farm.id}
+            listen={listen("soil")}
             labels={{
+              more,
               title: T("soilTitle"), moisture: T("soilProbeMoisture"), dry: T("soilDry"), ok: T("soilOk"), wet: T("soilWet"), temp: T("soilTemp"),
               salinity: T("soilSalinity"), salinityHigh: T("soilSalinityHigh"), salinityNormal: T("soilSalinityNormal"),
               nutrients: T("soilNutrients"), nutrientsNote: T("soilNutrientsNote"), simulated: T("soilSimulated"), updated: T("soilUpdated"),
@@ -195,8 +210,8 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
         <WeekCard s={s} T={T} L={L} listen={listen} />
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Droplets className="h-5 w-5 text-sky-700" aria-hidden /> {T("last7")}</CardTitle>
-            <p className="text-sm text-slate-600">{T("last7Sub")}</p>
+            <CardHead title={<><Droplets className="h-5 w-5 text-sky-700" aria-hidden /> {T("last7")}</>} listen={listen("chart")} />
+            <More label={more}><p>{T("last7Sub")}</p></More>
           </CardHeader>
           <CardContent>
             <PumpChart
@@ -206,12 +221,14 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             />
           </CardContent>
         </Card>
-        <SpareSunCard s={s} T={T} ur={ur} listen={listen} />
+        <SpareSunCard s={s} T={T} ur={ur} listen={listen} more={more} />
         <FertiliserPlan
           farmId={s.farm.id}
           areaLabel={areaText(s.farm.areaAcres, s.farm.areaUnit, T)}
           fert={s.fert}
+          listen={listen("fertiliser")}
           labels={{
+            more,
             title: T("fertTitle"), intro: T("fertIntro"), enter: T("fertEnter"), change: T("fertChange"), cancel: T("fertCancel"), save: T("fertSave"),
             urea: T("fertUrea"), dap: T("fertDap"), sop: T("fertSop"), perAcre: T("fertPerAcre"), splits: T("fertSplits"), splitsN: T("fertSplitsN"), splitsOne: T("fertSplitsOne"), bagsShort: T("fertBagsShort"),
             source: T("fertSource"), srcSoil: T("fertSrcSoil"), srcOfficer: T("fertSrcOfficer"), srcOther: T("fertSrcOther"), confirm: T("fertConfirm"),
@@ -225,26 +242,27 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
           farmId={s.farm.id}
           efficiency={s.pump.efficiency}
           calibrated={s.pump.calibrated}
+          listen={listen("bucket")}
           labels={{
+            more,
             title: T("bucketTitle"), intro: T("bucketIntro"), volume: T("bucketVolume"), seconds: T("bucketSeconds"), hour: T("bucketHour"),
             submit: T("bucketSubmit"), result: T("bucketResult"), reset: T("bucketReset"), error: T("bucketError"),
             efficiencyNow: T("efficiencyNow"), inverter: T("fcInverter"), calibrated: T("calibrated"), defaultEstimate: T("defaultEstimate"),
           }}
         />
-        <FieldCheck farmId={s.farm.id} d={dictFor(lang)} initial={{ ...fc, checks: fc.checks.map((c) => ({ ...c, takenAt: c.takenAt.toISOString() })) }} />
+        <FieldCheck farmId={s.farm.id} d={dictFor(lang)} listen={listen("fieldcheck")} initial={{ ...fc, checks: fc.checks.map((c) => ({ ...c, takenAt: c.takenAt.toISOString() })) }} />
         <WeatherCard s={s} T={T} locale={locale} listen={listen} />
         <Link href={`/farmer/${s.farm.id}/chat`} className={cn(buttonVariants({ size: "lg" }), "w-full bg-[#128C7E] hover:bg-[#0e7266]")}>
           <MessageCircle className="h-5 w-5" aria-hidden /> {T("askAssistant")}
         </Link>
         <footer className="flex flex-col gap-2 pt-2 text-xs text-slate-600">
-          <p className="flex items-start gap-2">
-            <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-            <span>
+          <More label={more}>
+            <p>
               {T("methodNote", { head: s.headM.toFixed(0), kpm: s.kwhPerM3.toFixed(2) })}{" "}
               <Link href="/about" className="font-semibold text-sky-800 underline">{T("howWeCalculate")}</Link>
-            </span>
-          </p>
-          <p>{T("consent")}</p>
+            </p>
+            <p>{T("consent")}</p>
+          </More>
           <Link href={`/report/${s.farm.id}`} className="font-semibold text-sky-800 underline">{T("openReportLink")}</Link>
         </footer>
       </div>
@@ -311,7 +329,7 @@ function YesterdayCard({ s, T, L, listen }: { s: FarmState; T: TFn; L: (m3: numb
   );
 }
 
-function HeroCard({ s, T, ur, listen }: { s: FarmState; T: TFn; ur: boolean; listen: ListenFn }) {
+function HeroCard({ s, T, ur, listen, more }: { s: FarmState; T: TFn; ur: boolean; listen: ListenFn; more: string }) {
   const a = s.today.advice;
   const style = a.kind === "irrigate" ? "from-emerald-700 to-emerald-600" : a.kind === "skip-rain" ? "from-indigo-700 to-sky-700" : "from-sky-800 to-sky-600";
   const Icon = a.kind === "irrigate" ? Droplets : a.kind === "skip-rain" ? CloudRain : PowerOff;
@@ -329,8 +347,16 @@ function HeroCard({ s, T, ur, listen }: { s: FarmState; T: TFn; ur: boolean; lis
         </p>
       )}
       {a.kind === "irrigate" && a.totalHours > a.hoursToday && <p className="mt-2 text-sm text-white/90">{T("adviceRemainder", { total: hrs(a.totalHours) })}</p>}
+      {a.kind !== "irrigate" && next !== null && (
+        <p className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-sm">
+          <CalendarClock className="h-4 w-4 shrink-0" aria-hidden />
+          {next > 14 ? T("nextInWeeks", { n: Math.round(next / 7) }) : T("nextInDays", { n: next })}
+        </p>
+      )}
+      <div className="mt-4 flex">{listen("advice", "dark")}</div>
+      <More label={more} tone="dark" className="mt-3">
       {a.kind === "irrigate" && s.waterPlan && s.waterPlan.grossMm > 0 && (
-        <div className="mt-3 rounded-xl bg-white/15 px-3 py-2 text-sm">
+        <div className="rounded-xl bg-white/15 px-3 py-2 text-sm">
           <p className="font-semibold">{T("planTitle")}</p>
           <p className="mt-0.5">
             {T("planLine", {
@@ -345,17 +371,11 @@ function HeroCard({ s, T, ur, listen }: { s: FarmState; T: TFn; ur: boolean; lis
         </div>
       )}
       {a.kind === "irrigate" && a.rainDeclined && (
-        <p className="mt-2 rounded-xl bg-white/15 px-3 py-2 text-sm">{T(a.rainDeclined === "weather" ? "rainBetWeather" : "rainBetSafe")}</p>
+        <p className="rounded-xl bg-white/15 px-3 py-2 text-sm">{T(a.rainDeclined === "weather" ? "rainBetWeather" : "rainBetSafe")}</p>
       )}
-      {a.kind !== "irrigate" && next !== null && (
-        <p className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-sm">
-          <CalendarClock className="h-4 w-4 shrink-0" aria-hidden />
-          {next > 14 ? T("nextInWeeks", { n: Math.round(next / 7) }) : T("nextInDays", { n: next })}
-        </p>
-      )}
-      <div className="mt-4 flex">{listen("advice", "dark")}</div>
-      <p className="mt-3 text-xs text-white/80">{T("soilMoisture", { used: Math.round(s.today.depletionStartMm), raw: Math.round(s.today.rawMm) })}</p>
-      <ConfidenceLine s={s} T={T} />
+      <p className="text-xs text-white/80">{T("soilMoisture", { used: Math.round(s.today.depletionStartMm), raw: Math.round(s.today.rawMm) })}</p>
+      </More>
+      <ConfidenceLine s={s} T={T} more={more} />
     </section>
   );
 }
@@ -366,7 +386,7 @@ const CONF_REASON_KEY = {
 } as const;
 
 /** How sure the advice is, and why not. The app is open loop (it advises, the farmer acts), so it says when its inputs are weak. */
-function ConfidenceLine({ s, T }: { s: FarmState; T: TFn }) {
+function ConfidenceLine({ s, T, more }: { s: FarmState; T: TFn; more: string }) {
   const c = s.confidence;
   const Icon = c.level === "high" ? ShieldCheck : ShieldAlert;
   return (
@@ -375,9 +395,11 @@ function ConfidenceLine({ s, T }: { s: FarmState; T: TFn }) {
         <Icon className="h-4 w-4 shrink-0" aria-hidden /> {T("confTitle")} {T(c.level === "high" ? "confHigh" : c.level === "medium" ? "confMedium" : "confLow")}
       </p>
       {c.reasons.length > 0 && (
-        <ul className="mt-1 list-disc ps-5 leading-6 text-white/90">
-          {c.reasons.map((r) => <li key={r}>{T(CONF_REASON_KEY[r])}</li>)}
-        </ul>
+        <More label={more} tone="dark" className="mt-1">
+          <ul className="list-disc ps-5 text-white/90">
+            {c.reasons.map((r) => <li key={r}>{T(CONF_REASON_KEY[r])}</li>)}
+          </ul>
+        </More>
       )}
     </div>
   );
@@ -439,7 +461,7 @@ function WeekCard({ s, T, L, listen }: { s: FarmState; T: TFn; L: (m3: number) =
   );
 }
 
-function SpareSunCard({ s, T, ur, listen }: { s: FarmState; T: TFn; ur: boolean; listen: ListenFn }) {
+function SpareSunCard({ s, T, ur, listen, more }: { s: FarmState; T: TFn; ur: boolean; listen: ListenFn; more: string }) {
   const kwh = n0(s.today.todaySpareKwh);
   return (
     <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-white">
@@ -459,7 +481,7 @@ function SpareSunCard({ s, T, ur, listen }: { s: FarmState; T: TFn; ur: boolean;
             </li>
           ))}
         </ul>
-        <p className="mt-2 text-xs text-slate-600">{T("spareNote")}</p>
+        <More label={more} className="mt-2"><p>{T("spareNote")}</p></More>
       </CardContent>
     </Card>
   );
@@ -504,7 +526,7 @@ function WeatherCard({ s, T, locale, listen }: { s: FarmState; T: TFn; locale: s
   );
 }
 
-function PumpOutputCard({ s, T, ur, listen }: { s: FarmState; T: TFn; ur: boolean; listen: ListenFn }) {
+function PumpOutputCard({ s, T, ur, listen, more }: { s: FarmState; T: TFn; ur: boolean; listen: ListenFn; more: string }) {
   const o = s.today.output;
   if (o.mid.litresPerMin <= 0) return null;
   const r10 = (x: number) => Math.round(x / 10) * 10;
@@ -519,7 +541,7 @@ function PumpOutputCard({ s, T, ur, listen }: { s: FarmState; T: TFn; ur: boolea
         <Stat icon={Gauge} label={T("outPerHour")} value={`${n0(o.mid.m3PerHour)} m³`} sub={`≈ ${o.mid.cusec.toFixed(2)} ${T("cusec")}`} />
         <Stat icon={Ruler} label={T("outArea")} value={`${o.mid.kanalPerHour.toFixed(1)} ${T("kanal")}`} sub={`≈ ${o.mid.acresPerHour.toFixed(2)} ${T("acre")}`} tone="text-emerald-800" />
         <Stat icon={CalendarClock} label={T("outHoursPerAcre")} value={o.mid.hoursPerAcre ? `${o.mid.hoursPerAcre.toFixed(1)} ${T("hours")}` : "–"} sub={`${s.farm.areaAcres} ${T("acres")}: ${o.mid.hoursPerAcre ? n0(o.mid.hoursPerAcre * s.farm.areaAcres) : "–"} ${T("hours")}`} />
-        <p className="col-span-2 text-xs text-slate-500">{T("outNote", { mm: o.depthMm, inch })}</p>
+        <More label={more} className="col-span-2"><p>{T("outNote", { mm: o.depthMm, inch })}</p></More>
       </CardContent>
     </Card>
   );

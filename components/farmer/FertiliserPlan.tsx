@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Check, Sprout, Undo2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { More } from "@/components/ui/more";
 import { cn } from "@/lib/utils";
 
 export interface FertLabels {
@@ -13,6 +14,7 @@ export interface FertLabels {
   tooHigh: string; empty: string; error: string; totals: string; bags: string; schedule: string; atSowing: string;
   dose: string; markApplied: string; undo: string; applied: string;
   hintApply: string; hintRain: string; hintWait: string; hintDone: string; disclaimer: string; savedBy: string;
+  more: string;
 }
 
 type Product = "urea" | "dap" | "sop";
@@ -27,7 +29,7 @@ export interface FertView {
 const fill = (s: string, v: Record<string, string | number>) => Object.entries(v).reduce((a, [k, x]) => a.replaceAll(`{${k}}`, String(x)), s);
 const MAX: Record<Product, number> = { urea: 6, dap: 4, sop: 3 };
 
-export function FertiliserPlan({ farmId, areaLabel, fert, labels }: { farmId: string; areaLabel: string; fert: FertView | null; labels: FertLabels }) {
+export function FertiliserPlan({ farmId, areaLabel, fert, listen, labels }: { farmId: string; areaLabel: string; fert: FertView | null; listen?: React.ReactNode; labels: FertLabels }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -84,8 +86,11 @@ export function FertiliserPlan({ farmId, areaLabel, fert, labels }: { farmId: st
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}</CardTitle>
-        {showForm && <p className="text-sm text-slate-600">{labels.intro}</p>}
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="flex items-center gap-2"><Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}</CardTitle>
+          {listen}
+        </div>
+        {showForm && <More label={labels.more}><p>{labels.intro}</p></More>}
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {showForm ? (
@@ -169,8 +174,10 @@ export function FertiliserPlan({ farmId, areaLabel, fert, labels }: { farmId: st
                 )}
                 <button type="button" onClick={() => setEditing(true)} className="min-h-11 rounded-xl border border-slate-300 px-3 text-sm font-semibold text-slate-800">{labels.change}</button>
               </div>
-              <p className="text-xs text-slate-500">{fill(labels.savedBy, { source: srcLabel })}</p>
-              <p className="text-xs text-slate-600">{labels.disclaimer}</p>
+              <More label={labels.more}>
+                <p>{fill(labels.savedBy, { source: srcLabel })}</p>
+                <p>{labels.disclaimer}</p>
+              </More>
             </>
           )
         )}

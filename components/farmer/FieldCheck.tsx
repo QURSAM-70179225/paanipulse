@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ClipboardList, Scale } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { More } from "@/components/ui/more";
 import type { DictKey } from "@/lib/i18n/dict";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +13,7 @@ interface Summary { count: number; meanAbsErrorPct: number | null; beforeCalibra
 const fill = (s: string, v: Record<string, string | number>) => Object.entries(v).reduce((a, [k, x]) => a.replaceAll(`{${k}}`, String(x)), s);
 const n0 = (x: number) => Math.round(x).toLocaleString("en-US");
 
-export function FieldCheck({ farmId, initial, d }: { farmId: string; initial: Summary; d: Record<DictKey, string> }) {
+export function FieldCheck({ farmId, initial, d, listen }: { farmId: string; initial: Summary; d: Record<DictKey, string>; listen?: React.ReactNode }) {
   const [summary, setSummary] = useState<Summary>(initial);
   const [f, setF] = useState({ volumeL: 200, seconds: 22, hour: 12, inverterKw: "" });
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -41,8 +42,11 @@ export function FieldCheck({ farmId, initial, d }: { farmId: string; initial: Su
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Scale className="h-5 w-5 text-sky-700" aria-hidden /> {d.fcTitle}</CardTitle>
-        <p className="text-sm text-slate-700">{d.fcIntro}</p>
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="flex items-center gap-2"><Scale className="h-5 w-5 text-sky-700" aria-hidden /> {d.fcTitle}</CardTitle>
+          <div className="shrink-0">{listen}</div>
+        </div>
+        <More label={d.moreInfo}><p>{d.fcIntro}</p></More>
       </CardHeader>
       <CardContent>
         <form className="grid grid-cols-2 gap-2" onSubmit={submit}>

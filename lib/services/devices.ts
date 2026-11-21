@@ -62,7 +62,8 @@ export async function pairDevice(i: { farmId: string; code: string; userId: stri
     if (!pump) return { ok: false, error: "no-pump" };
     await prisma.device.update({ where: { id: device.id }, data: { farmId: i.farmId, pairedAt: new Date(), pairedBy: i.userId } });
     // Forget what an earlier box reported, so the screen waits for this box's own first check-in.
-    await prisma.pump.update({ where: { id: pump.id }, data: { deviceOn: null, deviceSeenAt: null } });
+    // "Stop when the soil is wet enough" starts ON: it only ever stops the motor, and it acts only once a soil probe reports.
+    await prisma.pump.update({ where: { id: pump.id }, data: { deviceOn: null, deviceSeenAt: null, autoStopWhenFull: true } });
     await setControlEnabled(pump, true, i.actor);
     return { ok: true, kind, code };
   }

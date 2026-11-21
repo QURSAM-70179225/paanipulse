@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FlaskConical, Sprout, Thermometer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { More } from "@/components/ui/more";
 import { cn } from "@/lib/utils";
 
 export interface SoilLabels {
@@ -29,6 +30,7 @@ export interface SoilLabels {
   zoneWet: string;
   filled: string;
   filledNote: string;
+  more: string;
 }
 
 interface Soil {
@@ -65,7 +67,7 @@ function Spark({ data, aria }: { data: { m: number }[]; aria: string }) {
 }
 
 /** Polls the farm's soil-probe endpoint. Rendered only for farms that already have probe readings. */
-export function SoilNow({ farmId, labels }: { farmId: string; labels: SoilLabels }) {
+export function SoilNow({ farmId, listen, labels }: { farmId: string; listen?: React.ReactNode; labels: SoilLabels }) {
   const [d, setD] = useState<Soil>({ hasData: false });
 
   useEffect(() => {
@@ -100,16 +102,18 @@ export function SoilNow({ farmId, labels }: { farmId: string; labels: SoilLabels
   return (
     <Card className="border-sky-300">
       <CardHeader>
-        <CardTitle className="flex flex-wrap items-center gap-2">
-          <Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}
-          {l.source === "simulator" && <span className="ms-auto rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">{labels.simulated}</span>}
-        </CardTitle>
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="flex flex-wrap items-center gap-2">
+            <Sprout className="h-5 w-5 text-emerald-700" aria-hidden /> {labels.title}
+            {l.source === "simulator" && <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">{labels.simulated}</span>}
+          </CardTitle>
+          {listen}
+        </div>
       </CardHeader>
       <CardContent>
         {d.filled && (
           <div role="alert" className="mb-3 rounded-xl bg-emerald-600 p-3 text-white">
             <p className="font-bold">{labels.filled}</p>
-            <p className="mt-0.5 text-sm text-emerald-50">{labels.filledNote}</p>
           </div>
         )}
         <div className="flex items-end justify-between gap-3">
@@ -158,7 +162,6 @@ export function SoilNow({ farmId, labels }: { farmId: string; labels: SoilLabels
               {l.potassiumMgKg != null && <>· K {Math.round(l.potassiumMgKg)} </>}
               mg/kg
             </p>
-            <p className="mt-0.5 leading-6 text-slate-500">{labels.nutrientsNote}</p>
           </div>
         )}
 
@@ -167,7 +170,12 @@ export function SoilNow({ farmId, labels }: { farmId: string; labels: SoilLabels
             {d.check === "agree" ? labels.agree : d.check === "sensor-wetter" ? labels.sensorWetter : labels.sensorDrier}
           </p>
         )}
-        <p className="mt-2 text-xs text-slate-500">{labels.secondOpinion} · {ago}</p>
+        <p className="mt-2 text-xs text-slate-500">{ago}</p>
+        <More label={labels.more} className="mt-1">
+          <p>{labels.secondOpinion}</p>
+          {d.filled && <p>{labels.filledNote}</p>}
+          {hasNutrients && <p>{labels.nutrientsNote}</p>}
+        </More>
       </CardContent>
     </Card>
   );

@@ -56,6 +56,15 @@ describe("card voice notes", () => {
     for (const text of each(VOICE_PICKED)) expect(text.length).toBeGreaterThan(10);
   });
 
+  it("has a voice note for every device and tool card, whatever the farm", () => {
+    const all = cardScripts(farm());
+    for (const id of ["pumpctl", "pumpbox", "timer", "live", "probe", "soil", "chart", "fertiliser", "bucket", "fieldcheck"] as const) {
+      expect(all[id], id).not.toBeNull();
+    }
+    expect(all.pumpctl!.en).toMatch(/stops by itself/);
+    expect(all.pumpctl!.ur).toContain("خود بند");
+  });
+
   it("ends the advice with what to do", () => {
     expect(cardScripts(farm()).advice!.en).toContain("run the pump for 4 hours");
     expect(cardScripts(farm()).advice!.en).toContain("rest of the water tomorrow");
