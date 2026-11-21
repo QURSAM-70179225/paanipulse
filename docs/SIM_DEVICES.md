@@ -6,18 +6,22 @@ or with his phone switched off.
 
 > **Status**
 > - **Built and tested in software:** device codes and keys, linking and unlinking, the probe's batch upload (including readings
->   stored while offline), the pump box check-in with its own key, the "SIM devices" card, and both flows end to end with simulated
+>   stored while offline), the pump box check-in with its own key, the separate Soil probe and Pump control box cards, and both flows end to end with simulated
 >   devices (`npm run simulate:sim-probe`, `npm run simulate:pump -- --secret …`).
 > - **Not tested:** the two firmware sketches have **not been compiled or run on hardware**, and nothing has been connected to a
 >   real pump. Modem behaviour on 2G, 3G and 4G in Pakistan is not measured.
 
 ## How a farmer links a device (once)
 
-1. On the farm page, open **SIM devices (probe and pump box)**.
-2. Type the code printed on the box, for example `PP-7K3Q-9M2X` (lower case, spaces and missing dashes are fine), and tap **Link device**.
+1. The probe and the pump box are **separate devices with separate cards** on the farm page: **Soil probe (SIM)** further down, and
+   **Pump control box (SIM)** near the top, under Pump control.
+2. In the right card, type the code printed on the box, for example `PP-7K3Q-9M2X` (lower case, spaces and missing dashes are fine),
+   and tap **Link probe** or **Link pump box**. A probe code typed in the pump card (or the other way round) is refused with a message
+   saying which card it belongs in.
 3. **Probe:** linked at once. Its readings appear in **Soil now**.
    **Pump control box:** the app shows a safety checklist (an electrician fitted the box with overload and dry-run protection, and
-   there is a local switch at the pump). After the farmer ticks it, the box is linked and **Pump control** appears at the top of the page.
+   there is a local switch at the pump). After the farmer ticks it, the box is linked and **Pump control** appears just above it:
+   from there the farmer switches the motor on and off, sitting anywhere.
 4. That is all. The device needs no phone nearby. To move it to another farm, tap the bin icon and link it there.
 
 A farm can have several probes (several spots) and one pump box (one motor). An installer who manages the farm can link and
@@ -83,7 +87,7 @@ sketch and flash again. Readings outside 0–100 are clamped.
 | Codes, upload format, signal words (pure) | `lib/devices/code.ts` |
 | Making, linking, recognising devices | `lib/services/devices.ts`; table `Device` (migration `sim_devices`) |
 | APIs | `POST /api/device/soil` (probe), `POST /api/device/pump` (pump box), `GET/POST /api/farms/{id}/devices`, `DELETE /api/farms/{id}/devices/{deviceId}` |
-| Screen | `components/farmer/DevicesCard.tsx` |
+| Screen | `components/farmer/DeviceCard.tsx` (one card per kind: probe, pump box) |
 | Make devices | `npm run device:new` (`scripts/device-new.ts`) |
 | Simulators | `npm run simulate:sim-probe`, `npm run simulate:pump -- --secret …` |
 | Firmware (untested) | `hardware/paanipulse-probe-sim/`, `hardware/paanipulse-pump-box-sim/` |

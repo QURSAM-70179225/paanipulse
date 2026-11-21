@@ -24,7 +24,7 @@ import { LiveMeter } from "@/components/farmer/LiveMeter";
 import { SoilNow } from "@/components/farmer/SoilNow";
 import { FertiliserPlan } from "@/components/farmer/FertiliserPlan";
 import { areaText } from "@/lib/i18n/area";
-import { DevicesCard } from "@/components/farmer/DevicesCard";
+import { DeviceCard, type DeviceSharedLabels } from "@/components/farmer/DeviceCard";
 import { PumpControl } from "@/components/farmer/PumpControl";
 import { FarmSwitcher } from "@/components/farmer/FarmSwitcher";
 import { farmLabel } from "@/lib/services/farmLabel";
@@ -80,6 +80,14 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
   // Keep the stored history (read by the installer portal, report and authority map) in step with what the farmer sees.
   if (!s.farm.isSynthetic) after(() => storeRecentDays(id, s).catch(() => {}));
   const T: TFn = (k, v) => t(lang, k, v);
+  const deviceShared: DeviceSharedLabels = {
+    probe: T("devProbe"), pump: T("devPump"), codeLabel: T("devCodeLabel"), codePlaceholder: T("devCodePlaceholder"), linking: T("devLinking"),
+    waiting: T("devWaiting"), lastSeen: T("devLastSeen"), justNow: T("devJustNow"), signalGood: T("devSignalGood"), signalFair: T("devSignalFair"),
+    signalWeak: T("devSignalWeak"), remove: T("devRemove"), removeConfirm: T("devRemoveConfirm"), removePumpConfirm: T("devRemovePumpConfirm"),
+    safetyTitle: T("devSafetyTitle"), safetyBody: T("devSafetyBody"), safetyCheck: T("devSafetyCheck"), safetyLink: T("devSafetyLink"),
+    linkedProbe: T("devLinkedProbe"), linkedPump: T("devLinkedPump"), errBadCode: T("devErrBadCode"), errNotFound: T("devErrNotFound"),
+    errElsewhere: T("devErrElsewhere"), errPumpExists: T("devErrPumpExists"), errGeneric: T("errGeneric"),
+  };
   const ur = lang === "ur";
   const locale = ur ? "ur-PK" : "en-GB";
   const L = (m3: number) => `${n0(m3 * 1000)} ${T("litres")}`;
@@ -135,6 +143,13 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             }}
           />
         )}
+        <DeviceCard
+          kind="pump"
+          farmId={s.farm.id}
+          initial={devices}
+          shared={deviceShared}
+          labels={{ title: T("pumpBoxTitle"), intro: T("pumpBoxIntro"), none: T("pumpBoxNone"), link: T("pumpBoxLink"), note: T("pumpBoxNote"), errWrongKind: T("pumpBoxWrongKind") }}
+        />
         <PumpTimer
           farmId={s.farm.id}
           recommendedHours={s.today.advice.kind === "irrigate" ? s.today.advice.hoursToday : 0}
@@ -157,18 +172,12 @@ export default async function FarmPage({ params }: { params: Promise<{ id: strin
             overrunTitle: T("overrunTitle"), overrunNone: T("overrunNone"), overrunHours: T("overrunHours"), soundOn: T("alarmSoundOn"), soundOff: T("alarmSoundOff"),
           }}
         />
-        <DevicesCard
+        <DeviceCard
+          kind="probe"
           farmId={s.farm.id}
           initial={devices}
-          labels={{
-            title: T("devTitle"), intro: T("devIntro"), probe: T("devProbe"), pump: T("devPump"), none: T("devNone"), codeLabel: T("devCodeLabel"),
-            codePlaceholder: T("devCodePlaceholder"), link: T("devLink"), linking: T("devLinking"), waiting: T("devWaiting"), lastSeen: T("devLastSeen"),
-            justNow: T("devJustNow"), signalGood: T("devSignalGood"), signalFair: T("devSignalFair"), signalWeak: T("devSignalWeak"), remove: T("devRemove"),
-            removeConfirm: T("devRemoveConfirm"), removePumpConfirm: T("devRemovePumpConfirm"), safetyTitle: T("devSafetyTitle"), safetyBody: T("devSafetyBody"),
-            safetyCheck: T("devSafetyCheck"), safetyLink: T("devSafetyLink"), linkedProbe: T("devLinkedProbe"), linkedPump: T("devLinkedPump"),
-            errBadCode: T("devErrBadCode"), errNotFound: T("devErrNotFound"), errElsewhere: T("devErrElsewhere"), errPumpExists: T("devErrPumpExists"),
-            errGeneric: T("errGeneric"), offlineNote: T("devOfflineNote"),
-          }}
+          shared={deviceShared}
+          labels={{ title: T("probeCardTitle"), intro: T("probeCardIntro"), none: T("probeCardNone"), link: T("probeCardLink"), note: T("probeCardNote"), errWrongKind: T("probeCardWrongKind") }}
         />
         {hasSoilProbe && (
           <SoilNow
