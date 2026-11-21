@@ -32,7 +32,7 @@ const fill = (s: string, v: Record<string, string | number>) => Object.entries(v
 /** The team's numbers, so a farmer with no device yet can call or WhatsApp for help setting one up. */
 export interface SupportContact { tel: string | null; whatsapp: string | null; display: string | null }
 
-export function DeviceCard({ kind, farmId, initial, labels, shared, listen, contact }: { kind: "probe" | "pump"; farmId: string; initial: DeviceRow[]; labels: DeviceCardLabels; shared: DeviceSharedLabels; listen?: React.ReactNode; contact?: SupportContact }) {
+export function DeviceCard({ kind, farmId, initial, labels, shared, listen, art, contact }: { kind: "probe" | "pump"; farmId: string; initial: DeviceRow[]; labels: DeviceCardLabels; shared: DeviceSharedLabels; listen?: React.ReactNode; art?: React.ReactNode; contact?: SupportContact }) {
   const router = useRouter();
   const [all, setAll] = useState(initial);
   const devices = all.filter((d) => d.kind === kind);
@@ -116,6 +116,7 @@ export function DeviceCard({ kind, farmId, initial, labels, shared, listen, cont
           <CardTitle className="flex items-center gap-2"><TitleIcon className={cn("h-5 w-5", kind === "pump" ? "text-emerald-700" : "text-sky-700")} aria-hidden /> {labels.title}</CardTitle>
           <div className="shrink-0">{listen}</div>
         </div>
+        {art && <div className="mt-2">{art}</div>}
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {devices.length === 0 ? (

@@ -43,7 +43,7 @@ interface Live {
 const n0 = (x: number) => Math.round(x).toLocaleString("en-US");
 
 /** Polls the live meter every 5 s; refreshes the page once when telemetry first appears (badge → "Telemetry"). */
-export function LiveMeter({ farmId, initialHasTelemetry, limitHours, listen, labels }: { farmId: string; initialHasTelemetry: boolean; limitHours: number; listen?: React.ReactNode; labels: LiveLabels }) {
+export function LiveMeter({ farmId, initialHasTelemetry, limitHours, listen, art, labels }: { farmId: string; initialHasTelemetry: boolean; limitHours: number; listen?: React.ReactNode; art?: React.ReactNode; labels: LiveLabels }) {
   const router = useRouter();
   const [live, setLive] = useState<Live>({ hasTelemetry: initialHasTelemetry });
   const [display, setDisplay] = useState(0);
@@ -106,6 +106,7 @@ export function LiveMeter({ farmId, initialHasTelemetry, limitHours, listen, lab
           </CardTitle>
           <div className="shrink-0">{listen}</div>
         </div>
+        {art && <div className="mt-2">{art}</div>}
         {!live.hasTelemetry && (
           <>
             <p className="text-sm font-medium text-slate-700">{labels.notConnected}</p>
