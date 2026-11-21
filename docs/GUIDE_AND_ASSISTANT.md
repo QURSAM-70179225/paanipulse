@@ -7,7 +7,7 @@
    - A dismissible card at the top of the farm page ("New here? Listen to how to use the app"). Hiding it is remembered on that phone only.
    - A "How to use" button in the farm header.
    - A public page, `/guide`, with the voice note and a short written explanation of every feature in Urdu or English.
-3. **Assistant answers about the app.** Before, the assistant refused anything that was not pump, water, weather, solar or fertiliser. Now it also answers how to use every feature (probe, Bluetooth, SMS alert, pump control, several farms, bucket test, water chart, set-up, offline use). Other topics (cricket, politics, loans) are still refused, with the new sentence: "Sorry, I can only help with your pump, water, weather, solar and how to use this app." (Roman Urdu and Urdu versions in `app/api/chat/route.ts`.)
+3. **Assistant answers about the app.** Before, the assistant refused anything that was not pump, water, weather, solar or fertiliser. Now it also answers how to use every feature (probe, SIM devices, SMS alert, pump control, several farms, bucket test, water chart, set-up, offline use). Other topics (cricket, politics, loans) are still refused, with the new sentence: "Sorry, I can only help with your pump, water, weather, solar and how to use this app." (Roman Urdu and Urdu versions in `app/api/chat/route.ts`.)
 4. A chat chip "How do I use this app?".
 
 ## How it works

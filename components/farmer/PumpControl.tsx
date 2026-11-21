@@ -4,17 +4,19 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Power, PowerOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { signalWord } from "@/lib/devices/code";
 import { cn } from "@/lib/utils";
 
 export interface PumpCtlLabels {
   title: string; on: string; off: string; left: string; offline: string; never: string; hours: string; start: string; stop: string; confirm: string;
   auto: string; autoNote: string; safety: string; errOffline: string; errBusy: string; errHours: string; errDisabled: string; errGeneric: string; log: string;
+  offlineRunning: string; network: string; signalGood: string; signalFair: string; signalWeak: string;
   actions: Record<string, string>; actors: Record<string, string>;
 }
 
 interface View {
   available: boolean; enabled: boolean; on: boolean; remainingSeconds: number; offAt: string | null; online: boolean; deviceSeenAt: string | null;
-  autoStopWhenFull: boolean; log: { at: string; actor: string; action: string; detail: string | null }[];
+  autoStopWhenFull: boolean; network: string | null; signal: number | null; log: { at: string; actor: string; action: string; detail: string | null }[];
 }
 
 const fill = (s: string, v: Record<string, string | number>) => Object.entries(v).reduce((a, [k, x]) => a.replaceAll(`{${k}}`, String(x)), s);
@@ -22,8 +24,8 @@ const hm = (sec: number) => `${Math.floor(sec / 3600)}:${String(Math.floor((sec 
 const clock = (iso: string) => new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Karachi" });
 
 /**
- * Remote start and stop of the pump through a control box (PROTOTYPE). Shown only when the server has pump control switched on and
- * the installer enabled it for this pump. Every run has a hard stop time; the control box enforces it on its own clock.
+ * Remote start and stop of the pump through a SIM control box. Shown once a control box is linked to this farm with its code.
+ * Every run has a hard stop time; the control box enforces it on its own clock, so a weak or lost network cannot keep it running.
  */
 export function PumpControl({ farmId, advisedHours, labels }: { farmId: string; advisedHours: number; labels: PumpCtlLabels }) {
   const router = useRouter();
@@ -71,6 +73,8 @@ export function PumpControl({ farmId, advisedHours, labels }: { farmId: string; 
   if (!v || !v.available || !v.enabled) return null;
   const left = v.on && v.offAt ? Math.max(0, Math.floor((new Date(v.offAt).getTime() - Date.now()) / 1000)) : 0;
   const mins = v.deviceSeenAt ? Math.round((Date.now() - new Date(v.deviceSeenAt).getTime()) / 60_000) : null;
+  const sig = signalWord(v.signal);
+  const netLine = v.network || sig ? fill(labels.network, { n: [v.network, sig === "good" ? labels.signalGood : sig === "fair" ? labels.signalFair : sig === "weak" ? labels.signalWeak : null].filter(Boolean).join(" · ") }) : null;
 
   return (
     <Card className={cn(v.on ? "border-emerald-400" : "border-slate-300")}>
@@ -85,7 +89,13 @@ export function PumpControl({ farmId, advisedHours, labels }: { farmId: string; 
           {v.on && v.offAt && <p className="text-sm text-slate-700">{fill(labels.left, { t: `${hm(left)} (${clock(v.offAt)})` })}</p>}
         </div>
 
-        {!v.online && <p role="status" className="rounded-xl bg-amber-50 p-2 text-sm text-amber-900">{mins === null ? labels.never : fill(labels.offline, { mins })}</p>}
+        {!v.online && (
+          <p role="status" className="rounded-xl bg-amber-50 p-2 text-sm text-amber-900">
+            {mins === null ? labels.never : fill(labels.offline, { mins })}
+            {v.on && v.offAt && <span className="mt-1 block font-semibold">{fill(labels.offlineRunning, { t: clock(v.offAt) })}</span>}
+          </p>
+        )}
+        {v.online && netLine && <p className="text-xs text-slate-600">{netLine}</p>}
 
         {v.on ? (
           <button type="button" disabled={busy} onClick={() => post({ action: "stop" })} className="min-h-14 rounded-xl bg-red-600 px-4 text-lg font-bold text-white disabled:opacity-60">{labels.stop}</button>

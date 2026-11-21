@@ -11,19 +11,19 @@ datasource db {
 
 /// Account. Farmers sign in with phone + PIN; installers and authorities with email + password.
 model User {
-  id             String   @id @default(cuid())
+  id             String               @id @default(cuid())
   role           String // FARMER | INSTALLER | AUTHORITY
   name           String
-  phone          String?  @unique
-  email          String?  @unique
+  phone          String?              @unique
+  email          String?              @unique
   passwordHash   String
   organisation   String?
-  createdAt      DateTime @default(now())
-  farms          Farm[]   @relation("FarmOwner")
-  installedFarms Farm[]   @relation("FarmInstaller")
+  createdAt      DateTime             @default(now())
+  farms          Farm[]               @relation("FarmOwner")
+  installedFarms Farm[]               @relation("FarmInstaller")
   resetTokens    PasswordResetToken[]
   /// Farmer opted in to the daily advice (and pump over-run alerts) by SMS / WhatsApp.
-  smsAdvice      Boolean  @default(false)
+  smsAdvice      Boolean              @default(false)
 }
 
 /// One-time password reset link (email accounts). Only the SHA-256 hash of the token is stored.
@@ -72,12 +72,12 @@ model AudioCache {
 }
 
 model Farm {
-  id               String         @id @default(cuid())
+  id               String        @id @default(cuid())
   farmerName       String
   /// A name the farmer gives this farm ("North field"), so several farms in one account can be told apart.
   nickname         String?
   phone            String?
-  language         String         @default("ur") // "ur" | "en"
+  language         String        @default("ur") // "ur" | "en"
   lat              Float
   lng              Float
   district         String
@@ -86,48 +86,49 @@ model Farm {
   sowingDate       DateTime
   areaAcres        Float
   /// "sand" | "sandy-loam" | "loam" | "clay": sets how much water the soil holds. Default loam = the earlier fixed value.
-  soilType         String         @default("loam")
+  soilType         String        @default("loam")
   /// The seed variety the farmer knows (free text, e.g. "Galaxy-2013"). Recorded for the installer and the pilot; it does not change the maths.
   variety          String?
   /// "normal" | "early" | "late": a shorter- or longer-duration variety. Stretches the growth stages by 10% (a rough assumption).
-  maturity         String         @default("normal")
+  maturity         String        @default("normal")
   /// How the farmer thinks of his land: "acre" | "kanal" | "marla" | "murabba" | "ghumaon". areaAcres stays the stored value.
-  areaUnit         String         @default("acre")
+  areaUnit         String        @default("acre")
   /// Fertiliser rate the farmer or installer entered from a soil test or agriculture officer (not a recommendation by the app).
   fertPlan         Json?
   /// When the last "enough water has reached the probe" SMS was sent (at most one every few hours).
   lastFullAlertAt  DateTime?
   irrigationMethod String // flood | furrow | sprinkler | drip
-  isSynthetic      Boolean        @default(false)
-  dataConsent      Boolean        @default(true)
-  createdAt        DateTime       @default(now())
+  isSynthetic      Boolean       @default(false)
+  dataConsent      Boolean       @default(true)
+  createdAt        DateTime      @default(now())
   ownerId          String?
-  owner            User?          @relation("FarmOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  owner            User?         @relation("FarmOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   installerId      String?
-  installer        User?          @relation("FarmInstaller", fields: [installerId], references: [id], onDelete: SetNull)
+  installer        User?         @relation("FarmInstaller", fields: [installerId], references: [id], onDelete: SetNull)
   pumps            Pump[]
   dailyRecords     DailyRecord[]
   advisories       Advisory[]
   chatMessages     ChatMessage[]
   fieldChecks      FieldCheck[]
   soilReadings     SoilReading[]
+  devices          Device[]
 }
 
 model Pump {
-  id              String             @id @default(cuid())
-  farmId          String
-  farm            Farm               @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  ratedKw         Float
-  pvKwp           Float
-  staticDepthFt   Float // depth to water level (NOT bore depth)
-  boreDepthFt     Float?
-  drawdownM       Float              @default(3)
-  efficiency      Float              @default(0.4) // wire-to-water
-  calibrated      Boolean            @default(false)
-  hasTelemetry    Boolean            @default(false)
+  id               String             @id @default(cuid())
+  farmId           String
+  farm             Farm               @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  ratedKw          Float
+  pvKwp            Float
+  staticDepthFt    Float // depth to water level (NOT bore depth)
+  boreDepthFt      Float?
+  drawdownM        Float              @default(3)
+  efficiency       Float              @default(0.4) // wire-to-water
+  calibrated       Boolean            @default(false)
+  hasTelemetry     Boolean            @default(false)
   /// Local date (YYYY-MM-DD) of the last "pump ran too long" SMS, so it is sent at most once a day.
   lastOverrunAlert String?
-  /// Remote start/stop (PROTOTYPE, off by default). Needs a relay or starter fitted by a qualified electrician.
+  /// Remote start/stop. Switched on when a SIM control box (fitted by a qualified electrician) is linked to this farm.
   controlEnabled   Boolean            @default(false)
   desiredOn        Boolean            @default(false)
   /// Hard stop: the pump must be off by this time whatever else happens. The control box enforces it on its own clock.
@@ -138,7 +139,33 @@ model Pump {
   deviceOn         Boolean?
   deviceSeenAt     DateTime?
   controlLog       PumpControlLog[]
-  telemetry       TelemetryReading[]
+  telemetry        TelemetryReading[]
+}
+
+/// A SIM device: a soil probe or a pump control box. Each is made with a claim code printed on the box and a secret flashed into
+/// its firmware. The farmer types the code once to link it to a farm; after that the device reports by itself over 2G, 3G or 4G,
+/// wherever the farmer is.
+model Device {
+  id         String    @id @default(cuid())
+  /// "probe" | "pump"
+  kind       String
+  /// Claim code printed on the box, for example PP-7K3Q-9M2X.
+  code       String    @unique
+  /// SHA-256 of the secret in the firmware. The secret itself is never stored.
+  secretHash String    @unique
+  farmId     String?
+  farm       Farm?     @relation(fields: [farmId], references: [id], onDelete: SetNull)
+  pairedAt   DateTime?
+  /// User id of whoever linked it.
+  pairedBy   String?
+  lastSeenAt DateTime?
+  /// Network the device last used, as it reports it: "2G", "3G" or "4G".
+  network    String?
+  /// Signal quality 0-31 (the modem's CSQ), if reported.
+  signal     Int?
+  createdAt  DateTime  @default(now())
+
+  @@index([farmId])
 }
 
 /// Audit trail of every start, stop and automatic stop.

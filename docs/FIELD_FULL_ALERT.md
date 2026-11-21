@@ -36,13 +36,13 @@ and **at most one every 3 hours** per farm. The "Soil now" card also shows a gre
 
 ## How the probe sends data from the field: GSM / 4G
 
-Bluetooth only works near the probe, so it cannot serve a farmer who is at home. For that, the probe needs its own mobile
+A farmer who is at home is served by a probe with its own mobile
 connection. The server side is **already built**: `POST /api/soil` accepts readings with an ingest key. What is needed is a probe
 with a SIM:
 
-- **Our prototype sketch:** `hardware/esp32-soil-probe-4g/esp32-soil-probe-4g.ino` (ESP32 + a 4G modem such as the SIM7600 + a capacitive sensor).
+- **Our sketch:** `hardware/paanipulse-probe-sim/paanipulse-probe-sim.ino` (ESP32 + an LTE modem with 3G/2G fallback + a capacitive sensor), linked once with its code.
   It wakes, reads, sends over HTTPS, and sleeps: every 15 minutes, or every 3 minutes while the moisture is changing quickly.
-  **It has not been compiled or run on hardware.** See [SOIL_PROBE_4G.md](SOIL_PROBE_4G.md).
+  **It has not been compiled or run on hardware.** See [SIM_DEVICES.md](SIM_DEVICES.md).
 - **Or a ready-made sensor with a SIM or LoRa gateway** (for example WIT's WaterSense, if WIT can share its data by API or webhook).
   Those send to their own cloud, so a small adapter would be needed to forward readings to PaaniPulse.
 
@@ -64,5 +64,5 @@ with a SIM:
 | SMS check and rate limit | `lib/services/fieldFullAlert.ts`, message in `lib/services/smsText.ts` |
 | Hooks | `POST /api/soil`, `POST /api/farms/{id}/soil`; the banner is in `components/farmer/SoilNow.tsx` |
 | Simulator | `npm run simulate:soil -- --scenario filling` |
-| 4G firmware (prototype) | `hardware/esp32-soil-probe-4g/` |
+| SIM probe firmware (untested) | `hardware/paanipulse-probe-sim/` |
 | Tests | `tests/fieldFull.test.ts`, `tests/fieldFullAlert.test.ts` |
